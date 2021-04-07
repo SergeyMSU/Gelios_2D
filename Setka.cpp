@@ -1732,7 +1732,6 @@ void Setka::Go_stationary_5_komponent(int step)
 #pragma omp parallel for
 		for (int num_cell = 0; num_cell < this->All_Cells.size(); num_cell++)
 		{
-			//cout << "A1" << endl;
 			auto K = this->All_Cells[num_cell];
 			K->Potok[0] = K->Potok[1] = K->Potok[2] = K->Potok[3] = K->Potok[4] = 0.0;
 			K->Potok_H1[0] = K->Potok_H1[1] = K->Potok_H1[2] = K->Potok_H1[3] = 0.0;

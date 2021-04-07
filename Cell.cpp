@@ -20,15 +20,30 @@ Cell::Cell(void)
 
 void Cell::Get_Center(double& x, double& y)
 {
-	x = 0.0;
-	y = 0.0;
-	for (auto& i : this->contour)
+	if (this->contour.size() == 4)
 	{
-		x += i->x;
-		y += i->y;
+		x = 0.0;
+		y = 0.0;
+		for (auto& i : this->contour)
+		{
+			x += i->x;
+			y += i->y;
+		}
+		x = x / (1.0 * this->contour.size());
+		y = y / (1.0 * this->contour.size());
 	}
-	x = x / (1.0 * this->contour.size());
-	y = y / (1.0 * this->contour.size());
+	else
+	{
+		x = 0.0;
+		y = 0.0;
+		for (auto& i : this->contour)
+		{
+			x += i->x;
+			y += i->y;
+		}
+		x = x / (1.35 * this->contour.size());
+		y = y / (1.35 * this->contour.size());
+	}
 }
 
 double Cell::Get_Volume(void)
@@ -53,7 +68,22 @@ double Cell::Get_Volume(void)
 	}
 	else
 	{
-		return pi_ * kv(R1_) / 2.0;
+		double x = 0.0;
+		double y = 0.0;
+		
+		this->Get_Center(x, y);
+
+		double a1, a2, a3, p;
+		double S = 0.0;
+		for (auto& i : this->Grans)
+		{
+			a1 = sqrt(kv(i->A->x - x) + kv(i->A->y - y));
+			a2 = sqrt(kv(i->B->x - x) + kv(i->B->y - y));
+			a3 = sqrt(kv(i->A->x - i->B->x) + kv(i->A->y - i->B->y));
+			p = (a1 + a2 + a3) / 2.0;
+			S = S +  sqrt(p * (p - a1) * (p - a2) * (p - a3));
+		}
+		return S;
 	}
 	return 0.0;
 }
