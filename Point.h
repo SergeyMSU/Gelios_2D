@@ -31,8 +31,7 @@ public:
 	int number;
 	Point_type type;
 
-
-	vector < Cell * > my_cell;
+	vector <Cell*> my_cell;
 
 	Point(const double& x, const double& y);
 };

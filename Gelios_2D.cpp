@@ -14,6 +14,9 @@ int main()
     S.Print_cell_type();
     S.Print_connect();
     S.Proverka();
+    S.Print_Gran_type();
+    S.Save_Setka_ALL_ALPHA("aaa.txt");
+    S.Print_point_connect();
     //S.Init_conditions();
     //S.Go_stationary(250000);
     //S.Save_G_D();

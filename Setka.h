@@ -2,6 +2,7 @@
 
 #include "Help.h"
 #include <vector>
+#include <string>
 
 class Rail;
 class Point;
@@ -38,13 +39,19 @@ public:
 
 
 	Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4);
+	Setka();
+
+	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
+
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)
 	void Print_Gran();
+	void Print_Gran_type();
 	void Print_cell(void);   // Печатает ячейки (но много лишних узлов выписывает, т.к. просто каждую ячейку рисует и линии накладываются
 	void Print_cell_type(void);
 	void Print_cell2(void);  // В отличие от предыдущей не выводит лишних точек, нужна для дополнительной проверки правильности геометрии
 	void Print_connect(void); // Посмотреть, как связаны ячейки
+	void Print_point_connect(void); // Посмотреть, как связаны узлы с ячейками
 	void Print_Tecplot(void);
 
 	void Save_G_D(void);

@@ -842,10 +842,10 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 		for (int i = 0; i < kl; i++)
 		{
 			auto A = new Cell();
+			A->type = C_centr;
 			for (int j = i * how; j < (i + 1) * how; j++)
 			{
 				A->Grans.push_back(Cell_Centr->Grans[j]);
-				A->type = C_centr;
 				Cell_Centr->Grans[j]->Master = A;
 				Cell_Centr->Grans[j]->Gran_copy->Sosed = A;
 			}
@@ -859,11 +859,14 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 		for (auto& i : centr_cell)
 		{
 			i->contour.push_back(O);
+			O->my_cell.push_back(i);
 			for (auto& j : i->Grans)
 			{
 				i->contour.push_back(j->A);
+				j->A->my_cell.push_back(i);
 			}
 			i->contour.push_back(i->Grans[i->Grans.size() - 1]->B);
+			i->Grans[i->Grans.size() - 1]->B->my_cell.push_back(i);
 		}
 
 		for (int i = 0; i < centr_cell.size() - 1; i++)
@@ -1037,6 +1040,18 @@ void Setka::Print_cell_type(void)
 	}
 }
 
+void Setka::Print_Gran_type(void)
+{
+	ofstream fout;
+	fout.open("Gran_type.txt");
+	double x, y;
+	for (auto& i : this->All_Gran)
+	{
+		i->Get_Center(x, y);
+		fout << x << " " << y << " " << i->type << endl;
+	}
+}
+
 void Setka::Print_cell(void)
 {
 	int ll = this->All_Cells.size();
@@ -1128,6 +1143,41 @@ void Setka::Print_connect(void)
 				fout << x << " " << y << endl;
 				fout << x2 << " " << y2 << endl;
 			}
+		}
+	}
+
+	for (int i = 0; i < ll; i++)
+	{
+		fout << 2 * i + 1 << " " << 2 * i + 2 << endl;
+	}
+
+	fout.close();
+}
+
+void Setka::Print_point_connect(void)
+{
+	int ll = 0;
+	for (auto& i : this->All_Points)
+	{
+		ll += i->my_cell.size();
+	}
+	double x, y;
+	double x2, y2;
+	ofstream fout;
+	fout.open("Setka_connect_point.txt");
+	fout << "TITLE = \"HP\" ";
+	fout << " VARIABLES = \"X\", \"Y\"  ZONE T= \"HP\", N=  " << ll * 2;
+	fout << " , E= " << ll;
+	fout << " , F=FEPOINT, ET=LINESEG  " << endl;
+	for (auto& i : this->All_Points)
+	{
+		x = i->x;
+		y = i->y;
+		for (auto& j : i->my_cell)
+		{
+			j->Get_Center(x2, y2);
+			fout << x << " " << y << endl;
+			fout << x2 << " " << y2 << endl;
 		}
 	}
 
@@ -1244,6 +1294,176 @@ void Setka::Save_G_D_5_komponent(void)
 			i->par[0].ro_H4 << " " << i->par[0].p_H4 << " " << i->par[0].u_H4 << " " << i->par[0].v_H4 << " " <<//
 			endl;
 	}
+}
+
+void Setka::Save_Setka_ALL_ALPHA(string name)
+{
+	ofstream fout;
+	fout.open(name);
+
+	fout << this->N1 << " " << this->N2 << " " << this->N3 << " " << this->N4 << " " << this->M1 << " " << this->M2 << " " << this->M3 << " " << this->M4 << " " << endl;
+	
+	fout << this->All_Points.size() << endl;
+	for (auto& i : this->All_Points)
+	{
+		fout << i->x << " " << i->y << " " << i->type << endl;
+	}
+
+	fout << this->All_Gran.size() << endl;
+	for (auto& i : this->All_Gran)
+	{
+		fout << i->A->number << " " << i->B->number << " " << i->type << endl;
+	}
+
+	fout << this->All_Gran_copy.size() << endl;
+	for (auto& i : this->All_Gran_copy)
+	{
+		fout << i->A->number << " " << i->B->number << " " << i->type << endl;
+	}
+
+	fout << this->A_Rails.size() << endl;
+	for (auto& i : this->A_Rails)
+	{
+		fout << i->M1 << " " << i->M2 << " " << i->M3 << " " << i->M4 << " " << i->s << " " << i->type << endl;
+		fout << i->All_point.size() << endl;
+		for (auto& j : i->All_point)
+		{
+			fout << j->number << endl;
+		}
+
+		fout << i->Key_point.size() << endl;
+		for (auto& j : i->Key_point)
+		{
+			fout << j->number << endl;
+		}
+	}
+
+	fout << this->B_Rails.size() << endl;
+	for (auto& i : this->B_Rails)
+	{
+		fout << i->M1 << " " << i->M2 << " " << i->M3 << " " << i->M4 << " " << i->s << " " << i->type << endl;
+		fout << i->All_point.size() << endl;
+		for (auto& j : i->All_point)
+		{
+			fout << j->number << endl;
+		}
+
+		fout << i->Key_point.size() << endl;
+		for (auto& j : i->Key_point)
+		{
+			fout << j->number << endl;
+		}
+	}
+
+	fout << this->C_Rails.size() << endl;
+	for (auto& i : this->C_Rails)
+	{
+		fout << i->M1 << " " << i->M2 << " " << i->M3 << " " << i->M4 << " " << i->s << " " << i->type << endl;
+		fout << i->All_point.size() << endl;
+		for (auto& j : i->All_point)
+		{
+			fout << j->number << endl;
+		}
+
+		fout << i->Key_point.size() << endl;
+		for (auto& j : i->Key_point)
+		{
+			fout << j->number << endl;
+		}
+	}
+
+	fout << this->D_Rails.size() << endl;
+	for (auto& i : this->D_Rails)
+	{
+		fout << i->M1 << " " << i->M2 << " " << i->M3 << " " << i->M4 << " " << i->s << " " << i->type << endl;
+		fout << i->All_point.size() << endl;
+		for (auto& j : i->All_point)
+		{
+			fout << j->number << endl;
+		}
+
+		fout << i->Key_point.size() << endl;
+		for (auto& j : i->Key_point)
+		{
+			fout << j->number << endl;
+		}
+	}
+
+	fout << this->All_Cells.size() << endl;
+	for (auto& i : this->All_Cells)
+	{
+		fout << i->type << endl;
+		fout << i->contour.size() << endl;
+		for (auto& j : i->contour)
+		{
+			fout << j->number << endl;
+		}
+
+		fout << i->Grans.size() << endl;
+		for (auto& j : i->Grans)
+		{
+			fout << j->number << " " << j->main_gran << endl;
+		}
+	}
+
+	fout << this->All_Gran.size() << endl;
+	for (auto& i : this->All_Gran)
+	{
+		if (i->Sosed != nullptr)
+		{
+			fout << i->Master->number << " " << i->Sosed->number << " " << i->Gran_copy->number << endl;
+		}
+		else
+		{
+			fout << i->Master->number << " " << -1 << " " << -1 << endl;
+		}
+	}
+
+	fout << this->All_Gran_copy.size() << endl;
+	for (auto& i : this->All_Gran_copy)
+	{
+		fout << i->Master->number << " " << i->Sosed->number << " " << i->Gran_copy->number << endl;
+	}
+
+	fout << this->All_Points.size() << endl;
+	for (auto& i : this->All_Points)
+	{
+		fout << i->my_cell.size() << endl;
+		for (auto& j : i->my_cell)
+		{
+			fout << j->number << endl;
+		}
+	}
+
+	fout << this->Line_Contact.size() << endl;
+	for (auto& i : this->Line_Contact)
+	{
+		fout << i->number << endl;
+	}
+
+	fout << this->Line_Inner.size() << endl;
+	for (auto& i : this->Line_Inner)
+	{
+		fout << i->number << endl;
+	}
+
+	fout << this->Line_Outer.size() << endl;
+	for (auto& i : this->Line_Outer)
+	{
+		fout << i->number << endl;
+	}
+
+	fout << this->All_Cells.size() << endl;
+	for (auto& i : this->All_Cells)
+	{
+		fout << i->par[0].ro << " " << i->par[0].p << " " << i->par[0].u << " " << i->par[0].v << " " << i->par[0].Q << endl;
+		fout << i->par[0].ro_H1 << " " << i->par[0].p_H1 << " " << i->par[0].u_H1 << " " << i->par[0].v_H1 << endl;
+		fout << i->par[0].ro_H2 << " " << i->par[0].p_H2 << " " << i->par[0].u_H2 << " " << i->par[0].v_H2 << endl;
+		fout << i->par[0].ro_H3 << " " << i->par[0].p_H3 << " " << i->par[0].u_H3 << " " << i->par[0].v_H3 << endl;
+		fout << i->par[0].ro_H4 << " " << i->par[0].p_H4 << " " << i->par[0].u_H4 << " " << i->par[0].v_H4 << endl;
+	}
+
+	fout.close();
 }
 
 void Setka::Download_G_D_5_komponent(void)
