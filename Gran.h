@@ -33,6 +33,7 @@ public:
 
     Gran(Point* A, Point* B, Gran_type type = G_no);
     void Get_Center(double& x, double& y);
+    void Get_Center_posle(double& x, double& y);
     void Get_normal(double& n1, double& n2);
     double Get_square(void);
 

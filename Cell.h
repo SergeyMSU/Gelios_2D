@@ -61,7 +61,8 @@ public:
 	Cell(void);
 
 	void Get_Center(double& x, double& y);
+	void Get_Center_posle(double& x, double& y);
 	double Get_Volume(void);
-	double Get_Volume_posle(const double& time);
+	double Get_Volume_posle(void);
 };
 

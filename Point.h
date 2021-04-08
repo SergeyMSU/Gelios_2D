@@ -26,6 +26,8 @@ class Point
 public:
 	double x;
 	double y;
+	double x2;
+	double y2;
 	double Vx;
 	double Vy;
 	int number;

@@ -40,4 +40,4 @@
 #define R3_ 180.0
 #define R4_ 400.0
 #define R5_ 800.0
-#define Left_ -800
+#define Left_ -900

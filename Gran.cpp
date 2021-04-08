@@ -20,6 +20,12 @@ void Gran::Get_Center(double& x, double& y)
 	y = (this->A->y + this->B->y) / 2.0;
 }
 
+void Gran::Get_Center_posle(double& x, double& y)
+{
+	x = (this->A->x2 + this->B->x2) / 2.0;
+	y = (this->A->y2 + this->B->y2) / 2.0;
+}
+
 void Gran::Get_normal(double& n1, double& n2)
 {
 	double t1 = this->B->x - this->A->x;
@@ -47,9 +53,9 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	else if (this->type == Extern)  // Не надо менять
 	{
 		par = this->Master->par[i];
-		if (par.u >= -2.0)
+		if (par.u >= 0.0)
 		{
-			par.u = -2.0;
+			par.u = -0.1;
 		}
 	}
 	else if (this->type == Axis)  // Не надо менять

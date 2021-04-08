@@ -28,6 +28,10 @@ public:
 	vector <Gran*> Line_Inner;       // Внутренняя волна
 	vector <Gran*> Line_Outer;		 // Внешняя волна
 
+	vector <Point*> Contact;
+	vector <Point*> Inner;       // Внутренняя волна
+	vector <Point*> Outer;		 // Внешняя волна
+
 	int N1;
 	int N2;
 	int N3;
@@ -63,7 +67,9 @@ public:
 	void Proverka(void);   // Проверка правильности построения сетки (геометрии и связей). Сюда можно добавлять все тесты сетки в будующем
 
 	// Движение сетки
-	void Move_Setka_Calculate(void);
+	void Move_Setka_Calculate(const double& dt);
+	void Move_surface(int ii);  // Вычисление скоростей поверхностей   ii - какие параметры активные par[ii]
+	void Move_surface_hand(void);  // Ручное движение сетки
 
 
 	// Газовая динамика
@@ -71,9 +77,10 @@ public:
 	void Go_stationary(int step);
 	void Go_stationary_5_komponent(int step);
 	void Go(int step); // Выделение разрывов  Газовая динамика
+	void Go_5_komponent(int step);
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
-		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vc);
+		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp);
 	void Init_conditions(void);
 
 private:
