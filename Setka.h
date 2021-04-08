@@ -42,6 +42,7 @@ public:
 	Setka();
 
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
+	void Download_Setka_ALL_ALPHA(string name);
 
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)

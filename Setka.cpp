@@ -3,7 +3,16 @@
 #include <omp.h>
 #include <mutex>
 #include <math.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
 using namespace std;
+
+Setka::Setka()
+{
+
+}
 
 Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 // Начальная инициализация сетки,  эту функцию лучше не трогать, она писалась поэтапно и результаты постоянно проверялись
@@ -945,16 +954,39 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 		{
 			this->Line_Contact.push_back(i);
 		}
+		sort(this->Line_Contact.begin(), this->Line_Contact.end(), [&](Gran* i, Gran* j)
+			{
+				double x1, y1, x2, y2;
+				i->Get_Center(x1, y1);
+				j->Get_Center(x2, y2);
+				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+			});
 
 		if (i->A->type == P_Inner_shock && i->B->type == P_Inner_shock)
 		{
 			this->Line_Inner.push_back(i);
 		}
 
+		sort(this->Line_Inner.begin(), this->Line_Inner.end(), [&](Gran* i, Gran* j)
+			{
+				double x1, y1, x2, y2;
+				i->Get_Center(x1, y1);
+				j->Get_Center(x2, y2);
+				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+			});
+
 		if (i->A->type == P_Outer_shock && i->B->type == P_Outer_shock)
 		{
 			this->Line_Outer.push_back(i);
 		}
+
+		sort(this->Line_Outer.begin(), this->Line_Outer.end(), [&](Gran* i, Gran* j)
+			{
+				double x1, y1, x2, y2;
+				i->Get_Center(x1, y1);
+				j->Get_Center(x2, y2);
+				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+			});
 	}
 
 	num = 0;
@@ -1462,6 +1494,329 @@ void Setka::Save_Setka_ALL_ALPHA(string name)
 		fout << i->par[0].ro_H3 << " " << i->par[0].p_H3 << " " << i->par[0].u_H3 << " " << i->par[0].v_H3 << endl;
 		fout << i->par[0].ro_H4 << " " << i->par[0].p_H4 << " " << i->par[0].u_H4 << " " << i->par[0].v_H4 << endl;
 	}
+
+	fout.close();
+}
+
+void Setka::Download_Setka_ALL_ALPHA(string name)
+{
+	int n, m, k, type;
+	double x, y;
+	int num;
+	int m1, m2, m3, m4;
+	double s;
+	bool b;
+	ifstream fout;
+	fout.open(name);
+
+	fout >> this->N1 >> this->N2 >> this->N3 >> this->N4 >> this->M1 >> this->M2 >> this->M3 >> this->M4;
+
+	fout >> n;
+	this->All_Points.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> x >> y; 
+		auto P = new Point(x, y);
+		fout >> type;
+		P->type = static_cast<Point_type>(type);
+		this->All_Points.push_back(P);
+	}
+
+	fout >> n;
+	this->All_Gran.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m >> k;
+		auto G = new Gran(this->All_Points[m], this->All_Points[k]);
+		G->main_gran = true;
+		fout >> type;
+		G->type = static_cast<Gran_type>(type);
+		this->All_Gran.push_back(G);
+	}
+
+	fout >> n;
+	this->All_Gran_copy.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m >> k;
+		auto G = new Gran(this->All_Points[m], this->All_Points[k]);
+		G->main_gran = false;
+		fout >> type;
+		G->type = static_cast<Gran_type>(type);
+		this->All_Gran_copy.push_back(G);
+	}
+
+	fout >> n;
+	this->A_Rails.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m1 >> m2 >> m3 >> m4 >> s >> type;
+		auto R = new Rail(s);
+		R->M1 = m1;
+		R->M2 = m2;
+		R->M3 = m3;
+		R->M4 = m4;
+		R->type = static_cast<Rail_type>(type);
+
+		fout >> m;
+		R->All_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->All_point.push_back(this->All_Points[k]);
+		}
+
+		fout >> m;
+		R->Key_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->Key_point.push_back(this->All_Points[k]);
+		}
+		this->A_Rails.push_back(R);
+	}
+
+	fout >> n;
+	this->B_Rails.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m1 >> m2 >> m3 >> m4 >> s >> type;
+		auto R = new Rail(s);
+		R->M1 = m1;
+		R->M2 = m2;
+		R->M3 = m3;
+		R->M4 = m4;
+		R->type = static_cast<Rail_type>(type);
+
+		fout >> m;
+		R->All_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->All_point.push_back(this->All_Points[k]);
+		}
+
+		fout >> m;
+		R->Key_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->Key_point.push_back(this->All_Points[k]);
+		}
+		this->B_Rails.push_back(R);
+	}
+
+	fout >> n;
+	this->C_Rails.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m1 >> m2 >> m3 >> m4 >> s >> type;
+		auto R = new Rail(s);
+		R->M1 = m1;
+		R->M2 = m2;
+		R->M3 = m3;
+		R->M4 = m4;
+		R->type = static_cast<Rail_type>(type);
+
+		fout >> m;
+		R->All_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->All_point.push_back(this->All_Points[k]);
+		}
+
+		fout >> m;
+		R->Key_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->Key_point.push_back(this->All_Points[k]);
+		}
+		this->C_Rails.push_back(R);
+	}
+
+	fout >> n;
+	this->D_Rails.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> m1 >> m2 >> m3 >> m4 >> s >> type;
+		auto R = new Rail(s);
+		R->M1 = m1;
+		R->M2 = m2;
+		R->M3 = m3;
+		R->M4 = m4;
+		R->type = static_cast<Rail_type>(type);
+
+		fout >> m;
+		R->All_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->All_point.push_back(this->All_Points[k]);
+		}
+
+		fout >> m;
+		R->Key_point.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			R->Key_point.push_back(this->All_Points[k]);
+		}
+		this->D_Rails.push_back(R);
+	}
+
+	fout >> n;
+	this->All_Cells.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		auto C = new Cell();
+		fout >> type;
+		C->type = static_cast<Cell_type>(type);
+
+		fout >> m;
+		C->contour.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			C->contour.push_back(this->All_Points[k]);
+		}
+
+		fout >> m;
+		C->Grans.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k >> b;
+			if (b == true)
+			{
+				C->Grans.push_back(this->All_Gran[k]);
+			}
+			else
+			{
+				C->Grans.push_back(this->All_Gran_copy[k]);
+			}
+		}
+
+		this->All_Cells.push_back(C);
+	}
+
+	fout >> n;
+	for (auto& i : this->All_Gran)
+	{
+		fout >> m1 >> m2 >> m3;
+		i->Master = this->All_Cells[m1];
+		if (m2 != -1)
+		{
+			i->Sosed = this->All_Cells[m2];
+			i->Gran_copy = this->All_Gran_copy[m3];
+		}
+		else
+		{
+			i->Sosed = nullptr;
+			i->Gran_copy = nullptr;
+		}
+	}
+
+	fout >> n;
+	for (auto& i : this->All_Gran_copy)
+	{
+		fout >> m1 >> m2 >> m3;
+		i->Master = this->All_Cells[m1];
+		if (m2 != -1)
+		{
+			i->Sosed = this->All_Cells[m2];
+			i->Gran_copy = this->All_Gran[m3];
+		}
+		else
+		{
+			cout << "Syda ne dolgny popadat  hrgrfwgydwfy2e2443" << endl;
+			i->Sosed = nullptr;
+			i->Gran_copy = nullptr;
+		}
+	}
+
+
+	fout >> n;
+	for (auto& i : this->All_Points)
+	{
+		fout >> m;
+		i->my_cell.reserve(m);
+		for (int j = 0; j < m; j++)
+		{
+			fout >> k;
+			i->my_cell.push_back(this->All_Cells[k]);
+		}
+	}
+
+	fout >> n;
+	this->Line_Contact.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> k;
+		this->Line_Contact.push_back(this->All_Gran[k]);
+	}
+
+	fout >> n;
+	this->Line_Inner.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> k;
+		this->Line_Inner.push_back(this->All_Gran[k]);
+	}
+
+	fout >> n;
+	this->Line_Outer.reserve(n);
+	for (int i = 0; i < n; i++)
+	{
+		fout >> k;
+		this->Line_Outer.push_back(this->All_Gran[k]);
+	}
+
+	fout >> n;
+	for (auto& i : this->All_Cells)
+	{
+		fout >> i->par[0].ro >> i->par[0].p >> i->par[0].u >> i->par[0].v >> i->par[0].Q;
+		fout >> i->par[0].ro_H1 >> i->par[0].p_H1 >> i->par[0].u_H1 >> i->par[0].v_H1;
+		fout >> i->par[0].ro_H2 >> i->par[0].p_H2 >> i->par[0].u_H2 >> i->par[0].v_H2;
+		fout >> i->par[0].ro_H3 >> i->par[0].p_H3 >> i->par[0].u_H3 >> i->par[0].v_H3;
+		fout >> i->par[0].ro_H4 >> i->par[0].p_H4 >> i->par[0].u_H4 >> i->par[0].v_H4;
+
+		i->par[1] = i->par[0];
+	}
+
+	// Нумерация всего
+	num = 0;
+	for (auto& i : this->All_Gran)  // Нужно для выделения контактной поверхности
+	{
+		i->number = num;
+		num++;
+	}
+
+	num = 0;
+	for (auto& i : this->All_Gran_copy)  // Нужно для выделения контактной поверхности
+	{
+		i->number = num;
+		num++;
+	}
+
+	num = 0;
+	for (auto& i : this->All_Cells)
+	{
+		i->number = num;
+		num++;
+	}
+
+	num = 0;
+	// Нумеруем точки
+	for (auto& i : this->All_Points)
+	{
+		i->number = num;
+		num++;
+	}
+
+
+	cout << "Vsego tochek = " << this->All_Points.size() << endl;
+	cout << "Vsego Yacheek = " << this->All_Cells.size() << endl;
 
 	fout.close();
 }

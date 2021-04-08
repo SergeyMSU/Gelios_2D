@@ -12,6 +12,7 @@ enum Gran_type  // “ип грани нужен дл€ граничных условий
     Input,                 // ¬ходной поток
     Axis,                  // ќсь симметрии
     Upper_wall,            // ¬ерхн€€ стенка
+    G_no,
 };
 
 class Point;
@@ -30,7 +31,7 @@ public:
     Cell* Sosed;         // ячейка - сосед по этой грани
     Gran* Gran_copy;     // √рань - копи€, но с другой нормалью. ¬ведена дл€ удобства
 
-    Gran(Point* A, Point* B, Gran_type type);
+    Gran(Point* A, Point* B, Gran_type type = G_no);
     void Get_Center(double& x, double& y);
     void Get_normal(double& n1, double& n2);
     double Get_square(void);
