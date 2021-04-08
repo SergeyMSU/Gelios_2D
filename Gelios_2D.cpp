@@ -6,13 +6,13 @@ int main()
 {
     std::cout << "Hello World!\n";
     Setka S = Setka();
-    S.Download_Setka_ALL_ALPHA("all_save_9.txt");
+    S.Download_Setka_ALL_ALPHA("all_save_19.txt");
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
     //Setka S = Setka(35, 12, 13, 45, 30, 20, 20, 15);  // Нужно чтобы колучиство ячеек по углу делилось на 8 или 10 (не было простым)
 
 
-    S.Contact.push_back(new Point(200, 0));
+    /*S.Contact.push_back(new Point(200, 0));
     S.Contact.push_back(new Point(197, 58));
     S.Contact.push_back(new Point(174, 138));
     S.Contact.push_back(new Point(129, 217));
@@ -41,7 +41,7 @@ int main()
     S.Outer.push_back(new Point(290, 334));
     S.Outer.push_back(new Point(214, 468));
     S.Outer.push_back(new Point(73, 566));
-    S.Outer.push_back(new Point(0, 595));
+    S.Outer.push_back(new Point(0, 595));*/
 
     //S.Print_point();
     //S.Print_cell2();
@@ -57,11 +57,14 @@ int main()
     //S.Go_stationary(350000);
     //S.Save_G_D();
     //S.Download_G_D_5_komponent();
-    S.Go_stationary_5_komponent(300000);
-    S.Go_5_komponent(25000);
+    //S.Go_stationary_5_komponent(200000);
+    S.Go_5_komponent(3000000);
+    S.Save_Setka_ALL_ALPHA("all_save_20.txt");
+    S.Go_5_komponent(3336000);
     S.Print_Tecplot();
     S.Print_cell2();
-    S.Save_Setka_ALL_ALPHA("all_save_10.txt");
+    S.Print_Gran();
+    S.Save_Setka_ALL_ALPHA("all_save_21.txt");
     //S.Save_G_D_5_komponent();
     
 

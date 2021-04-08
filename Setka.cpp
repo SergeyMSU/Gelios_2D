@@ -1264,6 +1264,45 @@ void Setka::Print_Tecplot(void)
 			(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << endl;
 
 	}
+	fout.close();
+
+	name_f = "1D_tecplot.txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
+		"\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Ro_H4\", \"P_H4\", \"Vx_H4\", \"Vy_H4\", \"RO_H\", ZONE T = \"HP\"" << endl;
+	int num = 0;
+	for (auto& i : this->All_Cells)
+	{
+		num++;
+		if (num > this->M1 + this->M2 + this->M3 + this->M4)
+		{
+			break;
+		}
+		double Max = 0.0;
+		double QQ = 0.0;
+		double x, y;
+		i->Get_Center(x, y);
+		if (i->par[0].ro > 0.000000000001)
+		{
+			QQ = i->par[0].Q / i->par[0].ro;
+			Max = sqrt(kvv(i->par[0].u, i->par[0].v, 0.0) / (ggg * i->par[0].p / i->par[0].ro));
+		}
+
+		fout << x * r_o << " " << y * r_o << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
+			" " << i->par[0].ro * ro_o << " " << i->par[0].p * p_o << " " //
+			<< i->par[0].u * u_o << " " << i->par[0].v * u_o << " " << Max << " " << QQ << //
+			" " << i->par[0].ro_H1 * ro_o_H << " " << i->par[0].p_H1 * p_o << " " //
+			<< i->par[0].u_H1 * u_o << " " << i->par[0].v_H1 * u_o << //
+			" " << i->par[0].ro_H2 * ro_o_H << " " << i->par[0].p_H2 * p_o << " " //
+			<< i->par[0].u_H2 * u_o << " " << i->par[0].v_H2 * u_o << //
+			" " << i->par[0].ro_H3 * ro_o_H << " " << i->par[0].p_H3 * p_o << " " //
+			<< i->par[0].u_H3 * u_o << " " << i->par[0].v_H3 * u_o << //
+			" " << i->par[0].ro_H4 * ro_o_H << " " << i->par[0].p_H4 * p_o << " " //
+			<< i->par[0].u_H4 * u_o << " " << i->par[0].v_H4 * u_o << " " <<//
+			(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << endl;
+
+	}
+	fout.close();
 }
 
 void Setka::Proverka(void)
@@ -1949,17 +1988,17 @@ void Setka::Move_surface(int ii)
 {
 	// Разбираемся с контактом
 
-	for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
-	{
-		auto i = this->Line_Contact[j];
-		i->A->Vx = 0.3;
-		i->A->Vy = 0.0;
-		i->B->Vx = 0.3;
-		i->B->Vy = 0.0;
+	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
+	//{
+	//	auto i = this->Line_Contact[j];
+	//	i->A->Vx = 0.3;
+	//	i->A->Vy = 0.0;
+	//	i->B->Vx = 0.3;
+	//	i->B->Vy = 0.0;
 
-	}
+	//}
 
-	if (false)
+	if (true)
 	{
 		int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -1977,12 +2016,12 @@ void Setka::Move_surface(int ii)
 				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
 
 			double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV * 0.2;
+			VV = VV;
 
-			if (i->A->x < -200 && i->A->y < 300 && VV <= 0.0)
-			{
-				VV = 0.01;
-			}
+			//if (i->A->x < -200 && i->A->y < 400 && i->B->x < -200 && i->B->y < 400) //  && VV <= 0.0)
+			//{
+			//	VV = 10.0;
+			//}
 			//cout << i->A->x << " " << i->A->y << " " << VV << " " << n1 << " " << n2 <<  endl;
 			if (Max > 1)
 			{
@@ -2014,7 +2053,9 @@ void Setka::Move_surface(int ii)
 		}
 	}
 
-	for (int j = 0; j < this->Line_Inner.size(); j++)  // Вычисляем скорость контакта
+
+	// Движение внутренней ударной волны
+	for (int j = 0; j < this->Line_Inner.size(); j++)  
 	{
 		auto i = this->Line_Inner[j];
 		Parametr par1 = i->Master->par[ii];
@@ -2040,49 +2081,56 @@ void Setka::Move_surface(int ii)
 	this->Line_Inner[this->Line_Inner.size() - 1]->B->Vx = this->Line_Inner[this->Line_Inner.size() - 1]->A->Vx + //
 		(this->Line_Inner[this->Line_Inner.size() - 1]->A->x - this->Line_Inner[this->Line_Inner.size() - 1]->B->x);
 
-	double Vconst = 0.0;
-	for (int j = 0; j < this->Line_Outer.size(); j++)  // Вычисляем скорость контакта
+	// Двигаем ли внешнюю волну
+	if (false)
 	{
-		auto i = this->Line_Outer[j];
-		if (i->B->x > 0)
+		double Vconst = 0.0;
+		for (int j = 0; j < this->Line_Outer.size(); j++)
 		{
-			Parametr par1 = i->Master->par[ii];
-			Parametr par2 = i->Sosed->par[ii];
-			double n1, n2;
-			i->Get_normal(n1, n2);
-			double VV, Vl, Vp;
-			double P[4];
-			double PQ;
+			auto i = this->Line_Outer[j];
+			if (i->B->x > 10.0)
+			{
+				Parametr par1 = i->Master->par[ii];
+				Parametr par2 = i->Sosed->par[ii];
+				double n1, n2;
+				i->Get_normal(n1, n2);
+				double VV, Vl, Vp;
+				double P[4];
+				double PQ;
 
-			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vp = Vp;
-			i->A->Vx += Vp * n1 * 0.5;
-			i->A->Vy += Vp * n2 * 0.5;
-			i->B->Vx += Vp * n1 * 0.5;
-			i->B->Vy += Vp * n2 * 0.5;
-			Vconst = Vp;
-		}
-		else
-		{
-			i->A->Vx = 0.0;
-			i->A->Vy = Vconst;
-			i->B->Vx = 0.0;
-			i->B->Vy = Vconst;
+				this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+					par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
+				Vp = Vp * 0.00000001;
+				i->A->Vx += Vp * n1 * 0.5;
+				i->A->Vy += Vp * n2 * 0.5;
+				i->B->Vx += Vp * n1 * 0.5;
+				i->B->Vy += Vp * n2 * 0.5;
+				Vconst = Vp;
+			}
+			else
+			{
+				Vconst = 1.0;
+				i->A->Vx = 0.0;
+				i->A->Vy = Vconst;
+				i->B->Vx = 0.0;
+				i->B->Vy = Vconst;
+			}
+
 		}
 
+		this->Line_Outer[0]->A->Vx = this->Line_Outer[0]->B->Vx + (this->Line_Outer[0]->B->x - this->Line_Outer[0]->A->x);
+
+		this->Line_Outer[this->Line_Outer.size() - 1]->B->Vy = this->Line_Outer[this->Line_Outer.size() - 1]->A->Vy + //
+			(this->Line_Outer[this->Line_Outer.size() - 1]->A->y - this->Line_Outer[this->Line_Outer.size() - 1]->B->y);
 	}
-
-	this->Line_Outer[0]->A->Vx = this->Line_Outer[0]->B->Vx + (this->Line_Outer[0]->B->x - this->Line_Outer[0]->A->x);
-
-	this->Line_Outer[this->Line_Outer.size() - 1]->B->Vy = this->Line_Outer[this->Line_Outer.size() - 1]->A->Vy + //
-		(this->Line_Outer[this->Line_Outer.size() - 1]->A->y - this->Line_Outer[this->Line_Outer.size() - 1]->B->y);
 }
 
 void Setka::Move_Setka_Calculate(const double& dt)
 {
 	double Vx, Vy, V;
 	double R2, r, R3, R4;
+
+	double y_Outer = this->A_Rails[this->A_Rails.size() - 4]->Key_point[2]->y;
 
 	for (auto& i : this->A_Rails)
 	{
@@ -2101,6 +2149,10 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		i->Key_point[3]->x2 = i->Key_point[3]->x;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+		this->A_Rails[this->A_Rails.size() - 2]->Key_point[2]->y2 = y_Outer;
+		this->A_Rails[this->A_Rails.size() - 1]->Key_point[2]->y2 = y_Outer;
+		this->A_Rails[this->A_Rails.size() - 3]->Key_point[2]->y2 = y_Outer;
 
 		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
 
@@ -2151,7 +2203,7 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		V = i->Key_point[2]->Vx * 0.0 + i->Key_point[2]->Vy * 1.0;
 		i->Key_point[2]->x2 = i->Key_point[0]->x2;
-		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
+		i->Key_point[2]->y2 = y_Outer; // i->Key_point[2]->y + dt * V;
 
 		i->Key_point[3]->x2 = i->Key_point[0]->x2;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
@@ -2236,7 +2288,7 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		V = i->Key_point[2]->Vy;
 		i->Key_point[2]->x2 = i->Key_point[0]->x2;
-		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
+		i->Key_point[2]->y2 = y_Outer; // i->Key_point[2]->y + dt * V;
 
 		i->Key_point[3]->x2 = i->Key_point[0]->x2;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
