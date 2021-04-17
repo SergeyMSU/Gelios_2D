@@ -23,6 +23,7 @@ public:
 	vector <Gran*> All_Gran_copy;      // Грани фантомные (нормаль в другую сторону)
 
 	vector <Cell*> All_Cells;
+	vector <Cell*> All_Cells_Inner;
 
 	vector <Gran*> Line_Contact;
 	vector <Gran*> Line_Inner;       // Внутренняя волна
@@ -63,6 +64,7 @@ public:
 	void Download_G_D(void);
 	void Save_G_D_5_komponent(void);
 	void Download_G_D_5_komponent(void);
+	void Go_stationary_5_komponent_inner(int step);
 
 	void Proverka(void);   // Проверка правильности построения сетки (геометрии и связей). Сюда можно добавлять все тесты сетки в будующем
 
@@ -71,21 +73,24 @@ public:
 	void Move_surface(int ii);  // Вычисление скоростей поверхностей   ii - какие параметры активные par[ii]
 	void Move_surface_hand(void);  // Ручное движение сетки
 
+	void TVD_prepare(void);
+	void Print_TVD(void);
 
 	// Газовая динамика
 
 	void Go_stationary(int step);
+	void Go_stationary_TVD(int step);
 	void Go_stationary_5_komponent(int step);
 	void Go(int step); // Выделение разрывов  Газовая динамика
 	void Go_5_komponent(int step);
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
-		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp);
+		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok = false);
 	void Init_conditions(void);
 
-private:
-	double polar_angle(const double& x, const double& y);
 
+
+private:
 
 };
 

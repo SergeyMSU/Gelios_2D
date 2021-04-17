@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+
 using namespace std;
 
 Setka::Setka()
@@ -168,9 +169,10 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 				K->type = P_Outer_shock;
 			}
 		}
+		double x = pow(R5_ / R4_, 1.0 / (M4));
 		for (int j = 0; j < M4; j++)
 		{
-			l = R4_ + (j + 1) * (R5_ - R4_) / M4;
+			l = R4_ * pow(x, j + 1);  //R4_ + (j + 1) * (R5_ - R4_) / M4;
 			auto K = new Point(P->x, l);
 			this->D_Rails[i]->All_point.push_back(K);
 			this->All_Points.push_back(K);
@@ -842,7 +844,7 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 				double x1, y1, x2, y2;
 				i->Get_Center(x1, y1);
 				j->Get_Center(x2, y2);
-				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+				return (polar_angle(x1, y1) < polar_angle(x2, y2));
 			});
 
 		int kl = 8;
@@ -963,7 +965,7 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 				double x1, y1, x2, y2;
 				i->Get_Center(x1, y1);
 				j->Get_Center(x2, y2);
-				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+				return (polar_angle(x1, y1) < polar_angle(x2, y2));
 			});
 
 		if (i->A->type == P_Inner_shock && i->B->type == P_Inner_shock)
@@ -976,7 +978,7 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 				double x1, y1, x2, y2;
 				i->Get_Center(x1, y1);
 				j->Get_Center(x2, y2);
-				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+				return (polar_angle(x1, y1) < polar_angle(x2, y2));
 			});
 
 		if (i->A->type == P_Outer_shock && i->B->type == P_Outer_shock)
@@ -989,7 +991,7 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 				double x1, y1, x2, y2;
 				i->Get_Center(x1, y1);
 				j->Get_Center(x2, y2);
-				return (this->polar_angle(x1, y1) < this->polar_angle(x2, y2));
+				return (polar_angle(x1, y1) < polar_angle(x2, y2));
 			});
 	}
 
@@ -1018,6 +1020,162 @@ Setka::Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4)
 
 	cout << "Vsego tochek = " << this->All_Points.size() << endl;
 	cout << "Vsego Yacheek = " << this->All_Cells.size() << endl;
+}
+
+void Setka::TVD_prepare(void)
+{
+	double n1, n2, n;
+	double x, y;
+	double x1, y1;
+	double x3, y3;
+	double a, b, N;
+	Cell* A = nullptr;
+	cout << "TVD  prepare" << endl;
+	for (auto& i : this->All_Gran)
+	{
+		A = nullptr;
+		if (i->type != Usualy)
+		{
+			continue;
+		}
+		N = 1.0;
+		i->Sosed->Get_Center(x3, y3);
+		i->Get_Center(x, y);
+		n1 = x3 - x;
+		n2 = y3 - y;
+		n = sqrt(kv(n1) + kv(n2));
+		n1 = n1 / n;
+		n2 = n2 / n;
+
+		for (auto& j : i->Sosed->Grans)
+		{
+			if (j->type != Usualy || j->Sosed->number != i->Master->number)
+			{
+				if (j->Sosed != nullptr)
+				{
+					j->Sosed->Get_Center(x1, y1);
+				}
+				else
+				{
+					j->Get_Center(x1, y1);
+				}
+
+				a = x1 - x;
+				b = y1 - y;
+				n = sqrt(kv(a) + kv(b));
+				a = a / n;
+				b = b / n;
+				//cout << fabs(a * n1 + b * n2) << endl;
+				if (fabs(1.0 - fabs(a * n1 + b * n2)) < N)
+				{
+					N = fabs(1.0 - fabs(a * n1 + b * n2));
+					A = j->Sosed;
+				}
+			}
+			
+		}
+		i->Sosed_up = A;
+	}
+
+	for (auto& i : this->All_Gran_copy)
+	{
+		A = nullptr;
+		if (i->type != Usualy)
+		{
+			continue;
+		}
+		N = 1.0;
+		i->Sosed->Get_Center(x3, y3);
+		i->Get_Center(x, y);
+		n1 = x3 - x;
+		n2 = y3 - y;
+		n = sqrt(kv(n1) + kv(n2));
+		n1 = n1 / n;
+		n2 = n2 / n;
+		for (auto& j : i->Sosed->Grans)
+		{
+			if (j->type != Usualy || j->Sosed->number != i->Master->number)
+			{
+				if (j->Sosed != nullptr)
+				{
+					j->Sosed->Get_Center(x1, y1);
+				}
+				else
+				{
+					j->Get_Center(x1, y1);
+				}
+
+				a = x1 - x;
+				b = y1 - y;
+				n = sqrt(kv(a) + kv(b));
+				a = a / n;
+				b = b / n;
+				//cout << fabs(a * n1 + b * n2) << endl;
+				if (fabs(1.0 - fabs(a * n1 + b * n2)) < N)
+				{
+					N = fabs(1.0 - fabs(a * n1 + b * n2));
+					A = j->Sosed;
+				}
+			}
+
+		}
+		i->Sosed_up = A;
+	}
+
+	for (auto& i : this->All_Gran)
+	{
+		if (i->Gran_copy != nullptr)
+		{
+			i->Sosed_down = i->Gran_copy->Sosed_up;
+		}
+	}
+
+	for (auto& i : this->All_Gran_copy)
+	{
+		if (i->Gran_copy != nullptr)
+		{
+			i->Sosed_down = i->Gran_copy->Sosed_up;
+		}
+	}
+
+	cout << "TVD  prepare  end" << endl;
+}
+
+void Setka::Print_TVD(void)
+{
+	int ll = this->All_Gran.size();
+	ofstream fout;
+	fout.open("TVD.txt");
+	fout << "TITLE = \"HP\" ";
+	fout << " VARIABLES = \"X\", \"Y\", \"C\"  ZONE T= \"HP\", N=  " << 2 * ll;
+	fout << " , E= " << ll;
+	fout << " , F=FEPOINT, ET=LINESEG  " << endl;
+	double x1, y1;
+	double x2, y2;
+	int nn = 0;
+	for (auto& i : this->All_Gran)
+	{
+		nn++;
+		i->Get_Center(x1, y1);
+		if (i->Sosed_down != nullptr)
+		{
+			i->Sosed_down->Get_Center(x2, y2);
+		}
+		else
+		{
+			x2 = x1;
+			y2 = y1;
+		}
+		fout << x1 << " " << y1 << " " << nn << endl;
+		fout << x2 << " " << y2 << " " << nn << endl;
+	}
+
+	for (int i = 0; i < ll; i++)
+	{
+		fout << 2 * i + 1 << " " << 2 * i + 2 << endl;
+	}
+
+	fout.close();
 }
 
 void Setka::Print_point()
@@ -1233,6 +1391,8 @@ void Setka::Print_Tecplot(void)
 	double p_o = 1.0;   // Размер давления
 	double u_o = 10.38;   // Размер давления
 
+
+
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
 	fout.open(name_f);
@@ -1240,6 +1400,16 @@ void Setka::Print_Tecplot(void)
 		"\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Ro_H4\", \"P_H4\", \"Vx_H4\", \"Vy_H4\", \"RO_H\", ZONE T = \"HP\"" << endl;
 	for (auto& i : this->All_Cells)
 	{
+		double kk;
+		if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+		{
+			kk = (chi_real / chi_);
+		}
+		else
+		{
+			kk = 1.0;
+		}
+		double kk = 1.0;
 		double Max = 0.0;
 		double QQ = 0.0;
 		double x, y;
@@ -1251,8 +1421,8 @@ void Setka::Print_Tecplot(void)
 		}
 
 		fout << x * r_o << " " << y * r_o << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
-			" " << i->par[0].ro * ro_o << " " << i->par[0].p * p_o << " " //
-			<< i->par[0].u * u_o << " " << i->par[0].v * u_o << " " << Max << " " << QQ << //
+			" " << i->par[0].ro * ro_o/kv(kk) << " " << i->par[0].p * p_o << " " //
+			<< i->par[0].u * u_o * kk << " " << i->par[0].v * u_o * kk << " " << Max << " " << QQ << //
 			" " << i->par[0].ro_H1 * ro_o_H << " " << i->par[0].p_H1 * p_o << " " //
 			<< i->par[0].u_H1 * u_o << " " << i->par[0].v_H1 * u_o << //
 			" " << i->par[0].ro_H2 * ro_o_H << " " << i->par[0].p_H2 * p_o << " " //
@@ -1268,11 +1438,22 @@ void Setka::Print_Tecplot(void)
 
 	name_f = "1D_tecplot.txt";
 	fout.open(name_f);
-	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"Ro_r_r\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
 		"\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Ro_H4\", \"P_H4\", \"Vx_H4\", \"Vy_H4\", \"RO_H\", ZONE T = \"HP\"" << endl;
 	int num = 0;
+	double ro = (389.988 * 389.988) / (chi_ * chi_);
 	for (auto& i : this->All_Cells)
 	{
+		double kk;
+		if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+		{
+			kk = (chi_real / chi_);
+		}
+		else
+		{
+			kk = 1.0;
+		}
+		kk = 1.0;
 		num++;
 		if (num > this->M1 + this->M2 + this->M3 + this->M4)
 		{
@@ -1287,10 +1468,10 @@ void Setka::Print_Tecplot(void)
 			QQ = i->par[0].Q / i->par[0].ro;
 			Max = sqrt(kvv(i->par[0].u, i->par[0].v, 0.0) / (ggg * i->par[0].p / i->par[0].ro));
 		}
-
+		double dist = sqrt(kv(x) + kv(y));
 		fout << x * r_o << " " << y * r_o << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
-			" " << i->par[0].ro * ro_o << " " << i->par[0].p * p_o << " " //
-			<< i->par[0].u * u_o << " " << i->par[0].v * u_o << " " << Max << " " << QQ << //
+			" " << i->par[0].ro * ro_o / kv(kk) << " " << ro_o * ro / (dist * dist) << " " << i->par[0].p * p_o << " " //
+			<< i->par[0].u * u_o * kk << " " << i->par[0].v * u_o * kk << " " << Max << " " << QQ << //
 			" " << i->par[0].ro_H1 * ro_o_H << " " << i->par[0].p_H1 * p_o << " " //
 			<< i->par[0].u_H1 * u_o << " " << i->par[0].v_H1 * u_o << //
 			" " << i->par[0].ro_H2 * ro_o_H << " " << i->par[0].p_H2 * p_o << " " //
@@ -1337,6 +1518,52 @@ void Setka::Proverka(void)
 			if (n1 * (x - xc) + n2 * (y - yc) > 0)
 			{
 				cout << "ERROR  gran  wecwcefwcfwcfwcwcfwf:  " << xc << " " << yc << endl;
+			}
+		}
+
+	}
+
+	cout << "Proverka TVD" << endl;
+
+	for (auto& i : this->All_Gran)
+	{
+		if (i->type == Usualy)
+		{
+			Parametr par;
+			i->Get_par_TVD(par, 0);
+			if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+			{
+				cout << "PROBLEM BIG" << endl;
+			}
+			if ((par.p < i->Master->par[0].p && par.p < i->Sosed->par[0].p) || (par.p > i->Master->par[0].p && par.p > i->Sosed->par[0].p))
+			{
+				cout << "PROBLEM BIG" << endl;
+			}
+			if ((par.u < i->Master->par[0].u && par.u < i->Sosed->par[0].u) || (par.u > i->Master->par[0].u && par.u > i->Sosed->par[0].u))
+			{
+				cout << "PROBLEM BIG" << endl;
+			}
+			if ((par.v < i->Master->par[0].v && par.v < i->Sosed->par[0].v) || (par.v > i->Master->par[0].v && par.v > i->Sosed->par[0].v))
+			{
+				cout << "PROBLEM BIG" << endl;
+			}
+			if ((par.Q < i->Master->par[0].Q && par.Q < i->Sosed->par[0].Q) || (par.Q > i->Master->par[0].Q && par.Q > i->Sosed->par[0].Q))
+			{
+				cout << "PROBLEM BIG" << endl;
+			}
+		}
+
+	}
+
+	for (auto& i : this->All_Gran_copy)
+	{
+		if (i->type == Usualy)
+		{
+			Parametr par;
+			i->Get_par_TVD(par, 0);
+			if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+			{
+				cout << "PROBLEM BIG" << endl;
 			}
 		}
 
@@ -2000,30 +2227,97 @@ void Setka::Move_surface(int ii)
 
 	if (true)
 	{
-		int bb = -1;
+		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
 		{
+			//auto S = Solvers();
 			auto i = this->Line_Contact[j];
-			Parametr par1 = i->Master->par[ii];
-			Parametr par2 = i->Sosed->par[ii];
+			Parametr par1;// = i->Master->par[ii];
+			Parametr par2;// = i->Sosed->par[ii];
+			i->Get_par_TVD(par1, ii);
+			i->Gran_copy->Get_par_TVD(par2, ii);
 			double n1, n2;
+			//vector<double> qqq1(5);
+			//vector<double> qqq2(5);
+			//vector<double> qqq(5);
+			//vector<double> n(3);
 			i->Get_normal(n1, n2);
 			double VV, Vl, Vp;
 			double P[4];
 			double PQ;
 
+			/*n[0] = n1;
+			n[1] = n2;
+			n[2] = 0.0;
+
+			qqq1[0] = par1.ro;
+			qqq1[1] = par1.p;
+			qqq1[2] = par1.u;
+			qqq1[3] = par1.v;
+			qqq1[4] = 0.0;
+
+			qqq2[0] = par2.ro;
+			qqq2[1] = par2.p;
+			qqq2[2] = par2.u;
+			qqq2[3] = par2.v;
+			qqq2[4] = 0.0;*/
+
 			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
 
-			double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV;
+			//S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
 
-			//if (i->A->x < -200 && i->A->y < 400 && i->B->x < -200 && i->B->y < 400) //  && VV <= 0.0)
-			//{
-			//	VV = 10.0;
-			//}
+			//double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
+			VV = VV;// *0.2;
+
+			/*if (i->A->x < -400)
+			{
+				VV = 0.0;
+			}*/
+
+			/*if (i->A->x < -200)
+			{
+				VV = par1.u * n1 + par1.v * n2;
+			}*/
+
+
+
+			if ( (i->A->x < -200 && i->A->y < 200 && VV <= 0)|| (i->B->x < -200 && i->B->y < 200 && VV <= 0) )
+			{
+				VV = 0.0;
+			}
+
+			double t1 = -n2;
+			double t2 = n1;
+
+			if (par1.u * t1 + par1.v * t2 > 0)
+			{
+				i->B->Vx += VV * n1;
+				i->B->Vy += VV * n2;
+				i->B->count++;
+			}
+			else if (par1.u * t1 + par1.v * t2 < 0)
+			{
+				i->A->Vx += VV * n1;
+				i->A->Vy += VV * n2;
+				i->A->count++;
+			}
+			else
+			{
+				i->B->Vx += VV * n1;
+				i->B->Vy += VV * n2;
+				i->A->Vx += VV * n1;
+				i->A->Vy += VV * n2;
+				i->B->count++;
+				i->A->count++;
+			}
+
+			/*if (i->A->x < -200 && i->A->y < 400 && i->B->x < -200 && i->B->y < 400)
+			{
+				VV = 0.05;
+			}*/
 			//cout << i->A->x << " " << i->A->y << " " << VV << " " << n1 << " " << n2 <<  endl;
-			if (Max > 1)
+			/*if (Max > 1)
 			{
 				if (bb == -1)
 				{
@@ -2038,6 +2332,16 @@ void Setka::Move_surface(int ii)
 				i->A->Vy += VV * n2 * 0.5;
 				i->B->Vx += VV * n1 * 0.5;
 				i->B->Vy += VV * n2 * 0.5;
+			}*/
+		}
+
+		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
+		{
+			auto i = this->Line_Contact[j];
+			if (i->A->count > 0)
+			{
+				i->A->Vx /= (1.0 * i->A->count);
+				i->A->Vy /= (1.0 * i->A->count);
 			}
 		}
 
@@ -2046,76 +2350,227 @@ void Setka::Move_surface(int ii)
 		this->Line_Contact[this->Line_Contact.size() - 1]->B->Vy = this->Line_Contact[this->Line_Contact.size() - 1]->A->Vy + //
 			(this->Line_Contact[this->Line_Contact.size() - 1]->A->y - this->Line_Contact[this->Line_Contact.size() - 1]->B->y);
 
-		if (bb >= 0)
+		/*if (bb >= 0)
 		{
 			this->Line_Contact[bb]->A->Vx *= 2.0;
 			this->Line_Contact[bb]->A->Vy *= 2.0;
-		}
+		}*/
 	}
 
-
-	// Движение внутренней ударной волны
-	for (int j = 0; j < this->Line_Inner.size(); j++)  
+	if (true)
 	{
-		auto i = this->Line_Inner[j];
-		Parametr par1 = i->Master->par[ii];
-		Parametr par2 = i->Sosed->par[ii];
-		double n1, n2;
-		i->Get_normal(n1, n2);
-		double VV, Vl, Vp;
-		double P[4];
-		double PQ;
-
-		this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-			par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-		Vl = Vl * 0.03;
-		i->A->Vx += Vl * n1 * 0.5;
-		i->A->Vy += Vl * n2 * 0.5;
-		i->B->Vx += Vl * n1 * 0.5;
-		i->B->Vy += Vl * n2 * 0.5;
-		
-	}
-
-	this->Line_Inner[0]->A->Vx = this->Line_Inner[0]->B->Vx + (this->Line_Inner[0]->B->x - this->Line_Inner[0]->A->x);
-
-	this->Line_Inner[this->Line_Inner.size() - 1]->B->Vx = this->Line_Inner[this->Line_Inner.size() - 1]->A->Vx + //
-		(this->Line_Inner[this->Line_Inner.size() - 1]->A->x - this->Line_Inner[this->Line_Inner.size() - 1]->B->x);
-
-	// Двигаем ли внешнюю волну
-	if (false)
-	{
-		double Vconst = 0.0;
-		for (int j = 0; j < this->Line_Outer.size(); j++)
+		// Движение внутренней ударной волны
+		for (int j = 0; j < this->Line_Inner.size(); j++)
 		{
-			auto i = this->Line_Outer[j];
-			if (i->B->x > 10.0)
-			{
-				Parametr par1 = i->Master->par[ii];
-				Parametr par2 = i->Sosed->par[ii];
-				double n1, n2;
-				i->Get_normal(n1, n2);
-				double VV, Vl, Vp;
-				double P[4];
-				double PQ;
+			auto i = this->Line_Inner[j];
+			Parametr par1 = i->Master->par[ii];
+			double x, y, x2, y2;
+			i->Master->Get_Center(x, y);
+			double radius = sqrt(kv(x) + kv(y));
+			i->Get_Center(x2, y2);
+			double dis = sqrt(kv(x2) + kv(y2));
+			Parametr par2;// = i->Sosed->par[ii];
+			i->Gran_copy->Get_par_TVD(par2, ii);
+			double n1, n2;
+			i->Get_normal(n1, n2);
+			double VV, Vl, Vp;
+			double P[4];
+			double PQ;
+			par1.ro = par1.ro * kv(radius) / kv(dis);
+			par1.p = par1.p * pow(radius / dis, 2.0 * ggg);
+			polar_perenos(x, y, x2, y2, par1.u, par1.v);
 
-				this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-					par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-				Vp = Vp * 0.00000001;
-				i->A->Vx += Vp * n1 * 0.5;
-				i->A->Vy += Vp * n2 * 0.5;
-				i->B->Vx += Vp * n1 * 0.5;
-				i->B->Vy += Vp * n2 * 0.5;
-				Vconst = Vp;
+			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
+			Vl = Vl;
+			double t1 = -n2;
+			double t2 = n1;
+
+			if (true)// (j > 12)
+			{
+				if (par1.u * t1 + par1.v * t2 > 0)
+				{
+					i->B->Vx += Vl * n1;
+					i->B->Vy += Vl * n2;
+					i->B->count++;
+				}
+				else if (par1.u * t1 + par1.v * t2 < 0)
+				{
+					i->A->Vx += Vl * n1;
+					i->A->Vy += Vl * n2;
+					i->A->count++;
+				}
+				else
+				{
+					i->B->Vx += Vl * n1;
+					i->B->Vy += Vl * n2;
+					i->A->Vx += Vl * n1;
+					i->A->Vy += Vl * n2;
+					i->B->count++;
+					i->A->count++;
+				}
+			}
+			/*else if(j < 12)
+			{
+				if (par1.u * t1 + par1.v * t2 < 0)
+				{
+					i->B->Vx += Vl * n1;
+					i->B->Vy += Vl * n2;
+					i->B->count++;
+				}
+				else if (par1.u * t1 + par1.v * t2 > 0)
+				{
+					i->A->Vx += Vl * n1;
+					i->A->Vy += Vl * n2;
+					i->A->count++;
+				}
+				else
+				{
+					i->B->Vx += Vl * n1;
+					i->B->Vy += Vl * n2;
+					i->A->Vx += Vl * n1;
+					i->A->Vy += Vl * n2;
+					i->B->count++;
+					i->A->count++;
+				}
 			}
 			else
 			{
-				Vconst = 1.0;
-				i->A->Vx = 0.0;
-				i->A->Vy = Vconst;
-				i->B->Vx = 0.0;
-				i->B->Vy = Vconst;
-			}
+				i->B->Vx += Vl * n1;
+				i->B->Vy += Vl * n2;
+				i->A->Vx += Vl * n1;
+				i->A->Vy += Vl * n2;
+				i->B->count++;
+				i->A->count++;
+			}*/
 
+			/*i->B->Vx += Vl * n1 * 0.5;
+			i->B->Vy += Vl * n2 * 0.5;
+			i->A->Vx += Vl * n1 * 0.5;
+			i->A->Vy += Vl * n2 * 0.5;*/
+			/*if (j < 12)
+			{
+				i->A->Vx += Vl * n1;
+				i->A->Vy += Vl * n2;
+				i->A->count++;
+			}
+			else */
+			/*if(j > 12)
+			{
+				i->B->Vx += Vl * n1;
+				i->B->Vy += Vl * n2;
+				i->B->count++;
+			}
+			else
+			{
+				i->B->Vx += Vl * n1;
+				i->B->Vy += Vl * n2;
+				i->A->Vx += Vl * n1;
+				i->A->Vy += Vl * n2;
+				i->B->count++;
+				i->A->count++;
+			}*/
+
+		}
+
+		for (int j = 0; j < this->Line_Inner.size(); j++)  // Вычисляем скорость контакта
+		{
+			auto i = this->Line_Contact[j];
+			if (i->A->count > 0)
+			{
+				i->A->Vx /= (1.0 * i->A->count);
+				i->A->Vy /= (1.0 * i->A->count);
+			}
+		}
+
+		this->Line_Inner[0]->A->Vx = this->Line_Inner[0]->B->Vx + (this->Line_Inner[0]->B->x - this->Line_Inner[0]->A->x);
+
+		this->Line_Inner[this->Line_Inner.size() - 1]->B->Vx = this->Line_Inner[this->Line_Inner.size() - 1]->A->Vx + //
+			(this->Line_Inner[this->Line_Inner.size() - 1]->A->x - this->Line_Inner[this->Line_Inner.size() - 1]->B->x);
+
+	}
+
+	// Двигаем ли внешнюю волну
+	if (true)
+	{
+		//double Vconst = 0.0;
+		for (int j = 0; j < this->Line_Outer.size(); j++)
+		{
+			auto i = this->Line_Outer[j];
+			Parametr par1; // = i->Master->par[ii];
+			Parametr par2; // = i->Sosed->par[ii];
+			i->Get_par_TVD(par1, ii);
+			i->Gran_copy->Get_par_TVD(par2, ii);
+			double n1, n2;
+			i->Get_normal(n1, n2);
+			double VV, Vl, Vp;
+			double P[4];
+			double PQ;
+
+			vector<double> qqq1(5);
+			vector<double> qqq2(5);
+			vector<double> qqq(5);
+			vector<double> n(3);
+			n[0] = n1;
+			n[1] = n2;
+			n[2] = 0.0;
+
+			qqq1[0] = par1.ro;
+			qqq1[1] = par1.p;
+			qqq1[2] = par1.u;
+			qqq1[3] = par1.v;
+			qqq1[4] = 0.0;
+
+			qqq2[0] = par2.ro;
+			qqq2[1] = par2.p;
+			qqq2[2] = par2.u;
+			qqq2[3] = par2.v;
+			qqq2[4] = 0.0;
+
+			auto S = Solvers();
+			S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
+
+			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
+			Vp = Vp;
+
+			double t1 = -n2;
+			double t2 = n1;
+
+			
+
+			if (par1.u * t1 + par1.v * t2 > 0)
+			{
+				i->B->Vx += Vp * n1;
+				i->B->Vy += Vp * n2;
+				i->B->count++;
+			}
+			else if (par1.u * t1 + par1.v * t2 < 0)
+			{
+				i->A->Vx += Vp * n1;
+				i->A->Vy += Vp * n2;
+				i->A->count++;
+			}
+			else
+			{
+				i->B->Vx += Vp * n1;
+				i->B->Vy += Vp * n2;
+				i->A->Vx += Vp * n1;
+				i->A->Vy += Vp * n2;
+				i->B->count++;
+				i->A->count++;
+			}
+			
+		}
+
+		for (int j = 0; j < this->Line_Outer.size(); j++)  // Вычисляем скорость контакта
+		{
+			auto i = this->Line_Contact[j];
+			if (i->A->count > 0)
+			{
+				i->A->Vx /= (1.0 * i->A->count);
+				i->A->Vy /= (1.0 * i->A->count);
+			}
 		}
 
 		this->Line_Outer[0]->A->Vx = this->Line_Outer[0]->B->Vx + (this->Line_Outer[0]->B->x - this->Line_Outer[0]->A->x);
@@ -2130,10 +2585,11 @@ void Setka::Move_Setka_Calculate(const double& dt)
 	double Vx, Vy, V;
 	double R2, r, R3, R4;
 
-	double y_Outer = this->A_Rails[this->A_Rails.size() - 4]->Key_point[2]->y;
+	//double y_Outer = this->D_Rails[16]->Key_point[1]->y;
 
-	for (auto& i : this->A_Rails)
+	for (int jj = 0; jj < this->A_Rails.size(); jj++)
 	{
+		auto i = this->A_Rails[jj];
 		// Подвинем ключевые точки
 		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
 		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
@@ -2147,19 +2603,51 @@ void Setka::Move_Setka_Calculate(const double& dt)
 		i->Key_point[2]->x2 = i->Key_point[2]->x + dt * V * cos(i->s);
 		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V * sin(i->s);
 
+		/*if (jj == 2)
+		{
+			i->Key_point[2]->x2 = 270.28 * cos(i->s);
+			i->Key_point[2]->y2 = 270.28 * sin(i->s);
+		}
+		if (jj == 3)
+		{
+			i->Key_point[2]->x2 = 270.8 * cos(i->s);
+			i->Key_point[2]->y2 = 270.8 * sin(i->s);
+		}
+		if (jj == 4)
+		{
+			i->Key_point[2]->x2 = 270.7 * cos(i->s);
+			i->Key_point[2]->y2 = 270.7 * sin(i->s);
+		}*/
+
 		i->Key_point[3]->x2 = i->Key_point[3]->x;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
 
-		this->A_Rails[this->A_Rails.size() - 2]->Key_point[2]->y2 = y_Outer;
-		this->A_Rails[this->A_Rails.size() - 1]->Key_point[2]->y2 = y_Outer;
-		this->A_Rails[this->A_Rails.size() - 3]->Key_point[2]->y2 = y_Outer;
 
 		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
 
-		double x = pow(R2 / R1_, 1.0 / (i->M1 - 1));
-		for (int j = 0; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		double x;
+
+		x = pow(R11_ / R1_, 1.0 / n_inner);
+		for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
 		{
 			r = R1_ * pow(x, j);
+			//r = R1_ + (R2 - R1_) * j / (i->M1 - 1);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+		for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		{
+			r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		{
+			//r = R11_ * pow(x, j - 7);
+			r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
 			i->All_point[j]->x2 = r * cos(i->s);
 			i->All_point[j]->y2 = r * sin(i->s);
 		}
@@ -2175,6 +2663,7 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
 
+
 		for (int j = 0; j < i->M3 - 1; j++)
 		{
 			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
@@ -2182,16 +2671,20 @@ void Setka::Move_Setka_Calculate(const double& dt)
 			i->All_point[i->M1 + i->M2 + j]->y2 = r * sin(i->s);
 		}
 
+		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
 		for (int j = 0; j < i->M4; j++)
 		{
-			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			x = (j + 1.0) / (1.0 * i->M4);
+			r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.03 * x) * (R5_ - R4);
+			//r = R4 *  pow( 1.0 * (j + 2), x * (j + 1));  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
 			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = r * cos(i->s);
 			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r * sin(i->s);
 		}
 	}
 
-	for (auto& i : this->B_Rails)
+	for (int jj = 0; jj < this->B_Rails.size(); jj++)
 	{
+		auto i = this->B_Rails[jj];
 		// Подвинем ключевые точки
 		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
 		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
@@ -2203,17 +2696,35 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		V = i->Key_point[2]->Vx * 0.0 + i->Key_point[2]->Vy * 1.0;
 		i->Key_point[2]->x2 = i->Key_point[0]->x2;
-		i->Key_point[2]->y2 = y_Outer; // i->Key_point[2]->y + dt * V;
+		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
 
 		i->Key_point[3]->x2 = i->Key_point[0]->x2;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
 
 		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
 
-		double x = pow(R2 / R1_, 1.0 / (i->M1 - 1));
-		for (int j = 0; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		double x;
+		x = pow(R11_ / R1_, 1.0 / n_inner);
+		for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
 		{
 			r = R1_ * pow(x, j);
+			//r = R1_ + (R2 - R1_) * j / (i->M1 - 1);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+		for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		{
+			r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		{
+			//r = R11_ * pow(x, j - 7);
+			r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
 			i->All_point[j]->x2 = r * cos(i->s);
 			i->All_point[j]->y2 = r * sin(i->s);
 		}
@@ -2237,9 +2748,12 @@ void Setka::Move_Setka_Calculate(const double& dt)
 			i->All_point[i->M1 + i->M2 + j]->y2 = r;
 		}
 
+		//x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
 		for (int j = 0; j < i->M4; j++)
 		{
-			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			x = (j + 1.0) / (1.0 * i->M4);
+			r = R4 + (kv(x) * kv(x) + (1.0 - x) * (0.03 + 0.19 * jj / (this->B_Rails.size() - 1.0)) * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
 			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = i->Key_point[0]->x2;
 			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r;
 		}
@@ -2256,10 +2770,28 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
 
-		double x = pow(R2 / R1_, 1.0 / (i->M1 - 1));
-		for (int j = 0; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		double x;
+		x = pow(R11_ / R1_, 1.0 / n_inner);
+		for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
 		{
 			r = R1_ * pow(x, j);
+			//r = R1_ + (R2 - R1_) * j / (i->M1 - 1);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+		for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		{
+			r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		{
+			//r = R11_ * pow(x, j - 7);
+			r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
 			i->All_point[j]->x2 = r * cos(i->s);
 			i->All_point[j]->y2 = r * sin(i->s);
 		}
@@ -2278,17 +2810,29 @@ void Setka::Move_Setka_Calculate(const double& dt)
 		}
 	}
 
-	for (auto& i : this->D_Rails)
+	for (int jj = 0; jj < this->D_Rails.size(); jj++)
 	{
 		// Подвинем ключевые точки
-
+		auto i = this->D_Rails[jj];
 		V = i->Key_point[1]->Vy;
 		i->Key_point[1]->x2 = i->Key_point[0]->x2;
+		/*if (jj > 16)
+		{
+			i->Key_point[1]->y2 = y_Outer + (247.0 - y_Outer) * (jj - 16.0) / (this->D_Rails.size() - 1.0 - 16.0);
+		}
+		else
+		{
+			i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
+		}*/
 		i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
+		/*if (jj > 22)
+		{
+			i->Key_point[1]->y2 = this->D_Rails[22]->Key_point[1]->y2;
+		}*/
 
 		V = i->Key_point[2]->Vy;
 		i->Key_point[2]->x2 = i->Key_point[0]->x2;
-		i->Key_point[2]->y2 = y_Outer; // i->Key_point[2]->y + dt * V;
+		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
 
 		i->Key_point[3]->x2 = i->Key_point[0]->x2;
 		i->Key_point[3]->y2 = i->Key_point[3]->y;
@@ -2313,9 +2857,12 @@ void Setka::Move_Setka_Calculate(const double& dt)
 			i->All_point[this->M2 + j + 1]->y2 = r;
 		}
 
+		//double x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
 		for (int j = 0; j < this->M4; j++)
 		{
-			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			double x = (j + 1.0) / (1.0 * i->M4);
+			r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.22 * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
 			i->All_point[this->M2 + this->M3 + j + 1]->x2 = i->Key_point[0]->x2;
 			i->All_point[this->M2 + this->M3 + j + 1]->y2 = r;
 		}
@@ -2333,7 +2880,7 @@ void Setka::Init_conditions(void)
 	{
 		i->Get_Center(x, y);
 		dist = sqrt(kv(x) + kv(y));
-		if (dist < 150)
+		if (dist <= 110)
 		{
 			i->par[0] = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
 		(2.0 * (sigma(chi_real) * 389.988) / (2.0 * Kn_ * chi_real))* (1.0 / dist - 0.1 / kv(dist)), 0.000001, chi_real * x / dist, chi_real * y / dist, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
@@ -2382,8 +2929,9 @@ void Setka::Go_stationary(int step)
 			double dist;
 			double x, y;
 			K->Get_Center(x, y);
+			double rad = sqrt(kv(x) + kv(y));
 
-			if (sqrt(kv(x) + kv(y)) < 100.0)
+			if (K->type == C_centr)
 			{
 				continue;
 			}
@@ -2394,16 +2942,55 @@ void Setka::Go_stationary(int step)
 				double S = i->Get_square();
 				i->Get_Center(x2, y2);
 				dist = sqrt(kv(x - x2) + kv(y - y2));
-				Parametr par2; 
+				Parametr par2, par11; 
+				par11 = par1;
 				i->Get_par(par2, now1);
 				i->Get_normal(n1, n2);
 				double Vc, Vl, Vp;
-				int met = 0;
+				int met = 1;
+				if (rad < 95 && i->type == Usualy)
+				{
+					double x3, y3;
+					i->Sosed->Get_Center(x3, y3);
+					double dd = sqrt(kv(x3) + kv(y3));
+					par11.ro = par11.ro * kv(rad) / (kv(x2) + kv(y2));
+					par2.ro = par2.ro * kv(dd) / (kv(x2) + kv(y2));
+					par11.p = par11.p * pow(rad / sqrt(kv(x2) + kv(y2)), 2 * ggg);
+					par2.p = par2.p * pow(dd / sqrt(kv(x2) + kv(y2)), 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x3, y3, x2, y2, par2.u, par2.v);
+				}
+				else if (i->type == Inner_sphere)
+				{
+					par11.ro = par11.ro * kv(rad) / (kv(x2) + kv(y2));
+					par11.p = par11.p * pow(rad / sqrt(kv(x2) + kv(y2)), 2 * ggg);
+				}
+				else if (rad < 95 && i->type == Axis)
+				{
+					//par11.ro = par11.ro * kv(rad) / (kv(x2) + kv(y2));
+					//par11.p = par11.p * pow(rad / sqrt(kv(x2) + kv(y2)), 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					par11.v = 0.0;
+					par2 = par11;
+					//par2.v = -par2.v;
+				}
+				else if (i->type == Axis)
+				{
+					par11.v = 0.0;
+					par2 = par11;
+				}
+				/*if (num_cell == 1)
+				{
+					cout << "-----" << endl;
+					cout << n1 << " " << n2 << endl;
+					cout << par11.ro << " " << par11.u << " " << par11.v << endl;
+					cout << par2.ro << " " << par2.u << " " << par2.v << endl;
+				}*/
 				/*if (step > 20000)
 				{
 					met = 1;
 				}*/
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro, par11.Q, par11.p, par11.u, par11.v, par2.ro, par2.Q, //
 							par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
@@ -2428,7 +3015,7 @@ void Setka::Go_stationary(int step)
 			Q33 = par1.Q - (T[now1] / Volume) * K->Potok[4] - T[now1] * par1.Q * par1.v / y;
 			if (ro3 <= 0)
 			{
-				printf("Problemsssss  par1.ro < 0!\n");
+				printf("Problemsssss  par1.ro < 0!   %lf,   %lf,   %lf\n", x, y, par1.ro);
 				ro3 = 0.00001;
 			}
 			u3 = (par1.ro * par1.u - T[now1] * (K->Potok[1] / Volume + par1.ro * par1.v * par1.u / y)) / ro3;
@@ -2450,7 +3037,7 @@ void Setka::Go_stationary(int step)
 	}
 }
 
-void Setka::Go_stationary_5_komponent(int step)
+void Setka::Go_stationary_TVD(int step)
 {
 	cout << "START " << step << endl;
 	int now1 = 1;
@@ -2475,6 +3062,121 @@ void Setka::Go_stationary_5_komponent(int step)
 		{
 			auto K = this->All_Cells[num_cell];
 			K->Potok[0] = K->Potok[1] = K->Potok[2] = K->Potok[3] = K->Potok[4] = 0.0;
+			double P[4];
+			double PQ;
+			Parametr par1 = K->par[now1];
+			double n1, n2;
+			double dist;
+			double x, y;
+			K->Get_Center(x, y);
+
+			if (K->type == C_centr)
+			{
+				continue;
+			}
+
+			for (auto& i : K->Grans)
+			{
+				double x2, y2;
+				double S = i->Get_square();
+				i->Get_Center(x2, y2);
+				dist = sqrt(kv(x - x2) + kv(y - y2));
+				Parametr par2;
+				Parametr par3;
+				if (i->type == Usualy)
+				{
+					i->Get_par_TVD(par3, now1);
+					i->Gran_copy->Get_par_TVD(par2, now1);
+				}
+				else
+				{
+					par3 = par1;
+					i->Get_par(par2, now1);
+				}
+				i->Get_normal(n1, n2);
+				double Vc, Vl, Vp;
+				int met = 0;
+				/*if (step > 20000)
+				{
+					met = 1;
+				}*/
+				/*if (num_cell == 1)
+				{
+					cout << par3.ro << " " << par2.ro << " " << x2 << " " << y2 << endl;
+				}*/
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par3.ro, par3.Q, par3.p, par3.u, par3.v, par2.ro, par2.Q, //
+					par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+				{
+					K->Potok[k] = K->Potok[k] + P[k] * S;
+				}
+				//cout << "B5" << endl;
+				K->Potok[4] = K->Potok[4] + PQ * S;
+				//cout << "B6" << endl;
+			}
+
+			if (time < T[now2])
+			{
+				mut.lock();
+				T[now2] = time;
+				mut.unlock();
+			}
+
+			double ro3, p3, u3, v3, Q33;
+			double Volume = K->Get_Volume();
+
+			ro3 = par1.ro - T[now1] * (K->Potok[0] / Volume + par1.ro * par1.v / y);
+			Q33 = par1.Q - (T[now1] / Volume) * K->Potok[4] - T[now1] * par1.Q * par1.v / y;
+			if (ro3 <= 0)
+			{
+				printf("Problemsssss  par1.ro < 0!   %lf,   %lf,   %lf\n", x, y, par1.ro);
+				ro3 = 0.00001;
+			}
+			u3 = (par1.ro * par1.u - T[now1] * (K->Potok[1] / Volume + par1.ro * par1.v * par1.u / y)) / ro3;
+			v3 = (par1.ro * par1.v - T[now1] * (K->Potok[2] / Volume + par1.ro * par1.v * par1.v / y)) / ro3;
+			p3 = (((par1.p / (ggg - 1) + par1.ro * (par1.u * par1.u + par1.v * par1.v) * 0.5) - T[now1] * (K->Potok[3] / Volume +  //
+				+par1.v * (ggg * par1.p / (ggg - 1) + par1.ro * (par1.u * par1.u + par1.v * par1.v) * 0.5) / y)) - //
+				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			if (p3 <= 0)
+			{
+				p3 = 0.000001;
+			}
+
+			K->par[now2].ro = ro3;
+			K->par[now2].Q = Q33;
+			K->par[now2].p = p3;
+			K->par[now2].u = u3;
+			K->par[now2].v = v3;
+		}
+	}
+}
+
+void Setka::Go_stationary_5_komponent(int step)
+{
+	cout << "START " << step << endl;
+	int now1 = 1;
+	int now2 = 0;
+	double T[2];
+	T[0] = T[1] = 0.00000001;
+	mutex mut;
+	double x_min, y_min;
+
+	for (int st = 0; st < step; st++)
+	{
+		if (st % 1000 == 0 && st > 0)
+		{
+			cout << st << " " << T[now2] << " " << x_min << " " << y_min << endl;
+		}
+		now1 = (now1 + 1) % 2; // Какие параметры сейчас берём
+		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
+		double time = 10000000;
+		T[now2] = 100000000;
+
+#pragma omp parallel for
+		for (int num_cell = 0; num_cell < this->All_Cells.size(); num_cell++)
+		{
+			auto K = this->All_Cells[num_cell];
+			K->Potok[0] = K->Potok[1] = K->Potok[2] = K->Potok[3] = K->Potok[4] = 0.0;
 			K->Potok_H1[0] = K->Potok_H1[1] = K->Potok_H1[2] = K->Potok_H1[3] = 0.0;
 			K->Potok_H2[0] = K->Potok_H2[1] = K->Potok_H2[2] = K->Potok_H2[3] = 0.0;
 			K->Potok_H3[0] = K->Potok_H3[1] = K->Potok_H3[2] = K->Potok_H3[3] = 0.0;
@@ -2488,6 +3190,10 @@ void Setka::Go_stationary_5_komponent(int step)
 			double x, y;
 			K->Get_Center(x, y);
 			double radius = sqrt(kv(x) + kv(y));
+			if (radius < R11_)
+			{
+				continue;
+			}
 			double Volume = K->Get_Volume();
 
 			for (auto& i : K->Grans)
@@ -2496,15 +3202,58 @@ void Setka::Go_stationary_5_komponent(int step)
 				double S = i->Get_square();
 				i->Get_Center(x2, y2);
 				dist = sqrt(kv(x - x2) + kv(y - y2));
-				Parametr par2;
+				Parametr par2, par11;
+				par11 = par1;
 				i->Get_par(par2, now1);
 				i->Get_normal(n1, n2);
 				double Vc, Vl, Vp;
 				int met = 1;
+				double dis = sqrt(kv(x2) + kv(y2));
+				if (radius < 85 && i->type == Usualy)
+				{
+					double x3, y3;
+					i->Sosed->Get_Center(x3, y3);
+					double dd = sqrt(kv(x3) + kv(y3));
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par2.ro = par2.ro * kv(dd) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par2.ro_H1 = par2.ro_H1 * pow(dd / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par2.Q = par2.Q * kv(dd) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+					par2.p = par2.p * pow(dd / dis, 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x3, y3, x2, y2, par2.u, par2.v);
+					polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					polar_perenos(x3, y3, x2, y2, par2.u_H1, par2.v_H1);
+				}
+				else if (i->type == Inner_sphere)
+				{
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+				}
+				else if (radius < 85 && i->type == Axis)
+				{
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					//par11.v = 0.0;
+					par2 = par11;
+					par2.v = -par2.v;
+					par2.v_H1 = -par2.v_H1;
+					par2.v_H2 = -par2.v_H2;
+					par2.v_H3 = -par2.v_H3;
+					par2.v_H4 = -par2.v_H4;
+				}
 
 				if (K->type != C_centr)
 				{
-					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H1, par1.Q, par1.p_H1, par1.u_H1, par1.v_H1, par2.ro_H1, par2.Q, //
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H1, par11.Q, par11.p_H1, par11.u_H1, par11.v_H1, par2.ro_H1, par2.Q, //
 						par2.p_H1, par2.u_H1, par2.v_H1, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 					{
@@ -2512,21 +3261,21 @@ void Setka::Go_stationary_5_komponent(int step)
 					}
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H2, par1.Q, par1.p_H2, par1.u_H2, par1.v_H2, par2.ro_H2, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H2, par11.Q, par11.p_H2, par11.u_H2, par11.v_H2, par2.ro_H2, par2.Q, //
 					par2.p_H2, par2.u_H2, par2.v_H2, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
 					K->Potok_H2[k] = K->Potok_H2[k] + P[k] * S;
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H3, par1.Q, par1.p_H3, par1.u_H3, par1.v_H3, par2.ro_H3, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H3, par11.Q, par11.p_H3, par11.u_H3, par11.v_H3, par2.ro_H3, par2.Q, //
 					par2.p_H3, par2.u_H3, par2.v_H3, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
 					K->Potok_H3[k] = K->Potok_H3[k] + P[k] * S;
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H4, par1.Q, par1.p_H4, par1.u_H4, par1.v_H4, par2.ro_H4, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H4, par11.Q, par11.p_H4, par11.u_H4, par11.v_H4, par2.ro_H4, par2.Q, //
 					par2.p_H4, par2.u_H4, par2.v_H4, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
@@ -2536,7 +3285,7 @@ void Setka::Go_stationary_5_komponent(int step)
 
 				if (K->type != C_centr)
 				{
-					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro, par11.Q, par11.p, par11.u, par11.v, par2.ro, par2.Q, //
 						par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 					{
@@ -2550,6 +3299,8 @@ void Setka::Go_stationary_5_komponent(int step)
 			{
 				mut.lock();
 				T[now2] = time;
+				x_min = x;
+				y_min = y;
 				mut.unlock();
 			}
 
@@ -2561,13 +3312,13 @@ void Setka::Go_stationary_5_komponent(int step)
 			double nu_H1, nu_H2, nu_H3, nu_H4;
 			double q2_1, q2_2, q3;
 			double u, v, ro, p, Q;
-			if (false)//(par1.Q / par1.ro < 90)
+			if (par1.Q / par1.ro < 90)
 			{
-				u = par1.u * chi_real;
-				v = par1.v * chi_real;
-				ro = par1.ro / kv(chi_real);
+				u = par1.u * (chi_real / chi_);
+				v = par1.v * (chi_real / chi_);
+				ro = par1.ro / kv(chi_real / chi_);
 				p = par1.p;
-				Q = par1.Q / kv(chi_real);
+				Q = par1.Q / kv(chi_real / chi_);
 			}
 			else
 			{
@@ -2582,22 +3333,22 @@ void Setka::Go_stationary_5_komponent(int step)
 			double u_H3 = par1.u_H3, v_H3 = par1.v_H3, ro_H3 = par1.ro_H3, p_H3 = par1.p_H3;
 			double u_H4 = par1.u_H4, v_H4 = par1.v_H4, ro_H4 = par1.ro_H4, p_H4 = par1.p_H4;
 
-			U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi)) //
+			U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
 				* (p / ro + 2.0 * p_H1 / ro_H1));
-			U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi)) //
+			U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
 				* (p / ro + 2.0 * p_H2 / ro_H2));
-			U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi)) //
+			U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
 				* (p / ro + 2.0 * p_H3 / ro_H3));
-			U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi)) //
+			U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
 				* (p / ro + 2.0 * p_H4 / ro_H4));
 
-			U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi) //
+			U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
 				* (p / ro + 2.0 * p_H1 / ro_H1));
-			U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi) //
+			U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
 				* (p / ro + 2.0 * p_H2 / ro_H2));
-			U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi) //
+			U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
 				* (p / ro + 2.0 * p_H3 / ro_H3));
-			U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi) //
+			U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
 				* (p / ro + 2.0 * p_H4 / ro_H4));
 
 			sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
@@ -2621,7 +3372,7 @@ void Setka::Go_stationary_5_komponent(int step)
 				nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
 					(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
 				nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
-					(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+					(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro))) / (chi_real / chi_);
 
 
 			/*q2_1 = 0.0;
@@ -2632,11 +3383,11 @@ void Setka::Go_stationary_5_komponent(int step)
 			double ro3, p3, u3, v3, Q33;
 			double kappa = Q / ro;
 
-			/*u = par1.u;
+			u = par1.u;
 			v = par1.v;
 			ro = par1.ro;
 			p = par1.p;
-			Q = par1.Q;*/
+			Q = par1.Q;
 
 			if (K->type != C_centr)
 			{
@@ -2644,7 +3395,7 @@ void Setka::Go_stationary_5_komponent(int step)
 				Q33 = Q - (T[now1] / Volume) * K->Potok[4] - T[now1] * Q * v / y;
 				if (ro3 <= 0)
 				{
-					printf("Problemsssss  ro < 0!\n");
+					printf("Problemsssss  ro < 0!   %lf,  %lf\n", x, y);
 					ro3 = 0.00001;
 				}
 				u3 = (ro * u - T[now1] * (K->Potok[1] / Volume + ro * v * u / y - q2_1)) / ro3;
@@ -2672,14 +3423,14 @@ void Setka::Go_stationary_5_komponent(int step)
 				K->par[now2].v = K->par[now1].v;
 			}
 			
-			/*if (par1.Q / par1.ro < 90)
+			if (par1.Q / par1.ro < 90)
 			{
-				u = par1.u * chi_real;
-				v = par1.v * chi_real;
-				ro = par1.ro / kv(chi_real);
+				u = par1.u * (chi_real / chi_);
+				v = par1.v * (chi_real / chi_);
+				ro = par1.ro / kv(chi_real / chi_);
 				p = par1.p;
-				Q = par1.Q / kv(chi_real);
-			}*/
+				Q = par1.Q / kv(chi_real / chi_);
+			}
 
 			int k1 = 0, k2 = 0, k3 = 0, k4 = 0;
 
@@ -2687,7 +3438,7 @@ void Setka::Go_stationary_5_komponent(int step)
 			{
 				k3 = 0;
 				k4 = 0;
-				if (((kv(u) + kv(v)) / (ggg * p / ro) > 1.0) || ((radius <= 50.0)))
+				if (((kv(u) + kv(v)) / (ggg * p / ro) > 1.0) && ((radius <= 400.0)))
 				{
 					k1 = 1;
 					k2 = 0;
@@ -2849,6 +3600,423 @@ void Setka::Go_stationary_5_komponent(int step)
 	}
 }
 
+void Setka::Go_stationary_5_komponent_inner(int step)
+{
+	cout << "START " << step << endl;
+	int now1 = 1;
+	int now2 = 0;
+	double T[2];
+	T[0] = T[1] = 0.00000001;
+	mutex mut;
+	double x_min, y_min;
+
+	for (int st = 0; st < step; st++)
+	{
+		if (st % 1000 == 0 && st > 0)
+		{
+			cout << st << " " << T[now2] << " " << x_min << " " << y_min << endl;
+		}
+		now1 = (now1 + 1) % 2; // Какие параметры сейчас берём
+		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
+		double time = 10000000;
+		T[now2] = 100000000;
+
+#pragma omp parallel for
+		for (auto& K: this->All_Cells_Inner)
+		{
+			//auto K = this->All_Cells[num_cell];
+			K->Potok[0] = K->Potok[1] = K->Potok[2] = K->Potok[3] = K->Potok[4] = 0.0;
+			K->Potok_H1[0] = K->Potok_H1[1] = K->Potok_H1[2] = K->Potok_H1[3] = 0.0;
+			K->Potok_H2[0] = K->Potok_H2[1] = K->Potok_H2[2] = K->Potok_H2[3] = 0.0;
+			K->Potok_H3[0] = K->Potok_H3[1] = K->Potok_H3[2] = K->Potok_H3[3] = 0.0;
+			K->Potok_H4[0] = K->Potok_H4[1] = K->Potok_H4[2] = K->Potok_H4[3] = 0.0;
+
+			double P[4];
+			double PQ;
+			Parametr par1 = K->par[now1];
+			double n1, n2;
+			double dist;
+			double x, y;
+			K->Get_Center(x, y);
+			double radius = sqrt(kv(x) + kv(y));
+			double Volume = K->Get_Volume();
+
+			for (auto& i : K->Grans)
+			{
+				double x2, y2;
+				double S = i->Get_square();
+				i->Get_Center(x2, y2);
+				dist = sqrt(kv(x - x2) + kv(y - y2));
+				Parametr par2, par11, par3;
+				par11 = par1;
+				i->Get_par(par2, now1);
+				i->Get_normal(n1, n2);
+
+				double Vc, Vl, Vp;
+				int met = 1;
+				double dis = sqrt(kv(x2) + kv(y2));
+
+				if (i->type == Usualy)
+				{
+					double x3, y3;
+					i->Sosed->Get_Center(x3, y3);
+					double dd = sqrt(kv(x3) + kv(y3));
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par2.ro = par2.ro * kv(dd) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par2.ro_H1 = par2.ro_H1 * pow(dd / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par2.Q = par2.Q * kv(dd) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+					par2.p = par2.p * pow(dd / dis, 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x3, y3, x2, y2, par2.u, par2.v);
+					polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					polar_perenos(x3, y3, x2, y2, par2.u_H1, par2.v_H1);
+
+					if (K->type == C_1 && i->Sosed->type == C_1)
+					{
+						Parametr pp1, pp2;
+						i->Get_par_TVD_radial(pp1, now1);
+						i->Gran_copy->Get_par_TVD(pp2, now1);
+						par11.u_H1 = pp1.u_H1;
+						par11.v_H1 = pp1.v_H1;
+						par2.u_H1 = pp2.u_H1;
+						par2.v_H1 = pp2.v_H1;
+					}
+				}
+				else if (i->type == Inner_sphere)
+				{
+					/*par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / sqrt(kv(x2) + kv(y2)), 2 * ggg);*/
+					par11 = par2;
+				}
+				else if (i->type == Axis)
+				{
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					par2 = par11;
+					par2.v = -par2.v;
+					par2.v_H1 = -par2.v_H1;
+					par2.v_H2 = -par2.v_H2;
+					par2.v_H3 = -par2.v_H3;
+					par2.v_H4 = -par2.v_H4;
+				}
+
+				if (K->type != C_centr)
+				{
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H1, par11.Q, par11.p_H1, par11.u_H1, par11.v_H1, par2.ro_H1, par2.Q, //
+						par2.p_H1, par2.u_H1, par2.v_H1, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+					{
+						K->Potok_H1[k] = K->Potok_H1[k] + P[k] * S;
+					}
+				}
+
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H2, par11.Q, par11.p_H2, par11.u_H2, par11.v_H2, par2.ro_H2, par2.Q, //
+					par2.p_H2, par2.u_H2, par2.v_H2, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+				{
+					K->Potok_H2[k] = K->Potok_H2[k] + P[k] * S;
+				}
+
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H3, par11.Q, par11.p_H3, par11.u_H3, par11.v_H3, par2.ro_H3, par2.Q, //
+					par2.p_H3, par2.u_H3, par2.v_H3, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+				{
+					K->Potok_H3[k] = K->Potok_H3[k] + P[k] * S;
+				}
+
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H4, par11.Q, par11.p_H4, par11.u_H4, par11.v_H4, par2.ro_H4, par2.Q, //
+					par2.p_H4, par2.u_H4, par2.v_H4, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+				{
+					K->Potok_H4[k] = K->Potok_H4[k] + P[k] * S;
+				}
+
+
+				if (K->type != C_centr)
+				{
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro, par11.Q, par11.p, par11.u, par11.v, par2.ro, par2.Q, //
+						par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
+					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+					{
+						K->Potok[k] = K->Potok[k] + P[k] * S;
+					}
+					K->Potok[4] = K->Potok[4] + PQ * S;
+				}
+			}
+
+			if (time < T[now2])
+			{
+				mut.lock();
+				T[now2] = time;
+				x_min = x;
+				y_min = y;
+				mut.unlock();
+			}
+
+
+
+			double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+			double U_H1, U_H2, U_H3, U_H4;
+			double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+			double nu_H1, nu_H2, nu_H3, nu_H4;
+			double q2_1, q2_2, q3;
+			double u, v, ro, p, Q;
+
+			u = par1.u * (chi_real / chi_);
+			v = par1.v * (chi_real / chi_);
+			ro = par1.ro / kv(chi_real / chi_);
+			p = par1.p;
+			Q = par1.Q / kv(chi_real / chi_);
+
+			double u_H1 = par1.u_H1, v_H1 = par1.v_H1, ro_H1 = par1.ro_H1, p_H1 = par1.p_H1;
+			double u_H2 = par1.u_H2, v_H2 = par1.v_H2, ro_H2 = par1.ro_H2, p_H2 = par1.p_H2;
+			double u_H3 = par1.u_H3, v_H3 = par1.v_H3, ro_H3 = par1.ro_H3, p_H3 = par1.p_H3;
+			double u_H4 = par1.u_H4, v_H4 = par1.v_H4, ro_H4 = par1.ro_H4, p_H4 = par1.p_H4;
+
+			U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+				* (p / ro + 2.0 * p_H1 / ro_H1));
+			U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+				* (p / ro + 2.0 * p_H2 / ro_H2));
+			U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+				* (p / ro + 2.0 * p_H3 / ro_H3));
+			U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+				* (p / ro + 2.0 * p_H4 / ro_H4));
+
+			U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+				* (p / ro + 2.0 * p_H1 / ro_H1));
+			U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+				* (p / ro + 2.0 * p_H2 / ro_H2));
+			U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+				* (p / ro + 2.0 * p_H3 / ro_H3));
+			U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+				* (p / ro + 2.0 * p_H4 / ro_H4));
+
+			sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+			sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+			sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+			sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+			nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+			nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+			nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+			nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+			q2_1 = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+				+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+			q2_2 = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+				+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+			q3 = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+				(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+				nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+					(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+				nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+					(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+				nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+					(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro))) / (chi_real / chi_);
+
+
+			/*q2_1 = 0.0;
+			q2_2 = 0.0;
+			q3 = 0.0;*/
+
+			double ro2_p, p2_p, V1_p, V2_p, QQ2;
+			double ro3, p3, u3, v3, Q33;
+			double kappa = Q / ro;
+
+			u = par1.u;
+			v = par1.v;
+			ro = par1.ro;
+			p = par1.p;
+			Q = par1.Q;
+
+			if (K->type != C_centr)
+			{
+				ro3 = ro - T[now1] * (K->Potok[0] / Volume + ro * v / y);
+				Q33 = Q - (T[now1] / Volume) * K->Potok[4] - T[now1] * Q * v / y;
+				if (ro3 <= 0)
+				{
+					printf("Problemsssss  ro < 0!   %lf,  %lf\n", x, y);
+					ro3 = 0.00001;
+				}
+				u3 = (ro * u - T[now1] * (K->Potok[1] / Volume + ro * v * u / y - q2_1)) / ro3;
+				v3 = (ro * v - T[now1] * (K->Potok[2] / Volume + ro * v * v / y - q2_2)) / ro3;
+				p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) - T[now1] * (K->Potok[3] / Volume + //
+					+v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - q3)) - //
+					0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+				if (p3 <= 0)
+				{
+					p3 = 0.000001;
+				}
+
+				K->par[now2].ro = ro3;
+				K->par[now2].Q = Q33;
+				K->par[now2].p = p3;
+				K->par[now2].u = u3;
+				K->par[now2].v = v3;
+			}
+			else
+			{
+				K->par[now2].ro = K->par[now1].ro;
+				K->par[now2].Q = K->par[now1].Q;
+				K->par[now2].p = K->par[now1].p;
+				K->par[now2].u = K->par[now1].u;
+				K->par[now2].v = K->par[now1].v;
+			}
+
+			u = par1.u * (chi_real / chi_);
+			v = par1.v * (chi_real / chi_);
+			ro = par1.ro / kv(chi_real / chi_);
+			p = par1.p;
+			Q = par1.Q / kv(chi_real / chi_);
+			
+
+			int k1 = 1, k2 = 0, k3 = 0, k4 = 0;
+
+
+			double S1, S2;
+			double q1_H1, q1_H2, q1_H3, q1_H4;
+			double q21_H1, q21_H2, q21_H3, q21_H4;
+			double q22_H1, q22_H2, q22_H3, q22_H4;
+			double q3_H1, q3_H2, q3_H3, q3_H4;
+
+			S1 = nu_H1 + nu_H2 + nu_H3 + nu_H4;
+			S2 = nu_H1 * ((kv(u) + kv(v)) / 2.0 + (U_H1 / U_M_H1) * (p / ro))//
+				+ nu_H2 * ((kv(u) + kv(v)) / 2.0 + (U_H2 / U_M_H2) * (p / ro))//
+				+ nu_H3 * ((kv(u) + kv(v)) / 2.0 + (U_H3 / U_M_H3) * (p / ro))//
+				+ nu_H4 * ((kv(u) + kv(v)) / 2.0 + (U_H4 / U_M_H4) * (p / ro));
+
+			q1_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 - nu_H1);
+			q1_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 - nu_H2);
+			q1_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 - nu_H3);
+			q1_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 - nu_H4);
+
+			q21_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 * u - nu_H1 * u_H1);
+			q21_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 * u - nu_H2 * u_H2);
+			q21_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 * u - nu_H3 * u_H3);
+			q21_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 * u - nu_H4 * u_H4);
+
+			q22_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 * v - nu_H1 * v_H1);
+			q22_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 * v - nu_H2 * v_H2);
+			q22_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 * v - nu_H3 * v_H3);
+			q22_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 * v - nu_H4 * v_H4);
+
+			q3_H1 = (n_H_LISM_ / Kn_) * (k1 * S2 - nu_H1 * ((kv(u_H1) + kv(v_H1)) / 2.0 + (U_H1 / U_M_H1) * 2.0 * (p_H1 / ro_H1)));
+			q3_H2 = (n_H_LISM_ / Kn_) * (k2 * S2 - nu_H2 * ((kv(u_H2) + kv(v_H2)) / 2.0 + (U_H2 / U_M_H2) * 2.0 * (p_H2 / ro_H2)));
+			q3_H3 = (n_H_LISM_ / Kn_) * (k3 * S2 - nu_H3 * ((kv(u_H3) + kv(v_H3)) / 2.0 + (U_H3 / U_M_H3) * 2.0 * (p_H3 / ro_H3)));
+			q3_H4 = (n_H_LISM_ / Kn_) * (k4 * S2 - nu_H4 * ((kv(u_H4) + kv(v_H4)) / 2.0 + (U_H4 / U_M_H4) * 2.0 * (p_H4 / ro_H4)));
+
+
+			if (K->type != C_centr)
+			{
+				ro3 = ro_H1 - T[now1] * (K->Potok_H1[0] / Volume + ro_H1 * v_H1 / y - q1_H1);
+				if (ro3 <= 0)
+				{
+					printf("Problemsssss  ro H1 < 0!\n");
+					ro3 = 0.0000001;
+				}
+				u3 = (ro_H1 * u_H1 - T[now1] * (K->Potok_H1[1] / Volume + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
+				v3 = (ro_H1 * v_H1 - T[now1] * (K->Potok_H1[2] / Volume + ro_H1 * v_H1 * v_H1 / y - q22_H1)) / ro3;
+				p3 = (((p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) - T[now1] * (K->Potok_H1[3] / Volume + //
+					+v_H1 * (ggg * p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) / y - q3_H1)) - //
+					0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+				if (p3 <= 0)
+				{
+					p3 = 0.000001;
+				}
+
+				K->par[now2].ro_H1 = ro3;
+				K->par[now2].p_H1 = p3;
+				K->par[now2].u_H1 = u3;
+				K->par[now2].v_H1 = v3;
+			}
+			else
+			{
+				K->par[now2].ro_H1 = K->par[now1].ro_H1;
+				K->par[now2].p_H1 = K->par[now1].p_H1;
+				K->par[now2].u_H1 = K->par[now1].u_H1;
+				K->par[now2].v_H1 = K->par[now1].v_H1;
+			}
+
+
+			ro3 = ro_H2 - T[now1] * (K->Potok_H2[0] / Volume + ro_H2 * v_H2 / y - q1_H2);
+			if (ro3 <= 0)
+			{
+				printf("Problemsssss  ro H2 < 0!  %lf,  %lf\n", x, y);
+				ro3 = 0.000001;
+			}
+			u3 = (ro_H2 * u_H2 - T[now1] * (K->Potok_H2[1] / Volume + ro_H2 * v_H2 * u_H2 / y - q21_H2)) / ro3;
+			v3 = (ro_H2 * v_H2 - T[now1] * (K->Potok_H2[2] / Volume + ro_H2 * v_H2 * v_H2 / y - q22_H2)) / ro3;
+			p3 = (((p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) - T[now1] * (K->Potok_H2[3] / Volume + //
+				+v_H2 * (ggg * p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) / y - q3_H2)) - //
+				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			if (p3 <= 0)
+			{
+				p3 = 0.000001;
+			}
+
+			K->par[now2].ro_H2 = ro3;
+			K->par[now2].p_H2 = p3;
+			K->par[now2].u_H2 = u3;
+			K->par[now2].v_H2 = v3;
+
+
+			ro3 = ro_H3 - T[now1] * (K->Potok_H3[0] / Volume + ro_H3 * v_H3 / y - q1_H3);
+			if (ro3 <= 0.0)
+			{
+				printf("Problemsssss  ro H3 < 0!  %lf,  %lf\n", x, y);
+				ro3 = 0.000001;
+			}
+			u3 = (ro_H3 * u_H3 - T[now1] * (K->Potok_H3[1] / Volume + ro_H3 * v_H3 * u_H3 / y - q21_H3)) / ro3;
+			v3 = (ro_H3 * v_H3 - T[now1] * (K->Potok_H3[2] / Volume + ro_H3 * v_H3 * v_H3 / y - q22_H3)) / ro3;
+			p3 = (((p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) - T[now1] * (K->Potok_H3[3] / Volume + //
+				+v_H3 * (ggg * p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) / y - q3_H3)) - //
+				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			if (p3 <= 0)
+			{
+				p3 = 0.000001;
+			}
+
+			K->par[now2].ro_H3 = ro3;
+			K->par[now2].p_H3 = p3;
+			K->par[now2].u_H3 = u3;
+			K->par[now2].v_H3 = v3;
+
+
+			ro3 = ro_H4 - T[now1] * (K->Potok_H4[0] / Volume + ro_H4 * v_H4 / y - q1_H4);
+			if (ro3 <= 0)
+			{
+				printf("Problemsssss  ro H4 < 0!  %lf,  %lf\n", x, y);
+				ro3 = 0.000001;
+			}
+			u3 = (ro_H4 * u_H4 - T[now1] * (K->Potok_H4[1] / Volume + ro_H4 * v_H4 * u_H4 / y - q21_H4)) / ro3;
+			v3 = (ro_H4 * v_H4 - T[now1] * (K->Potok_H4[2] / Volume + ro_H4 * v_H4 * v_H4 / y - q22_H4)) / ro3;
+			p3 = (((p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) - T[now1] * (K->Potok_H4[3] / Volume + //
+				+v_H4 * (ggg * p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) / y - q3_H4)) - //
+				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			if (p3 <= 0)
+			{
+				p3 = 0.0000001;
+			}
+
+			K->par[now2].ro_H4 = ro3;
+			K->par[now2].p_H4 = p3;
+			K->par[now2].u_H4 = u3;
+			K->par[now2].v_H4 = v3;
+
+
+		}
+	}
+}
+
 void Setka::Go(int step)
 {
 	cout << "START " << step << endl;
@@ -2857,6 +4025,7 @@ void Setka::Go(int step)
 	double T[2];
 	T[0] = T[1] = 0.00000001;
 	mutex mut;
+	double xx, yy;
 
 	vector <double> q1(5);
 	vector <double> q2(5);
@@ -2868,94 +4037,18 @@ void Setka::Go(int step)
 
 	for (int st = 0; st < step; st++)
 	{
+		this->Init_conditions();
 		if (st % 1000 == 0 && st > 0)
 		{
-			cout << st << " " << T[now2] << endl;
+			cout << st << " " << T[now2] << " " << xx << " " << yy << endl;
 		}
 		now1 = (now1 + 1) % 2; // Какие параметры сейчас берём
 		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
 		double time = 10000000;
 		T[now2] = 100000000;
 
-		for (auto& i : this->Line_Contact)
-		{
-			i->A->Vx = 0.0;
-			i->A->Vy = 0.0;
-			i->B->Vx = 0.0;
-			i->B->Vy = 0.0;
-		}
-
-		int bb = -1;
-		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
-		{
-			auto i = this->Line_Contact[j];
-			Parametr par1 = i->Master->par[now1];
-			Parametr par2 = i->Sosed->par[now1];
-			double n1, n2;
-			i->Get_normal(n1, n2);
-			double VV, Vl, Vp;
-			double P[4];
-			double PQ;
-
-			
-			q1[0] = par1.ro;
-			q1[1] = par1.p;
-			q1[2] = par1.u;
-			q1[3] = par1.v;
-			q1[4] = 0.0;
-
-			q2[0] = par2.ro;
-			q2[1] = par2.p;
-			q2[2] = par2.u;
-			q2[3] = par2.v;
-			q2[4] = 0.0;
-
-			n[0] = n1;
-			n[1] = n2;
-			n[2] = 0.0;
-
-			//Sol.Godunov_Solver_Alexashov(q1, q2, n, q, dsl, dsp, VV);
-			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-
-			double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV * 0.2;
-
-			if (i->A->x < -200 && i->A->y < 300 && VV <= 0.0)
-			{
-				VV = 0.01;
-			}
-			//cout << i->A->x << " " << i->A->y << " " << VV << " " << n1 << " " << n2 <<  endl;
-			if (Max > 1)
-			{
-				if (bb == -1)
-				{
-					bb = j;
-				}
-				i->B->Vx += VV * n1;
-				i->B->Vy += VV * n2;
-			}
-			else
-			{
-				i->A->Vx += VV * n1 * 0.5;
-				i->A->Vy += VV * n2 * 0.5;
-				i->B->Vx += VV * n1 * 0.5;
-				i->B->Vy += VV * n2 * 0.5;
-			}
-		}
-
-		this->Line_Contact[0]->A->Vx = this->Line_Contact[0]->B->Vx + (this->Line_Contact[0]->B->x - this->Line_Contact[0]->A->x);
-
-		this->Line_Contact[this->Line_Contact.size() - 1]->B->Vy = this->Line_Contact[this->Line_Contact.size() - 1]->A->Vy + //
-			(this->Line_Contact[this->Line_Contact.size() - 1]->A->y - this->Line_Contact[this->Line_Contact.size() - 1]->B->y);
-
-		if(bb >= 0)
-		{
-			this->Line_Contact[bb]->A->Vx *= 2.0;
-			this->Line_Contact[bb]->A->Vy *= 2.0;
-		}
-
-		this->Move_Setka_Calculate(1);
+		this->Move_surface(now1);
+		this->Move_Setka_Calculate(T[now1]);
 
 #pragma omp parallel for
 		for (int num_cell = 0; num_cell < this->All_Cells.size(); num_cell++)
@@ -2971,29 +4064,40 @@ void Setka::Go(int step)
 			double dist;
 			double x, y;
 			K->Get_Center(x, y);
+			double W;
 			//cout << "A3" << endl;
+
+			if (sqrt(kv(x) + kv(y)) < 100.0)
+			{
+				continue;
+			}
 
 			for (auto& i : K->Grans)
 			{
 				double x2, y2;
+				double x3, y3;
 				double S = i->Get_square();
 				i->Get_Center(x2, y2);
+				i->Get_Center_posle(x3, y3);
 				dist = sqrt(kv(x - x2) + kv(y - y2));
 				Parametr par2;
 				i->Get_par(par2, now1);
 				i->Get_normal(n1, n2);
+				W = ((x3 - x2) * n1 + (y3 - y2) * n2) / T[now1];
 				double Vc, Vl, Vp;
-				double VV = (i->A->Vx + i->B->Vx) * 0.5 * n1 + (i->A->Vy + i->B->Vy) * 0.5 * n2;
+
+
 				if (i->A->type == P_Contact && i->B->type == P_Contact)
 				{
 					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-						par2.p, par2.u, par2.v, VV, P, PQ, n1, n2, dist, 1, Vl, Vc, Vp));
+						par2.p, par2.u, par2.v, W, P, PQ, n1, n2, dist, 1, Vl, Vc, Vp));
 				}
 				else
 				{
 					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-						par2.p, par2.u, par2.v, VV, P, PQ, n1, n2, dist, 0, Vl, Vc, Vp));
+						par2.p, par2.u, par2.v, W, P, PQ, n1, n2, dist, 0, Vl, Vc, Vp));
 				}
+
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
 					K->Potok[k] = K->Potok[k] + P[k] * S;
@@ -3007,6 +4111,8 @@ void Setka::Go(int step)
 			{
 				mut.lock();
 				T[now2] = time;
+				xx = x;
+				yy = y;
 				mut.unlock();
 			}
 
@@ -3018,7 +4124,7 @@ void Setka::Go(int step)
 			Q33 = par1.Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4] - T[now1] * par1.Q * par1.v / y;
 			if (ro3 <= 0)
 			{
-				printf("Problemsssss  par1.ro < 0!\n");
+				printf("Problemsssss  par1.ro < 0!   %lf,  %lf\n", x, y);
 				ro3 = 0.00001;
 			}
 			u3 = (par1.ro * par1.u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + par1.ro * par1.v * par1.u / y)) / ro3;
@@ -3038,16 +4144,13 @@ void Setka::Go(int step)
 			K->par[now2].v = v3;
 		}
 
-
 		for (auto& i : this->All_Points)
 		{
-			i->x += i->Vx * T[now1];
-			i->y += i->Vy * T[now1];
+			i->x = i->x2;
+			i->y = i->y2;
+			i->Vx = 0.0;
+			i->Vy = 0.0;
 		}
-
-		//this->Line_Contact[0]->A->x = this->Line_Contact[0]->B->x;
-
-		//this->Line_Contact[this->Line_Contact.size() - 1]->B->y = this->Line_Contact[this->Line_Contact.size() - 1]->A->y;
 	}
 }
 
@@ -3074,7 +4177,7 @@ void Setka::Go_5_komponent(int step)
 		this->Move_surface(now1);
 		this->Move_Setka_Calculate(T[now1]);
 		
-
+		//omp_set_num_threads(4);
 #pragma omp parallel for
 		for (int num_cell = 0; num_cell < this->All_Cells.size(); num_cell++)
 		{
@@ -3093,28 +4196,98 @@ void Setka::Go_5_komponent(int step)
 			double x, y;
 			K->Get_Center(x, y);
 			double radius = sqrt(kv(x) + kv(y));
+			if (radius < R11_)
+			{
+				continue;
+			}
 			double Volume = K->Get_Volume();
 			double Volume2 = K->Get_Volume_posle();
 			double W = 0.0;
 
 			for (auto& i : K->Grans)
 			{
-				double x2, y2;
-				double x3, y3;
+				double x2, y2, x4, y4;
 				double S = i->Get_square();
 				i->Get_Center(x2, y2);
-				i->Get_Center_posle(x3, y3);
+				i->Get_Center_posle(x4, y4);
 				dist = sqrt(kv(x - x2) + kv(y - y2));
-				Parametr par2;
+				Parametr par2, par11;
+				par11 = par1;
 				i->Get_par(par2, now1);
 				i->Get_normal(n1, n2);
-				W = (x3 - x2) * n1 + (y3 - y2) * n2;
 				double Vc, Vl, Vp;
+				W = ((x4 - x2) * n1 + (y4 - y2) * n2) / T[now1];
 				int met = 1;
+				double dis = sqrt(kv(x2) + kv(y2));
+
+
+				if (i->type == Usualy)
+				{
+					double x3, y3;
+					i->Sosed->Get_Center(x3, y3);
+					double dd = sqrt(kv(x3) + kv(y3));
+
+					if (K->type == C_1)
+					{
+						par11.ro = par11.ro * kv(radius) / kv(dis);
+						par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+						par11.Q = par11.Q * kv(radius) / kv(dis);
+						par11.p = par11.p * pow(radius / dis, 2 * ggg);
+						polar_perenos(x, y, x2, y2, par11.u, par11.v);
+						polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					}
+					else
+					{
+						i->Get_par_TVD(par11, now1);
+					}
+
+					if (i->Sosed->type == C_1)
+					{
+						par2.ro = par2.ro * kv(dd) / kv(dis);
+						par2.ro_H1 = par2.ro_H1 * pow(dd / dis, H_pow);
+						par2.Q = par2.Q * kv(dd) / kv(dis);
+						par2.p = par2.p * pow(dd / dis, 2 * ggg);
+						polar_perenos(x3, y3, x2, y2, par2.u, par2.v);
+						polar_perenos(x3, y3, x2, y2, par2.u_H1, par2.v_H1);
+					}
+					else
+					{
+						i->Gran_copy->Get_par_TVD(par2, now1);
+					}
+				}
+				else if (i->type == Inner_sphere)
+				{
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+				}
+				else if (K->type == C_1 && i->type == Axis)
+				{
+					par11.ro = par11.ro * kv(radius) / kv(dis);
+					par11.ro_H1 = par11.ro_H1 * pow(radius / dis, H_pow);
+					par11.Q = par11.Q * kv(radius) / kv(dis);
+					par11.p = par11.p * pow(radius / dis, 2 * ggg);
+					polar_perenos(x, y, x2, y2, par11.u, par11.v);
+					polar_perenos(x, y, x2, y2, par11.u_H1, par11.v_H1);
+					//par11.v = 0.0;
+					par2 = par11;
+					par2.v = -par2.v;
+					par2.v_H1 = -par2.v_H1;
+					par2.v_H2 = -par2.v_H2;
+					par2.v_H3 = -par2.v_H3;
+					par2.v_H4 = -par2.v_H4;
+				}
+				
+
+				/*if (i->A->type == P_Contact && i->B->type == P_Contact)
+				{
+					met = 1;
+				}*/
 
 				if (K->type != C_centr)
 				{
-					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H1, par1.Q, par1.p_H1, par1.u_H1, par1.v_H1, par2.ro_H1, par2.Q, //
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H1, par11.Q, par11.p_H1, par11.u_H1, par11.v_H1, par2.ro_H1, par2.Q, //
 						par2.p_H1, par2.u_H1, par2.v_H1, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 					{
@@ -3122,21 +4295,21 @@ void Setka::Go_5_komponent(int step)
 					}
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H2, par1.Q, par1.p_H2, par1.u_H2, par1.v_H2, par2.ro_H2, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H2, par11.Q, par11.p_H2, par11.u_H2, par11.v_H2, par2.ro_H2, par2.Q, //
 					par2.p_H2, par2.u_H2, par2.v_H2, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
 					K->Potok_H2[k] = K->Potok_H2[k] + P[k] * S;
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H3, par1.Q, par1.p_H3, par1.u_H3, par1.v_H3, par2.ro_H3, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H3, par11.Q, par11.p_H3, par11.u_H3, par11.v_H3, par2.ro_H3, par2.Q, //
 					par2.p_H3, par2.u_H3, par2.v_H3, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
 					K->Potok_H3[k] = K->Potok_H3[k] + P[k] * S;
 				}
 
-				time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro_H4, par1.Q, par1.p_H4, par1.u_H4, par1.v_H4, par2.ro_H4, par2.Q, //
+				time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro_H4, par11.Q, par11.p_H4, par11.u_H4, par11.v_H4, par2.ro_H4, par2.Q, //
 					par2.p_H4, par2.u_H4, par2.v_H4, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 				for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 				{
@@ -3146,7 +4319,7 @@ void Setka::Go_5_komponent(int step)
 
 				if (K->type != C_centr)
 				{
-					time = min(time, this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro, par11.Q, par11.p, par11.u, par11.v, par2.ro, par2.Q, //
 						par2.p, par2.u, par2.v, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp));
 					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
 					{
@@ -3171,11 +4344,23 @@ void Setka::Go_5_komponent(int step)
 			double nu_H1, nu_H2, nu_H3, nu_H4;
 			double q2_1, q2_2, q3;
 			double u, v, ro, p, Q;
-			u = par1.u;
-			v = par1.v;
-			ro = par1.ro;
-			p = par1.p;
-			Q = par1.Q;
+			if (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//(par1.Q / par1.ro < 90)//
+			{
+				u = par1.u * (chi_real/chi_);
+				v = par1.v * (chi_real / chi_);
+				ro = par1.ro / kv(chi_real / chi_);
+				p = par1.p;
+				Q = par1.Q / kv(chi_real / chi_);
+			}
+			else
+			{
+				u = par1.u;
+				v = par1.v;
+				ro = par1.ro;
+				p = par1.p;
+				Q = par1.Q;
+			}
+		
 			
 			double u_H1 = par1.u_H1, v_H1 = par1.v_H1, ro_H1 = par1.ro_H1, p_H1 = par1.p_H1;
 			double u_H2 = par1.u_H2, v_H2 = par1.v_H2, ro_H2 = par1.ro_H2, p_H2 = par1.p_H2;
@@ -3214,14 +4399,29 @@ void Setka::Go_5_komponent(int step)
 				+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
 			q2_2 = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
 				+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
-			q3 = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
-				(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
-				nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
-					(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
-				nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
-					(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
-				nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
-					(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+			if (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//(par1.Q / par1.ro < 90)//
+			{
+				q3 = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+					(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+					nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+						(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+					nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+						(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+					nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+						(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro))) / (chi_real / chi_);
+			}
+			else
+			{
+				q3 = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+					(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+					nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+						(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+					nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+						(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+					nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+						(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+			}
 
 
 			/*q2_1 = 0.0;
@@ -3232,6 +4432,12 @@ void Setka::Go_5_komponent(int step)
 			double ro3, p3, u3, v3, Q33;
 			double kappa = Q / ro;
 
+			
+			u = par1.u;
+			v = par1.v;
+			ro = par1.ro;
+			p = par1.p;
+			Q = par1.Q;
 
 			if (K->type != C_centr)
 			{
@@ -3239,7 +4445,7 @@ void Setka::Go_5_komponent(int step)
 				Q33 = Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4] - T[now1] * Q * v / y;
 				if (ro3 <= 0)
 				{
-					printf("Problemsssss  ro < 0!\n");
+					printf("Problemsssss  ro < 0!    %lf, %lf\n", x, y);
 					ro3 = 0.00001;
 				}
 				u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + ro * v * u / y - q2_1)) / ro3;
@@ -3267,14 +4473,31 @@ void Setka::Go_5_komponent(int step)
 				K->par[now2].v = K->par[now1].v;
 			}
 
+			if (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//(par1.Q / par1.ro < 90)//
+			{
+				u = par1.u * (chi_real / chi_);
+				v = par1.v * (chi_real / chi_);
+				ro = par1.ro / kv(chi_real / chi_);
+				p = par1.p;
+				Q = par1.Q / kv(chi_real / chi_);
+			}
+			else
+			{
+				u = par1.u;
+				v = par1.v;
+				ro = par1.ro;
+				p = par1.p;
+				Q = par1.Q;
+			}
+
 
 			int k1 = 0, k2 = 0, k3 = 0, k4 = 0;
 
-			if (kappa < 90)
+			if (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//(par1.Q / par1.ro < 90)//
 			{
 				k3 = 0;
 				k4 = 0;
-				if (((kv(u) + kv(v)) / (ggg * p / ro) > 1.0) || ((radius <= 50.0)))
+				if (K->type == C_1)//(((kv(u) + kv(v)) / (ggg * p / ro) > 1.0) && ((radius <= 250.0)))
 				{
 					k1 = 1;
 					k2 = 0;
@@ -3289,7 +4512,7 @@ void Setka::Go_5_komponent(int step)
 			{
 				k1 = 0;
 				k2 = 0;
-				if (p / ro > 1.8)   // ( ((y < 8.0)&&(p / ro > (y * (-0.0238) + 0.36)))||( (y >= 8.0)&&(p / ro > 0.17) ) )
+				if (K->type == C_4)//(p / ro > 1.8)   // ( ((y < 8.0)&&(p / ro > (y * (-0.0238) + 0.36)))||( (y >= 8.0)&&(p / ro > 0.17) ) )
 				{
 					k4 = 0;
 					k3 = 1;
@@ -3339,7 +4562,7 @@ void Setka::Go_5_komponent(int step)
 				ro3 = ro_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[0] / Volume2 + ro_H1 * v_H1 / y - q1_H1);
 				if (ro3 <= 0)
 				{
-					printf("Problemsssss  ro H1 < 0!\n");
+					printf("Problemsssss  ro H1 < 0!   %lf,  %lf\n", x, y);
 					ro3 = 0.0000001;
 				}
 				u3 = (ro_H1 * u_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[1] / Volume2 + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
@@ -3441,13 +4664,14 @@ void Setka::Go_5_komponent(int step)
 			i->y = i->y2;
 			i->Vx = 0.0;
 			i->Vy = 0.0;
+			i->count = 0;
 		}
 	}
 }
 
 double Setka::HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 	const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
-	double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp)
+	double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok)
 	// BestSeries
 	// Лучший работающий 2д распадник
 	//
@@ -3647,27 +4871,3 @@ double Setka::HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const 
 	return time;
 }
 
-double Setka::polar_angle(const double& x, const double& y)
-{
-	if (x < 0)
-	{
-		return atan(y / x) + 1.0 * pi_;
-	}
-	else if (x > 0 && y >= 0)
-	{
-		return atan(y / x);
-	}
-	else if (x > 0 && y < 0)
-	{
-		return atan(y / x) + 2.0 * pi_;
-	}
-	else if (y > 0 && x >= 0 && x <= 0)
-	{
-		return pi_ / 2.0;
-	}
-	else if (y < 0 && x >= 0 && x <= 0)
-	{
-		return  3.0 * pi_ / 2.0;
-	}
-	return 0.0;
-}

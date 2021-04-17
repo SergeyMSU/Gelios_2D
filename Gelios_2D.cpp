@@ -6,45 +6,14 @@ int main()
 {
     std::cout << "Hello World!\n";
     Setka S = Setka();
-    S.Download_Setka_ALL_ALPHA("all_save_19.txt");
+    S.Download_Setka_ALL_ALPHA("all_save_3_74.txt");   // 70 
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
-    //Setka S = Setka(35, 12, 13, 45, 30, 20, 20, 15);  // Нужно чтобы колучиство ячеек по углу делилось на 8 или 10 (не было простым)
+    //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // Нужно чтобы количиство ячеек по углу делилось на 8 или 10 (не было простым)
 
-
-    /*S.Contact.push_back(new Point(200, 0));
-    S.Contact.push_back(new Point(197, 58));
-    S.Contact.push_back(new Point(174, 138));
-    S.Contact.push_back(new Point(129, 217));
-    S.Contact.push_back(new Point(28, 315));
-    S.Contact.push_back(new Point(15, 326));
-    S.Contact.push_back(new Point(-86, 380));
-    S.Contact.push_back(new Point(-150, 407));
-    S.Contact.push_back(new Point(-286, 450));
-    S.Contact.push_back(new Point(-400, 450));
-    S.Contact.push_back(new Point(-600, 450));
-
-
-    S.Inner.push_back(new Point(109, 0));
-    S.Inner.push_back(new Point(102, 45));
-    S.Inner.push_back(new Point(82, 87));
-    S.Inner.push_back(new Point(44, 125));
-    S.Inner.push_back(new Point(-21, 158));
-    S.Inner.push_back(new Point(-110, 164));
-    S.Inner.push_back(new Point(-177, 130));
-    S.Inner.push_back(new Point(-224, 83));
-    S.Inner.push_back(new Point(-254, 0));
-    
-    S.Outer.push_back(new Point(370, 0));
-    S.Outer.push_back(new Point(364, 84));
-    S.Outer.push_back(new Point(313, 277));
-    S.Outer.push_back(new Point(290, 334));
-    S.Outer.push_back(new Point(214, 468));
-    S.Outer.push_back(new Point(73, 566));
-    S.Outer.push_back(new Point(0, 595));*/
 
     //S.Print_point();
-    //S.Print_cell2();
+    S.Print_cell2();
     /*S.Print_Gran();
     S.Print_cell_type();
     S.Print_connect();
@@ -52,20 +21,105 @@ int main()
     S.Print_Gran_type();*/
     //S.Save_Setka_ALL_ALPHA("aaa.txt");
     //S.Print_point_connect();
-
+    //S.Print_cell2();
     //S.Init_conditions();
     //S.Go_stationary(350000);
     //S.Save_G_D();
     //S.Download_G_D_5_komponent();
     //S.Go_stationary_5_komponent(200000);
-    S.Go_5_komponent(3000000);
-    S.Save_Setka_ALL_ALPHA("all_save_20.txt");
-    S.Go_5_komponent(3336000);
+    //S.Go_5_komponent(1);
+    //S.Init_conditions();
+    //S.Go_stationary(100000);
+
+    /*for (auto& i : S.All_Cells)
+    {
+        double x, y;
+        i->Get_Center(x, y);
+        if (x < -600 && y < 150)
+        {
+            i->par[1].u = i->par[0].u = -3.0;
+        }
+    }*/
+    /*S.Move_Setka_Calculate(0);
+    for (auto& i : S.All_Points)
+    {
+        i->x = i->x2;
+        i->y = i->y2;
+        i->Vx = 0.0;
+        i->Vy = 0.0;
+    }*/
+
+    S.TVD_prepare();
+    //S.Print_TVD();
+
+    /*auto A = S.All_Cells[2]->Grans[1];
+    double x1, x2, x3, x4, y1, y2, y3, y4;
+    double n1, n2;
+    A->Get_Center(x1, y1);
+    A->Get_normal(n1, n2);
+    cout << x1 << " " << y1 << endl;
+    cout << n1 << " " << n2 << endl;
+    A->Sosed_down->Get_Center(x2, y2);
+    cout << x2 << " " << y2 << endl;
+    A->Gran_copy->Sosed_down->Get_Center(x3, y3);
+    cout << x3 << " " << y3 << endl;*/
+
+    S.Proverka();
+    S.Print_cell_type();
+
+
+
+    /*S.Move_Setka_Calculate(0);
+    for (auto& i : S.All_Points)
+    {
+        i->x = i->x2;
+        i->y = i->y2;
+        i->Vx = 0.0;
+        i->Vy = 0.0;
+    }*/
+
+
+    for (auto i : S.All_Cells)
+    {
+        double x, y;
+        i->Get_Center(x, y);
+        if (sqrt(x * x + y * y) <= R111_)
+        {
+            S.All_Cells_Inner.push_back(i);
+        }
+
+        /*if (i->type == C_1 || i->type == C_centr)
+        {
+            i->par[0].u_H2 = 0.0;
+            i->par[0].v_H2 = 0.0;
+            i->par[0].ro_H2 = 0.0003;
+            i->par[1] = i->par[0];
+        }*/
+    }
+
+    //S.Go_stationary_5_komponent_inner(10000);
+
+    //S.Go_stationary_5_komponent_inner(30000);
+    //S.Go_stationary_5_komponent_inner(250000);
+    //S.Print_Gran();
+    //S.Go_stationary_5_komponent_inner(250000);
+    //S.Go_stationary_5_komponent_inner(500000);
+    for (int i = 0; i < 1; i++)
+    {
+        //S.Go_stationary_5_komponent_inner(10000);
+        S.Go_5_komponent(1000000);
+        //S.Go_stationary_5_komponent_inner(250000);
+        //S.Go_stationary_5_komponent_inner(50000);
+    }
+    //S.Go_5_komponent(100000);
+    //S.Go_5_komponent(300000);
+    //S.Go_5_komponent(5000000);
+    //S.Go_5_komponent(500000);
     S.Print_Tecplot();
     S.Print_cell2();
     S.Print_Gran();
-    S.Save_Setka_ALL_ALPHA("all_save_21.txt");
-    //S.Save_G_D_5_komponent();
+    S.Print_connect();
+    S.Save_Setka_ALL_ALPHA("all_save_3_75.txt");
     
 
 }

@@ -12,4 +12,5 @@ Point::Point(const double& x, const double& y)
 	this->type = Point_type::P_No;
 	this->Vx = 0.0;
 	this->Vy = 0.0;
+	this->count = 0;
 }

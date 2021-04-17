@@ -41,8 +41,8 @@ void Cell::Get_Center(double& x, double& y)
 			x += i->x;
 			y += i->y;
 		}
-		x = x / (1.35 * this->contour.size());
-		y = y / (1.35 * this->contour.size());
+		x = x / (1.1 * this->contour.size());
+		y = y / (1.1 * this->contour.size());
 	}
 }
 

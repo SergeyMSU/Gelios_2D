@@ -21,7 +21,8 @@ void Rail::Init_start(Rail* T)
 		double x = pow(R2_ / R1_, 1.0 / (this->M1 - 1));
 		for (int i = 0; i < this->M1; i++)
 		{
-			r = R1_ * pow(x, i);  //R1_ + (R2_ - R1_) * i / (this->M1 - 1);
+			r = R1_ * pow(x, i);  
+			//r = R1_ + (R2_ - R1_) * i / (this->M1 - 1);
 			auto K = new Point(r * cos(this->s), r * sin(this->s));
 			this->All_point.push_back(K);
 			K->type = P_U_1;
@@ -65,9 +66,10 @@ void Rail::Init_start(Rail* T)
 			}
 		}
 
+		x = pow(R5_ / R4_, 1.0 / (this->M4));
 		for (int i = 0; i < this->M4; i++)
 		{
-			r = R4_ + (R5_ - R4_) * (i + 1) / (this->M4);
+			r = R4_ * pow(x, i + 1);  //R4_ + (R5_ - R4_) * (i + 1) / (this->M4);
 			auto K = new Point(r * cos(this->s), r * sin(this->s));
 			this->All_point.push_back(K);
 			K->type = P_U_5;
@@ -80,10 +82,11 @@ void Rail::Init_start(Rail* T)
 	}
 	else if (this->type == B)
 	{
+		double x = pow(R2_ / R1_, 1.0 / (this->M1 - 1));
 		for (int i = 0; i < this->M1; i++)
 		{
-			double x = pow(R2_ / R1_, 1.0 / (this->M1 - 1));
-			r = R1_ * pow(x, i); //r = R1_ + (R2_ - R1_) * i / (this->M1 - 1);
+			r = R1_ * pow(x, i); //
+			//r = R1_ + (R2_ - R1_) * i / (this->M1 - 1);
 			auto K = new Point(r * cos(this->s), r * sin(this->s));
 			this->All_point.push_back(K);
 			K->type = P_U_1;
@@ -127,9 +130,10 @@ void Rail::Init_start(Rail* T)
 			}
 		}
 
+		x = pow(R5_ / R4_, 1.0 / (this->M4));
 		for (int i = 0; i < this->M4; i++)
 		{
-			l = R4_ + (i + 1) * (R5_ - R4_) / this->M4;
+			l = R4_ * pow(x, i + 1);  //R4_ + (i + 1) * (R5_ - R4_) / this->M4;
 			auto K = new Point(R2_ * cos(this->s), l);
 			this->All_point.push_back(K);
 			K->type = P_U_5;
@@ -145,7 +149,8 @@ void Rail::Init_start(Rail* T)
 		double x = pow(R2_ / R1_, 1.0 / (this->M1 - 1));
 		for (int i = 0; i < this->M1; i++)
 		{
-			r = R1_ * pow(x, i); // r = R1_ + (R2_ - R1_) * i / (this->M1 - 1);
+			r = R1_ * pow(x, i); // 
+			//r = R1_ + (R2_ - R1_) * i / (this->M1 - 1);
 			auto K = new Point(r * cos(this->s), r * sin(this->s));
 			this->All_point.push_back(K);
 			K->type = P_U_1;

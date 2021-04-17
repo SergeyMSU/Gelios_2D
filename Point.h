@@ -31,6 +31,7 @@ public:
 	double Vx;
 	double Vy;
 	int number;
+	int count;   //  оличесвто граней, подвинувших узел
 	Point_type type;
 
 	vector <Cell*> my_cell;
