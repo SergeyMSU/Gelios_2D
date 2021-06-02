@@ -2298,7 +2298,7 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii)
 {
-	double koef = 1.0;// 0.00001;
+	double koef = 0.1;// 0.00001;
 	// Разбираемся с контактом
 
 	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -2311,7 +2311,7 @@ void Setka::Move_surface(int ii)
 
 	//}
 
-	if (false)
+	if (true)
 	{
 		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -2354,7 +2354,7 @@ void Setka::Move_surface(int ii)
 			//S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
 
 			//double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV * koef;// *0.2;
+			VV = VV * koef;// *0.05;
 
 			/*if (i->A->x < -400)
 			{
@@ -2596,7 +2596,7 @@ void Setka::Move_surface(int ii)
 
 			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vp = Vp * koef;
+			Vp = Vp * koef * 0.1;
 
 			double t1 = -n2;
 			double t2 = n1;
@@ -5026,7 +5026,7 @@ double Setka::HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const 
 	}*/
 
 
-	if (false)//(nul_potok == true)
+	if (nul_potok == true)
 	{
 		vRR = UZ2 / UZ0;
 		vLL = vRR;

@@ -6,7 +6,7 @@ int main()
 {
     std::cout << "Hello World!\n";
     Setka S = Setka();
-    S.Download_Setka_ALL_ALPHA("all_save_3_123.txt");   // 96 
+    S.Download_Setka_ALL_ALPHA("all_save_3_122.txt");   // 96 
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
     //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // Нужно чтобы количиство ячеек по углу делилось на 8 или 10 (не было простым)
@@ -107,12 +107,12 @@ int main()
     //S.Move_Setka_Calculate(0);
     //S.Init_conditions();
     //S.Go_stationary_5_komponent_inner(200000);
-    cout << "sin = " << sin(0.5 * alpha_rot * pi_ / 180.0) << endl;
-    for (int i = 0; i < 1; i++)
+
+    for (int i = 0; i < 4; i++)
     {
         //S.Go_stationary_5_komponent_inner(100000);
-        S.Go_5_komponent(400000);
-        //S.Go_stationary_5_komponent_inner(50000);
+        S.Go_5_komponent(1000000);
+        S.Go_stationary_5_komponent_inner(200000);
     }
     //S.Go_5_komponent(100000);
     //S.Go_5_komponent(300000);
@@ -122,7 +122,7 @@ int main()
     S.Print_cell2();
     S.Print_Gran();
     S.Print_connect();
-    S.Save_Setka_ALL_ALPHA("all_save_3_124.txt");
+    S.Save_Setka_ALL_ALPHA("all_save_3_123.txt");
     
 
 }

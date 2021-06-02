@@ -35,7 +35,7 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 #define Velosity_inf -2.54186
 #define chi_ 2.0 //36.1059 // 36.1059
 #define chi_real 36.1059
-#define kurant  0.8
+#define kurant  0.25
 #define Kn_  242.944										// „исло  нудсена
 #define a_2 0.10263
 #define n_p_LISM_ (3.0) 
@@ -49,7 +49,7 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 #define zazor 1.3   // ƒлина зазора между контактом и близжайшими точками 
 #define zazor2 2.0   // ƒлина зазора между внешней волной и близжайшими точками 
 #define s_k 0.03   // —жатие области 4 к поверхност€м
-#define alpha_rot 2.0  // ”гор вращени€ (полный сектор), то есть в одну сторону на половину угла и в другую
+#define alpha_rot 0.1  // ”гор вращени€ (полный сектор), то есть в одну сторону на половину угла и в другую
 #define R1_ 1.0
 #define R11_ 27.0
 #define R111_ 37.0
