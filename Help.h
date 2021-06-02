@@ -20,6 +20,7 @@ int sign(const double& x);
 double minmod(const double& x, const double& y);
 double polar_angle(const double& x, const double& y);
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& x3, const double& t3, const double& y);
+double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& y);
 void polar_perenos(const double& x1, const double& y1, const double& x2, const double& y2, double& u, double& v);
 
 #define ga (5.0/3.0)          // ѕоказатель адиабаты
@@ -44,7 +45,9 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 
 
 #define n_inner 10  // —колько €чеек во внутреннем слое
-#define m_inner 16  // —колько €чеек во внутреннем слое  (до какой €чейки внутреений слой)
+#define m_inner 16  // —колько €чеек во внутреннем слое  (до какой €чейки внутреений слой считаетс€)
+#define zazor 1.0   // ƒлина зазора между контактом и близжайшими точками 
+#define zazor2 2.0   // ƒлина зазора между внешней волной и близжайшими точками 
 #define R1_ 1.0
 #define R11_ 27.0
 #define R111_ 37.0

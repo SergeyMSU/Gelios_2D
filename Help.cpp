@@ -72,3 +72,10 @@ double linear(const double& x1, const double& t1, const double& x2, const double
 	double d = minmod((t1 - t2) / (x1 - x2), (t2 - t3) / (x2 - x3));
 	return  (d * (y - x2) + t2);
 }
+
+double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& y)
+// Главное значение с параметрами 2
+{
+	double d = (t1 - t2) / (x1 - x2);
+	return  (d * (y - x2) + t2);
+}

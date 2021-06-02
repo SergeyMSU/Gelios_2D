@@ -22,14 +22,14 @@ public:
 	vector <Gran*> All_Gran;           // √рани основные
 	vector <Gran*> All_Gran_copy;      // √рани фантомные (нормаль в другую сторону)
 
-	vector <Cell*> All_Cells;
-	vector <Cell*> All_Cells_Inner;
+	vector <Cell*> All_Cells;          // ¬се €чейки
+	vector <Cell*> All_Cells_Inner;    // ячейки внутри маленького радиуса (там отдельно считает)
 
-	vector <Gran*> Line_Contact;
+	vector <Gran*> Line_Contact;     //  онтакт
 	vector <Gran*> Line_Inner;       // ¬нутренн€€ волна
 	vector <Gran*> Line_Outer;		 // ¬нешн€€ волна
 
-	vector <Point*> Contact;
+	vector <Point*> Contact;     //  онтакт
 	vector <Point*> Inner;       // ¬нутренн€€ волна
 	vector <Point*> Outer;		 // ¬нешн€€ волна
 
