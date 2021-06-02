@@ -45,6 +45,11 @@ double Gran::Get_square(void)
 	return sqrt(kv(this->B->x - this->A->x) + kv(this->B->y - this->A->y));
 }
 
+double Gran::Get_square_rotate(const double& angle)
+{
+	return pi_ * sqrt(kv(this->B->x - this->A->x) + kv(this->B->y - this->A->y)) * 0.5 * (this->B->y + this->A->y) * angle/180.0;
+}
+
 void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 {
 

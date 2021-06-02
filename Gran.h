@@ -38,6 +38,7 @@ public:
     void Get_Center_posle(double& x, double& y);
     void Get_normal(double& n1, double& n2);
     double Get_square(void);
+    double Get_square_rotate(const double& angle);
 
     void Get_par(Parametr& par, int i); // Здесь задаются граничные условия на грани
     void Get_par_TVD(Parametr& par, int i);

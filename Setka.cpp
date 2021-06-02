@@ -1541,7 +1541,8 @@ void Setka::Print_Tecplot(void)
 void Setka::Proverka(void)
 {
 	cout << "Proverka  Start" << endl;
-	for (auto& i : this->All_Cells)
+	// Выписываем ячейки у которых не 4 соседа - особые
+	for (auto& i : this->All_Cells)  
 	{
 		if (i->Grans.size() != 4)
 		{
@@ -1551,6 +1552,8 @@ void Setka::Proverka(void)
 		}
 	}
 
+
+	// Проверяем правильное определение нормалей к граням
 	for (auto& i : this->All_Gran)
 	{
 		if (i->type == Usualy)
@@ -1620,6 +1623,36 @@ void Setka::Proverka(void)
 		}
 
 	}
+
+
+	// Проверяем расположение точек в ячейке по кругу!  (как грани расположены тоже надо будет проверить)
+	for (auto& i : this->All_Cells)
+	{
+		bool t = false;
+		for (int j = 0; j < i->contour.size() - 1; j++)
+		{
+			auto A = i->contour[j];
+			auto B = i->contour[j + 1];
+			for (auto& k : i->Grans)
+			{
+				if ((k->A == A && k->B == B) || (k->A == B && k->B == A))
+				{
+					t = true;
+				}
+			}
+		}
+
+		if (t == false)
+		{
+			cout << "EROR hygwyfwuhlduwhguydcw" << endl;
+			for (auto& j: i->contour)
+			{
+				cout << j->x << " " << j->y << endl;
+			}
+			cout << "EROR hygwyfwuhlduwhguydcw" << endl;
+		}
+	}
+
 
 	cout << "Proverka  End" << endl;
 }
@@ -2278,7 +2311,7 @@ void Setka::Move_surface(int ii)
 
 	//}
 
-	if (true)
+	if (false)
 	{
 		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -4301,15 +4334,18 @@ void Setka::Go_5_komponent(int step)
 			{
 				continue;
 			}
-			double Volume = K->Get_Volume();
-			double Volume2 = K->Get_Volume_posle();
+			double Volume = K->Get_Volume_rotate(alpha_rot);
+			//cout << "Vol = " << Volume << endl;
+			double Volume2 = K->Get_Volume_posle_rotate(alpha_rot);
+			//cout << "Vol2 = " << Volume2 << endl;
 			double W = 0.0;
 			bool np = true;
 
 			for (auto& i : K->Grans)
 			{
 				double x2, y2, x4, y4;
-				double S = i->Get_square();
+				double S = i->Get_square_rotate(alpha_rot); // i->Get_square();
+				//cout << "S = " << S << endl;
 				i->Get_Center(x2, y2);
 				i->Get_Center_posle(x4, y4);
 				dist = sqrt(kv(x - x2) + kv(y - y2));
@@ -4580,18 +4616,25 @@ void Setka::Go_5_komponent(int step)
 
 			if (K->type != C_centr)
 			{
-				ro3 = ro * Volume / Volume2 - T[now1] * (K->Potok[0] / Volume2 + ro * v / y);
-				Q33 = Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4] - T[now1] * Q * v / y;
-				if (ro3 <= 0)
+				ro3 = ro * Volume / Volume2 - T[now1] * (K->Potok[0] / Volume2);  // В декартовых
+				//ro3 = ro * Volume / Volume2 - T[now1] * (K->Potok[0] / Volume2 + ro * v / y);  // В цилиндрических
+
+				Q33 = Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4];
+				//Q33 = Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4] - T[now1] * Q * v / y;
+				if (ro3 <= 0.0)
 				{
 					printf("Problemsssss  ro < 0!    %lf, %lf\n", x, y);
 					ro3 = 0.00001;
 				}
-				u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + ro * v * u / y - q2_1)) / ro3;
-				v3 = (ro * v * Volume / Volume2 - T[now1] * (K->Potok[2] / Volume2 + ro * v * v / y - q2_2)) / ro3;
-				p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok[3] / Volume2 + //
-					+v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - q3)) - //
+				u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2  - q2_1)) / ro3;
+				v3 = (ro * v * Volume / Volume2 - T[now1] * ( (K->Potok[2] - 2.0 * p * sin(0.5 * alpha_rot * pi_ / 180.0) * K->Get_Volume()) / Volume2  - q2_2)) / ro3;
+				p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok[3] / Volume2 - q3)) - //
 					0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+				//u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + ro * v * u / y - q2_1)) / ro3;
+				//v3 = (ro * v * Volume / Volume2 - T[now1] * (K->Potok[2] / Volume2 + ro * v * v / y - q2_2)) / ro3;
+				//p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok[3] / Volume2 + //
+				//	+v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - q3)) - //
+				//	0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 				if (p3 <= 0)
 				{
 					p3 = 0.000001;
@@ -4698,17 +4741,22 @@ void Setka::Go_5_komponent(int step)
 
 			if (K->type != C_centr)
 			{
-				ro3 = ro_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[0] / Volume2 + ro_H1 * v_H1 / y - q1_H1);
+				//ro3 = ro_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[0] / Volume2 + ro_H1 * v_H1 / y - q1_H1);
+				ro3 = ro_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[0] / Volume2 - q1_H1);
 				if (ro3 <= 0)
 				{
 					printf("Problemsssss  ro H1 < 0!   %lf,  %lf\n", x, y);
 					ro3 = 0.0000001;
 				}
-				u3 = (ro_H1 * u_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[1] / Volume2 + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
-				v3 = (ro_H1 * v_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[2] / Volume2 + ro_H1 * v_H1 * v_H1 / y - q22_H1)) / ro3;
-				p3 = (((p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H1[3] / Volume2 + //
-					+v_H1 * (ggg * p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) / y - q3_H1)) - //
+				u3 = (ro_H1 * u_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[1] / Volume2  - q21_H1)) / ro3;
+				v3 = (ro_H1 * v_H1 * Volume / Volume2 - T[now1] * ((K->Potok_H1[2] - 2.0 * p_H1 * sin(0.5 * alpha_rot * pi_ / 180.0) * K->Get_Volume()) / Volume2  - q22_H1)) / ro3;
+				p3 = (((p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H1[3] / Volume2  - q3_H1)) - //
 					0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+				//u3 = (ro_H1 * u_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[1] / Volume2 + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
+				//v3 = (ro_H1 * v_H1 * Volume / Volume2 - T[now1] * (K->Potok_H1[2] / Volume2 + ro_H1 * v_H1 * v_H1 / y - q22_H1)) / ro3;
+				//p3 = (((p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H1[3] / Volume2 + //
+				//	+v_H1 * (ggg * p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) / y - q3_H1)) - //
+				//	0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 				if (p3 <= 0)
 				{
 					p3 = 0.000001;
@@ -4728,17 +4776,22 @@ void Setka::Go_5_komponent(int step)
 			}
 
 
-			ro3 = ro_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[0] / Volume2 + ro_H2 * v_H2 / y - q1_H2);
+			//ro3 = ro_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[0] / Volume2 + ro_H2 * v_H2 / y - q1_H2);
+			ro3 = ro_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[0] / Volume2 - q1_H2);
 			if (ro3 <= 0)
 			{
 				printf("Problemsssss  ro H2 < 0!  %lf,  %lf\n", x, y);
 				ro3 = 0.000001;
 			}
-			u3 = (ro_H2 * u_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[1] / Volume2 + ro_H2 * v_H2 * u_H2 / y - q21_H2)) / ro3;
-			v3 = (ro_H2 * v_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[2] / Volume2 + ro_H2 * v_H2 * v_H2 / y - q22_H2)) / ro3;
-			p3 = (((p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H2[3] / Volume2 + //
-				+v_H2 * (ggg * p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) / y - q3_H2)) - //
+			u3 = (ro_H2 * u_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[1] / Volume2 - q21_H2)) / ro3;
+			v3 = (ro_H2 * v_H2 * Volume / Volume2 - T[now1] * ((K->Potok_H2[2] - 2.0 * p_H2 * sin(0.5 * alpha_rot * pi_ / 180.0) * K->Get_Volume()) / Volume2 - q22_H2)) / ro3;
+			p3 = (((p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H2[3] / Volume2  - q3_H2)) - //
 				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			//u3 = (ro_H2 * u_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[1] / Volume2 + ro_H2 * v_H2 * u_H2 / y - q21_H2)) / ro3;
+			//v3 = (ro_H2 * v_H2 * Volume / Volume2 - T[now1] * (K->Potok_H2[2] / Volume2 + ro_H2 * v_H2 * v_H2 / y - q22_H2)) / ro3;
+			//p3 = (((p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H2[3] / Volume2 + //
+			//	+v_H2 * (ggg * p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) / y - q3_H2)) - //
+			//	0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 			if (p3 <= 0)
 			{
 				p3 = 0.000001;
@@ -4750,17 +4803,22 @@ void Setka::Go_5_komponent(int step)
 			K->par[now2].v_H2 = v3;
 
 
-			ro3 = ro_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[0] / Volume2 + ro_H3 * v_H3 / y - q1_H3);
+			//ro3 = ro_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[0] / Volume2 + ro_H3 * v_H3 / y - q1_H3);
+			ro3 = ro_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[0] / Volume2  - q1_H3);
 			if (ro3 <= 0.0)
 			{
 				printf("Problemsssss  ro H3 < 0!  %lf,  %lf\n", x, y);
 				ro3 = 0.000001;
 			}
-			u3 = (ro_H3 * u_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[1] / Volume2 + ro_H3 * v_H3 * u_H3 / y - q21_H3)) / ro3;
-			v3 = (ro_H3 * v_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[2] / Volume2 + ro_H3 * v_H3 * v_H3 / y - q22_H3)) / ro3;
-			p3 = (((p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H3[3] / Volume2 + //
-				+v_H3 * (ggg * p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) / y - q3_H3)) - //
+			u3 = (ro_H3 * u_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[1] / Volume2  - q21_H3)) / ro3;
+			v3 = (ro_H3 * v_H3 * Volume / Volume2 - T[now1] * ((K->Potok_H3[2] - 2.0 * p_H3 * sin(0.5 * alpha_rot * pi_ / 180.0) * K->Get_Volume()) / Volume2  - q22_H3)) / ro3;
+			p3 = (((p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H3[3] / Volume2  - q3_H3)) - //
 				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			//u3 = (ro_H3 * u_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[1] / Volume2 + ro_H3 * v_H3 * u_H3 / y - q21_H3)) / ro3;
+			//v3 = (ro_H3 * v_H3 * Volume / Volume2 - T[now1] * (K->Potok_H3[2] / Volume2 + ro_H3 * v_H3 * v_H3 / y - q22_H3)) / ro3;
+			//p3 = (((p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H3[3] / Volume2 + //
+			//	+v_H3 * (ggg * p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) / y - q3_H3)) - //
+			//	0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 			if (p3 <= 0)
 			{
 				p3 = 0.000001;
@@ -4772,17 +4830,22 @@ void Setka::Go_5_komponent(int step)
 			K->par[now2].v_H3 = v3;
 
 
-			ro3 = ro_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[0] / Volume2 + ro_H4 * v_H4 / y - q1_H4);
+			//ro3 = ro_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[0] / Volume2 + ro_H4 * v_H4 / y - q1_H4);
+			ro3 = ro_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[0] / Volume2  - q1_H4);
 			if (ro3 <= 0)
 			{
 				printf("Problemsssss  ro H4 < 0!  %lf,  %lf\n", x, y);
 				ro3 = 0.000001;
 			}
-			u3 = (ro_H4 * u_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[1] / Volume2 + ro_H4 * v_H4 * u_H4 / y - q21_H4)) / ro3;
-			v3 = (ro_H4 * v_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[2] / Volume2 + ro_H4 * v_H4 * v_H4 / y - q22_H4)) / ro3;
-			p3 = (((p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H4[3] / Volume2 + //
-				+v_H4 * (ggg * p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) / y - q3_H4)) - //
+			u3 = (ro_H4 * u_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[1] / Volume2 - q21_H4)) / ro3;
+			v3 = (ro_H4 * v_H4 * Volume / Volume2 - T[now1] * ((K->Potok_H4[2] - 2.0 * p_H4 * sin(0.5 * alpha_rot * pi_ / 180.0) * K->Get_Volume()) / Volume2  - q22_H4)) / ro3;
+			p3 = (((p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H4[3] / Volume2 - q3_H4)) - //
 				0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+			//u3 = (ro_H4 * u_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[1] / Volume2 + ro_H4 * v_H4 * u_H4 / y - q21_H4)) / ro3;
+			//v3 = (ro_H4 * v_H4 * Volume / Volume2 - T[now1] * (K->Potok_H4[2] / Volume2 + ro_H4 * v_H4 * v_H4 / y - q22_H4)) / ro3;
+			//p3 = (((p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok_H4[3] / Volume2 + //
+			//	+v_H4 * (ggg * p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) / y - q3_H4)) - //
+			//	0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 			if (p3 <= 0)
 			{
 				p3 = 0.0000001;
@@ -4963,7 +5026,7 @@ double Setka::HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const 
 	}*/
 
 
-	if (nul_potok == true)
+	if (false)//(nul_potok == true)
 	{
 		vRR = UZ2 / UZ0;
 		vLL = vRR;

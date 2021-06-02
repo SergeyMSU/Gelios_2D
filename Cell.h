@@ -52,7 +52,7 @@ public:
 	double Potok_H3[4];
 	double Potok_H4[4];
 	Parametr par[2];
-	vector <Point*> contour;
+	vector <Point*> contour;    // Гарантируется расположение точек по кругу
 	vector <Gran*> Grans;
 	int number;
 	Cell_type type;
@@ -63,6 +63,8 @@ public:
 	void Get_Center(double& x, double& y);
 	void Get_Center_posle(double& x, double& y);
 	double Get_Volume(void);
+	double Get_Volume_rotate(const double& angle);
 	double Get_Volume_posle(void);
+	double Get_Volume_posle_rotate(const double& angle);
 };
 

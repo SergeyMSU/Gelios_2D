@@ -116,6 +116,26 @@ double Cell::Get_Volume(void)
 	return 0.0;
 }
 
+double Cell::Get_Volume_rotate(const double& angle)
+{
+	double A = 0.0;
+	double G = 0.0;
+	int k = 0;
+	for(int i = 0; i < this->contour.size(); i++)
+	{
+		auto a = this->contour[i];
+		k = i + 1;
+		if (k == this->contour.size()) k = 0;
+		auto b = this->contour[k];
+		A = A + (a->x * b->y - a->y * b->x);
+		G = G + (a->y + b->y) * (a->x * b->y - a->y * b->x);
+	}
+	A = A * 0.5;
+
+	return fabs(A) * (1.0 / (6.0 * A)) * G * pi_ * angle / 180.0;
+	
+}
+
 double Cell::Get_Volume_posle(void)
 {
 	if (this->contour.size() == 4)
@@ -162,4 +182,25 @@ double Cell::Get_Volume_posle(void)
 		return S;
 	}
 	return 0.0;
+}
+
+double Cell::Get_Volume_posle_rotate(const double& angle)
+{
+	double A = 0.0;
+	double G = 0.0;
+	int k = 0;
+	for (int i = 0; i < this->contour.size(); i++)
+	{
+		auto a = this->contour[i];
+		k = i + 1;
+		if (k == this->contour.size()) k = 0;
+		auto b = this->contour[k];
+		A = A + (a->x2 * b->y2 - a->y2 * b->x2);
+		G = G + (a->y2 + b->y2) * (a->x2 * b->y2 - a->y2 * b->x2);
+	}
+
+	A = A * 0.5;
+
+	return fabs(A) * (1.0 / (6.0 * A)) * G * pi_ * angle / 180.0;
+
 }
