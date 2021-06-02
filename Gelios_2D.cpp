@@ -6,7 +6,7 @@ int main()
 {
     std::cout << "Hello World!\n";
     Setka S = Setka();
-    S.Download_Setka_ALL_ALPHA("all_save_3_117.txt");   // 96 
+    S.Download_Setka_ALL_ALPHA("all_save_3_119.txt");   // 96 
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
     //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // Нужно чтобы количиство ячеек по углу делилось на 8 или 10 (не было простым)
@@ -70,14 +70,14 @@ int main()
 
 
     // Если мы хотим подвинуть сетку до начала счёта то помогает следующий блок кода
-    S.Move_Setka_Calculate(0);
+   /* S.Move_Setka_Calculate(0);
     for (auto& i : S.All_Points)
     {
         i->x = i->x2;
         i->y = i->y2;
         i->Vx = 0.0;
         i->Vy = 0.0;
-    }
+    }*/
 
 
     for (auto i : S.All_Cells)
@@ -110,7 +110,7 @@ int main()
     for (int i = 0; i < 1; i++)
     {
         //S.Go_stationary_5_komponent_inner(100000);
-        //S.Go_5_komponent(500000);
+        S.Go_5_komponent(350000);
         //S.Go_stationary_5_komponent_inner(50000);
     }
     //S.Go_5_komponent(100000);
@@ -121,7 +121,7 @@ int main()
     S.Print_cell2();
     S.Print_Gran();
     S.Print_connect();
-    S.Save_Setka_ALL_ALPHA("all_save_3_118.txt");
+    S.Save_Setka_ALL_ALPHA("all_save_3_120.txt");
     
 
 }

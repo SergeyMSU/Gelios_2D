@@ -2688,7 +2688,9 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		for (int j = 1; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
 		{
-			r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			x = (j) / (1.0 * (i->M3 - 1));
+			r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
 			i->All_point[i->M1 + i->M2 + j]->x2 = r * cos(i->s);
 			i->All_point[i->M1 + i->M2 + j]->y2 = r * sin(i->s);
 		}
@@ -2770,9 +2772,11 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		R4 = i->Key_point[2]->y2;
 
-		for (int j = 0; j < i->M3 - 1; j++)
+		for (int j = 1; j < i->M3 - 1; j++)
 		{
-			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			x = (j) / (1.0 * (i->M3 - 1));
+			r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
 			i->All_point[i->M1 + i->M2 + j]->x2 = i->Key_point[0]->x2;
 			i->All_point[i->M1 + i->M2 + j]->y2 = r;
 		}
@@ -2841,6 +2845,7 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 	for (int jj = 0; jj < this->D_Rails.size(); jj++)
 	{
+		double x;
 		// Подвинем ключевые точки
 		auto i = this->D_Rails[jj];
 		V = i->Key_point[1]->Vy;
@@ -2868,20 +2873,29 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		R2 = i->Key_point[0]->y2;
 
-		R3 = i->Key_point[1]->y2;
+		R3 = i->Key_point[1]->y2 - zazor;
 
-		for (int j = 0; j < this->M2 - 1; j++)
+		for (int j = 0; j < this->M2 - 2; j++)
 		{
-			r = R2 + (R3 - R2) * (j + 1) / (i->M2);
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2 - 1);
 			i->All_point[j + 1]->x2 = i->Key_point[0]->x2;
 			i->All_point[j + 1]->y2 = r;
 		}
 
+		i->All_point[1 + i->M2 - 2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку до контакта 
+		i->All_point[1 + i->M2 - 2]->y2 = R3;
+		R3 = i->Key_point[1]->y2 + zazor;
+
+		i->All_point[1 + i->M2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку после контакта 
+		i->All_point[1 + i->M2]->y2 = R3;
+
 		R4 = i->Key_point[2]->y2;
 
-		for (int j = 0; j < this->M3 - 1; j++)
+		for (int j = 1; j < this->M3 - 1; j++)
 		{
-			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			x = (j) / (1.0 * (i->M3 - 1));
+			r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
 			i->All_point[this->M2 + j + 1]->x2 = i->Key_point[0]->x2;
 			i->All_point[this->M2 + j + 1]->y2 = r;
 		}
