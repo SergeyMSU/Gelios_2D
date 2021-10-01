@@ -159,8 +159,8 @@ public:
 	double w_c_v_s(const double& r, const double& v, int i);
 	void Fly_exchenge_Imit(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		 double KSI, double I_do, int area, const double& mu_start); // Имитационный метод
-	void Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
-		double I_do, int area, const double& mu_start);  // Смотри описание функции в коде функции
+	void Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		 int area, bool ExCh, const double& mu_start);  // Смотри описание функции в коде функции
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);
 	double Velosity_2(const double& u, const double& cp);

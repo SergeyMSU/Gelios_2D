@@ -1579,7 +1579,6 @@ void Setka::Print_Tecplot_MK(void)
 		{
 			kk = 1.0;
 		}*/
-		//double kk = 1.0;
 		double Max = 0.0;
 		double QQ = 0.0;
 		double x, y;
@@ -6574,13 +6573,13 @@ void Setka::M_K_prepare(void)
 
 	for (auto& i : this->All_Cells) 
 	{
-		if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
-		{
-			i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
-			i->par[0].v = i->par[0].v * (chi_real / chi_);
-			i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
-			i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
-		}
+		//if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+		//{
+		//	i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
+		//	i->par[0].v = i->par[0].v * (chi_real / chi_);
+		//	i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
+		//	i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
+		//}
 
 		for (auto& j : i->Grans)
 		{
@@ -6617,43 +6616,16 @@ void Setka::M_K_prepare(void)
 	}
 
 
-	/*cout << "START" << endl;
-	unsigned long int ll = 4294967100UL;
-	for (ll = 1; ll <= 300; ll++)
-	{
-		double k = (1.0 * (ll + 3)) / 4294967301.0;
-		cout << ll << " " << log(1.0 - k) << endl;
-	}*/
-
-	//cout << log((1.0 * (4294967294 + 3)) / 4294967301.0) << endl;
-	//cout << log(1.0 - ((1.0 * (4294967294 + 3)) / 4294967301.0)) << endl;
-	//exit(-1);
-
-//	mutex mut_1;
-//#pragma omp parallel for
-//	for (int j = 0; j < 270; j++)
-//	{
-//		mut_1.lock();
-//		cout << j << endl;
-//		mut_1.unlock();
-//		for (int i = 0; i < 400000000; i++)
-//		{
-//			//cout << this->Sensors2[269]->MakeRandom() << endl;
-//			this->Sensors2[j]->MakeRandom();
-//		}
-//	}
-//	exit(-1);
-
 	double Y = fabs(Velosity_inf);
 	this->sqv_1 = (R5_- 2.0) * (0.5 * (R5_ - 2.0) * pi_ * Y * (erf(Y) * (1.0 + 1.0 / (2.0 * kv(Y))) + 1.0 + exp(-kv(Y)) / (Y * sqrtpi_)));
 	this->sqv_2 = sqrtpi_ * (R5_ - 2.0) * fabs(Left_);
 	this->sqv_3 = pi_ * kv(R5_ - 2.0) * exp(-kv(Velosity_inf)) * (1.0 + exp(kv(Velosity_inf)) * sqrtpi_ * Velosity_inf * (1.0 + erf(Velosity_inf)))/(2.0 * sqrtpi_);
 	this->sqv_4 = pi_ * kv(R_m) * 0.5 * (exp(-kv(Velosity_inf))/sqrtpi_ - Velosity_inf * erfc(Velosity_inf));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 135 * 20000;
-	this->Number2 = 135 * 3000;
-	this->Number3 = 135 * 200;
-	this->Number4 = 135 * 10000;
+	this->Number1 = 135 * 40;
+	this->Number2 = 135 * 3;
+	this->Number3 = 135 * 2;
+	this->Number4 = 135 * 5;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	Ri.resize(I_);
@@ -6765,7 +6737,7 @@ void Setka::MK_start(void)
 				//Fly_exchenge(sens2, x, y, z, Vx, Vy, Vz, Point, mu[i] * mu1, mu[i] * mu1, false);
 				//Fly_exchenge_Split(sens2, x, y, z, Vx, Vy, Vz, Point, mu[i] * mu1, mu[i] * mu1, false, i);
 				//cout << "A" << endl;
-				Fly_exchenge_Imit(sens2, x, y, z, Vx, Vy, Vz, Point, mu[i] * mu1, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1);
+				Fly_exchenge_Imit_Korol(sens2, x, y, z, Vx, Vy, Vz, Point, mu[i] * mu1,  3, false, mu1);
 				//cout << "B" << endl;
 				//cout << mu[i] << endl;
 			}
@@ -6790,8 +6762,8 @@ void Setka::MK_start(void)
 			z = (R5_ - 2.0) * sin(phi);
 
 			Cell* Point = Belong_point(2, x, sqrt(kv(z) + kv(y)));  // Находит ячейку, которой принадлежит точка
-			Fly_exchenge_Imit(sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
-				Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2);
+			Fly_exchenge_Imit_Korol(sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
+				Point, mu2, 3, false, mu2);
 		}
 		for (int ii = 0; ii < Number3 / 135; ii++)  //  Вылет сзади
 		{
@@ -6807,7 +6779,7 @@ void Setka::MK_start(void)
 
 			Cell* Point = Belong_point(3, Left_ + 2.0, sqrt(kv(z) + kv(y)));  // Находит ячейку, которой принадлежит точка
 			//cout << "Start" << endl;
-			Fly_exchenge_Imit(sens2, Left_ + 2.0, y, z, a, b, c, Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu3);
+			Fly_exchenge_Imit_Korol(sens2, Left_ + 2.0, y, z, a, b, c, Point, mu3, 3, false, mu3);
 			//cout << "Stop" << endl;
 		}
 		for (int ii = 0; ii < Number4 / 135; ii++)  //Number4 / 135
@@ -6842,7 +6814,7 @@ void Setka::MK_start(void)
 				Fly_exchenge_Imit(sens2, (R5_ - 2.0), y, z, Vx, Vy, Vz, this->Cell_m, mu[i] * mu4, -log(1.0 - sens1->MakeRandom()), 0.0, 3);
 			}*/
 
-			Fly_exchenge_Imit(sens2, (R5_ - 2.0), y, z, a, b, c, this->Cell_m, mu4, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu4);
+			Fly_exchenge_Imit_Korol(sens2, (R5_ - 2.0), y, z, a, b, c, this->Cell_m, mu4,  3, false, mu4);
 		}
 	}
 
@@ -6852,14 +6824,15 @@ void Setka::MK_start(void)
 
 		double no = (1.0 * AllNumber * k->Get_Volume_rotate(360.0));
 
+		k->par[0].I_u = sum_s * k->par[0].I_u / no;
+		k->par[0].I_v = sum_s * k->par[0].I_v / no;
+		k->par[0].I_T = sum_s * k->par[0].I_T / no;
+
 		if (k->par[0].F_n > 0)
 		{
 			/*k->par[0].I_u = k->par[0].I_u / k->par[0].F_n;
 			k->par[0].I_v = k->par[0].I_v / k->par[0].F_n;
 			k->par[0].I_T = k->par[0].I_T / k->par[0].F_n;*/
-			k->par[0].I_u = sum_s * k->par[0].I_u / no;
-			k->par[0].I_v = sum_s * k->par[0].I_v / no;
-			k->par[0].I_T = sum_s * k->par[0].I_T / no;
 
 			k->par[0].F_u = k->par[0].F_u / k->par[0].F_n;
 			k->par[0].F_v = k->par[0].F_v / k->par[0].F_n;
@@ -6867,9 +6840,9 @@ void Setka::MK_start(void)
 		}
 		else
 		{
-			k->par[0].I_u = 0.0;
+			/*k->par[0].I_u = 0.0;
 			k->par[0].I_v = 0.0;
-			k->par[0].I_T = 0.0;
+			k->par[0].I_T = 0.0;*/
 
 			k->par[0].F_n = 0.0;
 			k->par[0].F_u = 0.0;
@@ -6908,9 +6881,12 @@ void Setka::MK_start(void)
 		k->par[0].I_v = (n_p_LISM_ / Kn_) * (-k->par[0].ro * k->par[0].I_v);
 		k->par[0].I_T = (n_p_LISM_ / Kn_) * (-(1.0 / 2.0) * k->par[0].ro * k->par[0].I_T);*/
 
-		k->par[0].I_u = (n_p_LISM_ / Kn_) * (k->par[0].ro * k->par[0].I_u);
-		k->par[0].I_v = (n_p_LISM_ / Kn_) * (k->par[0].ro * k->par[0].I_v);
-		k->par[0].I_T = (n_p_LISM_ / Kn_) * (k->par[0].ro * k->par[0].I_T);
+		/*k->par[0].I_u = (n_p_LISM_ / Kn_) * (k->par[0].I_u);
+		k->par[0].I_v = (n_p_LISM_ / Kn_) * (k->par[0].I_v);
+		k->par[0].I_T = (n_p_LISM_ / Kn_) * (k->par[0].I_T);*/
+		k->par[0].I_u = (n_p_LISM_) * (-k->par[0].I_u);
+		k->par[0].I_v = (n_p_LISM_) * (-k->par[0].I_v);
+		k->par[0].I_T = (n_p_LISM_) * (k->par[0].I_T);
 
 		// Считаем мультифдюидные источники
 
@@ -7297,27 +7273,395 @@ void Setka::Fly_exchenge(sensor2* sens, double x_0, double y_0, double z_0, doub
 	//}
 }
 
-void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
-	double I_do, int area, const double& mu_start)
-// Новая версия полёта нейтрального атома 
+void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+	int area, bool ExCh, const double& mu_start)
+// Новая версия полёта нейтрального атома. Функция без лишнего кода и насыщена комментариями
 // Функция использует геометрическое и физическое расщепление
 // Описание переменных:
 // sens - датчик случайных чисел
-// x_0 ... - 
-// Vx ... - 
-// now - 
-// mu - 
-// KSI - 
-// I_do - 
-// area - 
-// mu_start - 
+// x_0 ... -  координаты начала полёта нейтрального атома в данной ячейке
+// Vx ... -   скорость летящего нейтрального атома
+// now -      текущая ячейка
+// mu -       вес нейтрального атома
+// area -     в какой области летит атом
+// mu_start - начальный вес атома при инициализации (чтобы понимать, сколько от исходного осталось)
 {
+	double normV = sqrt(kvv(Vx, Vy, Vz));
+	double dt = geo_accur * now->L / normV;  // Время на один мини-шаг в ячейке (планируется сделать много шагов в ячейке)
 
+	// Нахождение времени до попадания в следующую ячейку
+	double time;  // искомое время
+	int a = 1000;   // нижняя оценка для количество шагов до выхода (правильная из-за предыдущего цикла)
+	int b = 10000;  // верхняя оценка (не правильная)
+
+	// цикл нахождения времени (можно не заходить без надобности)
+	if (true)
+	{
+		int lk = 0; // Вспомогательная переменная для следующего цикла
+
+		// находим, какое должно быть время мини-шага, чтобы 1000 мини-шагов оставили нас в ячейке
+		while (now->belong(x_0 + 1000.0 * dt * Vx, sqrt(kv(y_0 + 1000.0 * dt * Vy) + kv(z_0 + 1000.0 * dt * Vz))) == false) // Слишком большой шаг
+		{
+			lk++;
+			if (lk > 1000)
+			{
+				cout << "_7332_ dt = " << dt << " " << x_0 << " " << sqrt(kv(y_0) + kv(z_0)) << endl;
+				cout << normV << " " << Vx << " " << Vy << " " << Vz << endl;
+				exit(-1);
+			}
+			dt = dt / 2.0;
+		}
+
+		// Нужно подправить верхнюю оценку выхода
+		while (now->belong(x_0 + (1.0 * b) * dt * Vx, sqrt(kv(y_0 + (1.0 * b) * dt * Vy) + kv(z_0 + (1.0 * b) * dt * Vz))) == true)
+		{
+			b = b + 500;
+		}
+
+		int k = (a + b) / 2;
+
+		// Методом деления пополам ищем точное количество мини-шагов до выхода из ячейки
+		while (k != a)
+		{
+			if (now->belong(x_0 + (1.0 * k) * dt * Vx, sqrt(kv(y_0 + (1.0 * k) * dt * Vy) + kv(z_0 + (1.0 * k) * dt * Vz))) == true)
+			{
+				a = k;
+			}
+			else
+			{
+				b = k;
+			}
+			k = (a + b) / 2;
+		}
+
+		time = dt * (b); // Время нахождения в ячейке (b - это индекс, когда уже вышел из ячейки)
+	}
+	
+	// теперь время time, a, b уже определены
+
+	double uz, uz_M, uz_E;								// средние скорости в интегралах
+	double cp = sqrt(now->par[0].p / now->par[0].ro);
+	double vx = now->par[0].u;							// Скорости плазмы в ячейке
+	double vy = now->par[0].v;
+	double ro = now->par[0].ro;
+
+	double t_ex = 0.0;									// время до перезарядки
+	double t2 = time;									// время после перезарядки (будет)
+
+	double x_ex = x_0, y_ex = y_0, z_ex = z_0;		    // координаты перезарядки
+	double u1, u2, u3;
+
+	double l = sqrt(kvv(time * Vx, time * Vy, time * Vz));                    // Расстояние до выхода из ячейки
+
+	double alpha = 0.0;								    // угол 
+	double u = 0.0;                                     // модуль относительной скорости атома и плазмы
+	double nu_ex = 0.0;								    // частота перезарядки
+	double mu_ex = 0.0;									// вес перезаряженного атома
+	double mu2 = mu;									// вес не-перезаряженного атома
+
+	if (ExCh == false) // Если перезарядки в этой ячейке ещё не было
+	{
+		alpha = polar_angle(y_0, z_0);
+		u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+		uz = Velosity_1(u, cp);
+		nu_ex = (ro * uz * sigma(uz));
+		double kappa = (nu_ex * time) / Kn_;
+		t_ex = -(time / kappa) * log(1.0 - sens->MakeRandom() * (1.0 - exp(-kappa))); // Время до перезарядки
+		t2 = time - t_ex;
+		mu_ex = mu * (1.0 - exp(-kappa)); // вес перезаряженного атома
+		mu2 = mu - mu_ex;
+
+		x_ex = x_0 + t_ex * Vx;  // Координаты перезарядки
+		y_ex = y_0 + t_ex * Vy;
+		z_ex = z_0 + t_ex * Vz;
+
+		alpha = polar_angle(y_ex, z_ex);
+
+		// проверка, если перезарядка произошла за пределами ячейки (нужно немного сдвигать её в этом случае)
+		if (now->belong(x_ex, sqrt(kv(y_ex) + kv(z_ex))) == false)
+		{
+			x_ex = x_0 + (1.0 * a * dt) * Vx;  // Координаты перезарядки
+			y_ex = y_0 + (1.0 * a * dt) * Vy;
+			z_ex = z_0 + (1.0 * a * dt) * Vz;
+			t_ex = (1.0 * a * dt);
+			t2 = time - t_ex;
+			alpha = polar_angle(y_ex, z_ex);
+		}
+
+		// Считаем источники для частицы до перезарядки
+		u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+		uz = Velosity_1(u, cp);
+		uz_M = Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi_);
+		uz_E = Velosity_3(u, cp);
+		u1 = vx - Vx;
+		u2 = vy * cos(alpha) - Vy;
+		u3 = vy * sin(alpha) - Vz;
+		double skalar = Vx * u1 + Vy * u2 + Vz * u3;
+
+
+		now->mut.lock();
+		now->par[0].F_n += t_ex * mu;
+		now->par[0].F_u += t_ex * Vx * mu;
+		now->par[0].F_v += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+		now->par[0].F_T += t_ex * kvv(Vx, Vy, Vz) * mu;
+		now->par[0].H_n[area] += t_ex * mu;
+		now->par[0].H_u[area] += t_ex * Vx * mu;
+		now->par[0].H_v[area] += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+		now->par[0].H_T[area] += t_ex * kvv(Vx, Vy, Vz) * mu;
+
+		now->par[0].I_u += mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * u1 / u;
+		now->par[0].I_v += mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+		now->par[0].I_T += mu_ex * 0.5 * (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) * (sigma2(uz_E, cp) / sigma2(uz, cp)) - //
+			uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * skalar / u);
+		now->mut.unlock();
+
+		int area2 = 0;
+		// определим область в которой находится атом
+		if (now->type == C_5)
+		{
+			area2 = 3;
+		}
+		else if (now->type == C_4)
+		{
+			area2 = 2;
+		}
+		else if (now->type == C_1 || now->type == C_centr)
+		{
+			area2 = 0;
+		}
+		else
+		{
+			area2 = 1;
+		}
+
+		bool bol;       
+		// цикл, убирающий слишком маленькие атомы
+		if (mu_ex >= Mu[0] * mu_start)
+		{
+			bol = true;
+		}
+		else
+		{
+			if (mu_ex >= sens->MakeRandom() * Mu[0] * mu_start)
+			{
+				mu_ex = Mu[0] * mu_start;
+				bol = true;
+			}
+			else
+			{
+				bol = false;
+			}
+		}
+
+		if (bol == true)   // тогла расщепляем и запускаем 
+		{
+			double Ur, Uthe, Uphi, Vr, Vthe, Vphi;
+			double r = sqrt(kvv(x_ex, y_ex, z_ex));
+			spherical_skorost(y_ex, z_ex, x_ex, vy * cos(alpha), vy * sin(alpha), vx, Ur, Uphi, Uthe);
+			spherical_skorost(y_ex, z_ex, x_ex, Vy, Vz, Vx, Vr, Vphi, Vthe);
+
+			int I = 0;  // Число дополнительных траекторий
+			if (Ur / cp <= Ur_m)
+			{
+				if (r > 1.0 * Ri[I_ - 2])  // Выбираем, сколько расщеплений атома будет.
+				{
+					I = 4;
+				}
+				else if (r > 1.0 * Ri[I_ - 3])
+				{
+					I = 3;
+				}
+				else if (r > 1.0 * Ri[I_ - 4])
+				{
+					I = 2;
+				}
+				else if (r > 1.0 * Ri[I_ - 5])
+				{
+					I = 1;
+				}
+				else
+				{
+					I = 0;
+				}
+			}
+
+			vector <double> Wr(I + 1);
+			vector <double> Wthe(I + 1);
+			vector <double> Wphi(I + 1);
+			vector <double> mu_(I + 1);
+
+			Change_Velosity_Split(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, I);
+
+			for (int i = 0; i <= I; i++)
+			{
+				Wr[i] = Wr[i] * cp;
+				Wthe[i] = Wthe[i] * cp;
+				Wphi[i] = Wphi[i] * cp;
+			}
+
+			double aa, bb, cc, mu3;
+			bool kj = true;
+			for (int i = 0; i < I; i++)
+			{
+				mu3 = mu_[i] * mu_ex;
+				if (mu3 >= this->Mu[i] * mu_start)
+				{
+					kj = true;
+				}
+				else
+				{
+					if (mu3 >= sens->MakeRandom() * this->Mu[i] * mu_start)
+					{
+						mu3 = this->Mu[i] * mu_start;
+						kj = true;
+					}
+					else
+					{
+						kj = false;
+					}
+				}
+				if (kj == true)
+				{
+					dekard_skorost(y_ex, z_ex, x_ex, Wr[i], Wphi[i], Wthe[i], bb, cc, aa);
+					Fly_exchenge_Imit_Korol(sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, true, mu_start);
+				}
+			}
+
+
+			mu3 = mu_[I] * mu_ex;
+			if (mu3 >= this->Mu[I] * mu_start)
+			{
+				kj = true;
+			}
+			else
+			{
+				if (mu3 >= sens->MakeRandom() * this->Mu[I] * mu_start)
+				{
+					mu3 = this->Mu[I] * mu_start;
+					kj = true;
+				}
+				else
+				{
+					kj = false;
+				}
+			}
+			if (kj == true)
+			{
+				dekard_skorost(y_ex, z_ex, x_ex, Wr[I], Wphi[I], Wthe[I], bb, cc, aa);
+				Fly_exchenge_Imit_Korol(sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, true, mu_start);
+			}
+
+			mmu5 += mu_[I] * mu_ex / mu_start;
+			mn5++;
+
+			if (I >= 1)
+			{
+				mmu1 += mu_[0] * mu_ex / mu_start;
+				mn1++;
+			}
+			if (I >= 2)
+			{
+				mmu2 += mu_[1] * mu_ex / mu_start;
+				mn2++;
+			}
+			if (I >= 3)
+			{
+				mmu3 += mu_[2] * mu_ex / mu_start;
+				mn3++;
+			}
+			if (I >= 4)
+			{
+				mmu4 += mu_[3] * mu_ex / mu_start;
+				mn4++;
+			}
+		}
+
+	}
+
+
+	if (mu2 < Mu[0] * mu_start && ExCh == false)
+	{
+		if (mu2 >= sens->MakeRandom() * Mu[0] * mu_start)
+		{
+			mu2 = Mu[0] * mu_start;
+		}
+		else
+		{
+			return;
+		}
+	}
+	// этот блок кода будет работать и для частиц, которые не попали в предыдущий цикл
+	// здесь t2, _ex будут иметь исходные значения, как при инициализации
+	alpha = polar_angle(y_ex + 0.5 * t2 * Vy, z_ex + 0.5 * t2 * Vz);
+	now->mut.lock();
+	now->par[0].F_n += t2 * mu2;
+	now->par[0].F_u += t2 * Vx * mu2;
+	now->par[0].F_v += t2 * (Vy * cos(alpha) + Vz * sin(alpha)) * mu2;
+	now->par[0].F_T += t2 * kvv(Vx, Vy, Vz) * mu2;
+	now->par[0].H_n[area] += t2 * mu2;
+	now->par[0].H_u[area] += t2 * Vx * mu2;
+	now->par[0].H_v[area] += t2 * (Vy * cos(alpha) + Vz * sin(alpha)) * mu2;
+	now->par[0].H_T[area] += t2 * kvv(Vx, Vy, Vz) * mu2;
+	now->mut.unlock();
+
+	double X = x_ex + t2 * Vx;
+	double Y = y_ex + t2 * Vy;
+	double Z = z_ex + t2 * Vz;
+
+
+	Cell* next = nullptr;             // В какую ячейку попадаем следующую
+	double xk, yk;
+	xk = x_0 + (1.0 * b) * dt * Vx;
+	yk = sqrt(kv(y_0 + (1.0 * b) * dt * Vy) + kv(z_0 + (1.0 * b) * dt * Vz));
+	if (xk < Left_ || (sqrt(kv(xk) + kv(yk)) > R5_ && xk > 0) || (xk < 0 && yk > R5_))
+	{
+		next = nullptr;
+	}
+	else
+	{
+		for (auto& i : now->Grans)
+		{
+			if (i->Sosed != nullptr)
+			{
+				if (i->Sosed->belong(xk, yk) == true)
+				{
+					next = i->Sosed;
+				}
+			}
+		}
+		if (next == nullptr)
+		{
+			for (auto& k : now->Grans)
+			{
+				if (k->Sosed != nullptr)
+				{
+					for (auto& i : k->Sosed->Grans)
+					{
+						if (i->Sosed != nullptr)
+						{
+							if (i->Sosed->belong(xk, yk) == true)
+							{
+								next = i->Sosed;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (next != nullptr)
+	{
+		Fly_exchenge_Imit_Korol(sens, X, Y, Z, Vx, Vy, Vz, next, mu2, area, false, mu_start);
+	}
+
+	return;
 }
 
 void Setka::Fly_exchenge_Imit(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 	double I_do, int area, const double& mu_start)
 {
+
 	//cout << "NEW" << endl;
 	//cout << x_0 << " " << sqrt(kvv(y_0, z_0, 0.0)) << " " << mu << endl;
 	//double f1, f2;
@@ -8133,7 +8477,6 @@ void Setka::Fly_exchenge_Split(sensor2* sens, double x_0, double y_0, double z_0
 	return;
 	
 }
-
 
 void Setka::Change_Velosity(sensor2* s, const double& Ur, const double& Uthe, const double& Uphi, //
 	const double& Vr, const double& Vthe, const double& Vphi, double& X, double& Y, double& Z, const double& cp)

@@ -11,18 +11,18 @@ int main()
     /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
     /// 125 - счёт монте-карло с большим числом частиц    ALPHA_2_0
 
-
+    //S.Print_Tecplot_MK();
     // Нужно перенормировать параметры плазмы
-    for (auto& i : S.All_Cells)
-    {
-        if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
-        {
-            i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
-            i->par[0].v = i->par[0].v / (chi_real / chi_);
-            i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
-            i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
-        }
-    }
+    //for (auto& i : S.All_Cells)
+    //{
+    //    if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+    //    {
+    //        i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+    //        i->par[0].v = i->par[0].v / (chi_real / chi_);
+    //        i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+    //        i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+    //    }
+    //}
 
     /*double a, b, c;
     cout << sqrt(kvv(1, 2, 3)) << endl;
