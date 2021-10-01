@@ -1639,15 +1639,15 @@ void Setka::Print_Tecplot_MK(void)
 	for (auto& i : this->All_Cells)
 	{
 		double kk;
-		if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+		/*if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
 		{
 			kk = (chi_real / chi_);
 		}
 		else
 		{
 			kk = 1.0;
-		}
-		//kk = 1.0;
+		}*/
+		kk = 1.0;
 		num++;
 		if (num > this->M1 + this->M2 + this->M3 + this->M4)
 		{
@@ -6622,10 +6622,10 @@ void Setka::M_K_prepare(void)
 	this->sqv_3 = pi_ * kv(R5_ - 2.0) * exp(-kv(Velosity_inf)) * (1.0 + exp(kv(Velosity_inf)) * sqrtpi_ * Velosity_inf * (1.0 + erf(Velosity_inf)))/(2.0 * sqrtpi_);
 	this->sqv_4 = pi_ * kv(R_m) * 0.5 * (exp(-kv(Velosity_inf))/sqrtpi_ - Velosity_inf * erfc(Velosity_inf));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 135 * 40;
-	this->Number2 = 135 * 3;
-	this->Number3 = 135 * 2;
-	this->Number4 = 135 * 5;
+	this->Number1 = 135 * 200;
+	this->Number2 = 135 * 10;
+	this->Number3 = 135 * 10;
+	this->Number4 = 135 * 20;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	Ri.resize(I_);
