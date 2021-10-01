@@ -11,6 +11,18 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 	return;
 }
 
+//double max(const double& x, const double& y)
+//{
+//	if (x >= y)
+//	{
+//		return x;
+//	}
+//	else
+//	{
+//		return y;
+//	}
+//}
+
 
 double polar_angle(const double& x, const double& y)
 {
@@ -50,19 +62,19 @@ double minmod(const double& x, const double& y)
 	}
 }
 
-int sign(const double& x)
+double sign(const double& x)
 {
 	if (x > 0)
 	{
-		return 1;
+		return 1.0;
 	}
 	else if (x < 0)
 	{
-		return -1;
+		return -1.0;
 	}
 	else
 	{
-		return 0;
+		return 0.0;
 	}
 }
 
@@ -78,4 +90,34 @@ double linear(const double& x1, const double& t1, const double& x2, const double
 {
 	double d = (t1 - t2) / (x1 - x2);
 	return  (d * (y - x2) + t2);
+}
+
+void dekard_skorost(double x, double y, double z, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz)
+{
+	double r_2 = sqrt(x * x + y * y + z * z);
+	double the_2 = acos(z / r_2);
+	double phi_2 = polar_angle(x, y);
+
+	Vx = Vr * sin(the_2) * cos(phi_2) + Vtheta * cos(the_2) * cos(phi_2) - Vphi * sin(phi_2);
+	Vy = Vr * sin(the_2) * sin(phi_2) + Vtheta * cos(the_2) * sin(phi_2) + Vphi * cos(phi_2);
+	Vz = Vr * cos(the_2) - Vtheta * sin(the_2);
+}
+
+void dekard_skorost2(double r2, double the_2, double phi_2, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz)
+{
+	Vx = Vr * sin(the_2) * cos(phi_2) + Vtheta * cos(the_2) * cos(phi_2) - Vphi * sin(phi_2);
+	Vy = Vr * sin(the_2) * sin(phi_2) + Vtheta * cos(the_2) * sin(phi_2) + Vphi * cos(phi_2);
+	Vz = Vr * cos(the_2) - Vtheta * sin(the_2);
+}
+
+void spherical_skorost(const double& x, const double& y, const double& z, const double& Vx,//
+	const double& Vy, const double& Vz, double& Vr, double& Vphi, double& Vtheta)
+{
+	double r_1 = sqrt(x * x + y * y + z * z);
+	double the_1 = acos(z / r_1);
+	double phi_1 = polar_angle(x, y);
+
+	Vr = Vx * sin(the_1) * cos(phi_1) + Vy * sin(the_1) * sin(phi_1) + Vz * cos(the_1);
+	Vtheta = Vx * cos(the_1) * cos(phi_1) + Vy * cos(the_1) * sin(phi_1) - Vz * sin(the_1);
+	Vphi = -Vx * sin(phi_1) + Vy * cos(phi_1);
 }

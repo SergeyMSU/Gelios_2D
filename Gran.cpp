@@ -13,6 +13,135 @@ Gran::Gran(Point* A, Point* B, Gran_type type)
 	this->main_gran = true;
 	this->Sosed_down = nullptr;
 	this->Sosed_up = nullptr;
+	if (fabs(A->x - B->x) > 0.00001)
+	{
+		this->parallel = false;
+		this->a = (A->y - B->y) / (A->x - B->x);
+		this->b = (A->y * B->x - B->y * A->x) / (B->x - A->x);
+	}
+	else
+	{
+		this->parallel = true;
+		this->a = 0.0;
+		this->b = 0.0;
+	}
+
+	if (this->parallel == false)
+	{
+		double n1, n2;
+		this->Get_normal(n1, n2);
+		double x, y;
+		x = A->x + n1;
+		y = A->y + n2;
+		if (y - this->a * x - this->b > 0)
+		{
+			this->koef = 1;
+		}
+		else
+		{
+			this->koef = -1;
+		}
+	}
+	else
+	{
+		this->koef = 0;
+	}
+}
+
+void Gran::renew(void)
+{
+	if (fabs(A->x - B->x) > 0.00001)
+	{
+		this->parallel = false;
+		this->a = (A->y - B->y) / (A->x - B->x);
+		this->b = (A->y * B->x - B->y * A->x) / (B->x - A->x);
+	}
+	else
+	{
+		this->parallel = true;
+		this->a = 0.0;
+		this->b = 0.0;
+	}
+
+	if (this->parallel == false)
+	{
+		double n1, n2;
+		this->Get_normal(n1, n2);
+		double x, y;
+		x = A->x + n1;
+		y = A->y + n2;
+		if (y - this->a * x - this->b > 0)
+		{
+			this->koef = 1;
+		}
+		else
+		{
+			this->koef = -1;
+		}
+	}
+	else
+	{
+		this->koef = 0;
+	}
+}
+
+bool Gran::belong(const double& x, const double& y)
+{
+	if (this->parallel == false)
+	{
+		if (this->koef * (y - this->a * x - this->b) <= 0.0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		double n1, n2;
+		this->Get_normal(n1, n2);
+		if ((x - this->A->x) / n1 < 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+double Gran::Get_lenght(void)
+{
+	return sqrt(kv(this->A->x - this->B->x) + kv(this->B->y - this->A->y));
+}
+
+bool Gran::belong_gran(const double& x, const double& y)
+{
+	if (this->parallel == false)
+	{
+		if (fabs(y - this->a * x - this->b)/(sqrt(1.0 + kv(this->a))) <= 0.00001)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (fabs(x - this->A->x) <= 0.00001 && max(this->A->y, this->B->y) >= y && min(this->A->y, this->B->y) <= y)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 

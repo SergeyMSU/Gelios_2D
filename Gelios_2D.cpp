@@ -7,6 +7,30 @@ int main()
     std::cout << "Hello World!\n";
     Setka S = Setka();
     S.Download_Setka_ALL_ALPHA("all_save_3_122.txt");   // 96 
+    //S.Download_Setka_ALL_ALPHA_2_0("all_save_3_122.txt");
+    /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
+    /// 125 - счёт монте-карло с большим числом частиц    ALPHA_2_0
+
+
+    // Нужно перенормировать параметры плазмы
+    for (auto& i : S.All_Cells)
+    {
+        if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+        {
+            i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+            i->par[0].v = i->par[0].v / (chi_real / chi_);
+            i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+            i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+        }
+    }
+
+    /*double a, b, c;
+    cout << sqrt(kvv(1, 2, 3)) << endl;
+    spherical_skorost(1, 1, 1, 1, 2, 3, a, b, c);
+    cout << sqrt(kvv(a, b, c)) << endl;
+    spherical_skorost(1, 8, 9, 1, 2, 3, a, b, c);
+    cout << sqrt(kvv(a, b, c)) << endl;
+    return 0;*/
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
     //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // Нужно чтобы количиство ячеек по углу делилось на 8 или 10 (не было простым)
@@ -28,7 +52,6 @@ int main()
     //S.Download_G_D_5_komponent();
     //S.Go_stationary_5_komponent(200000);
     //S.Go_5_komponent(1);
-    //S.Init_conditions();
     //S.Go_stationary(100000);
 
     /*for (auto& i : S.All_Cells)
@@ -50,6 +73,7 @@ int main()
     }*/
 
     S.TVD_prepare();
+    S.M_K_prepare();
     //S.Print_TVD();
 
     /*auto A = S.All_Cells[2]->Grans[1];
@@ -105,24 +129,36 @@ int main()
     //S.Print_Gran();
     //S.Go_stationary_5_komponent_inner(250000);
     //S.Move_Setka_Calculate(0);
+
     //S.Init_conditions();
+    S.MK_start();
+    cout << 1.0 * S.mmu1 / (1.0 * S.mn1) << " " << S.mn1 << endl;
+    cout << S.mmu2 / (1.0 * S.mn2) << " " << S.mn2 << endl;
+    cout << S.mmu3 / (1.0 * S.mn3) << " " << S.mn3 << endl;
+    cout << S.mmu4 / (1.0 * S.mn4) << " " << S.mn4 << endl;
+    cout << S.mmu5 / (1.0 * S.mn5) << " " << S.mn5 << endl;
+    for (int i = 0; i < 270; i++)
+    {
+        cout << S.Sensors2[i]->num << endl;
+    }
     //S.Go_stationary_5_komponent_inner(200000);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
+        //S.Go_stationary_5_komponent_inner_MK(50000);
         //S.Go_stationary_5_komponent_inner(100000);
-        S.Go_5_komponent(1000000);
-        S.Go_stationary_5_komponent_inner(200000);
+        //S.Go_stationary_5_komponent_inner(200000);
+        //S.Go_5_komponent_MK(200000);
     }
     //S.Go_5_komponent(100000);
     //S.Go_5_komponent(300000);
     //S.Go_5_komponent(5000000);
     //S.Go_5_komponent(500000);
-    S.Print_Tecplot();
+    S.Print_Tecplot_MK();
     S.Print_cell2();
     S.Print_Gran();
     S.Print_connect();
-    S.Save_Setka_ALL_ALPHA("all_save_3_123.txt");
+    S.Save_Setka_ALL_ALPHA("all_save_3_126.txt");
     
 
 }

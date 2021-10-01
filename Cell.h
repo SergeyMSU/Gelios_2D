@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Help.h"
+#include <mutex>
 
 using namespace std;
 
@@ -38,6 +39,24 @@ struct Parametr
 	double p_H4 = 0.0;
 	double u_H4 = 0.0;
 	double v_H4 = 0.0;
+	double F_n = 0.0;
+	double F_u = 0.0;
+	double F_v = 0.0;
+	double F_T = 0.0;
+	double I_u = 0.0;
+	double I_v = 0.0;
+	double I_T = 0.0;
+	double M_u = 0.0;   // ћультифлюид источники
+	double M_v = 0.0;
+	double M_T = 0.0;
+	double H_n[4];
+	double H_u[4];
+	double H_v[4];
+	double H_T[4];
+	double k_u = 0.0;
+	double k_v = 0.0;
+	double k_T = 0.0;
+
 };
 
 class Point;
@@ -51,11 +70,13 @@ public:
 	double Potok_H2[4];
 	double Potok_H3[4];
 	double Potok_H4[4];
+	double L;                   // ’арактерный размер €чейки
 	Parametr par[2];
 	vector <Point*> contour;    // √арантируетс€ расположение точек по кругу
 	vector <Gran*> Grans;
 	int number;
 	Cell_type type;
+	mutex mut;                 // ћьютекс дл€ записи в €чейку
 
 	Cell(Point* A, Point* B, Point* C, Point* D);
 	Cell(void);
@@ -66,5 +87,8 @@ public:
 	double Get_Volume_rotate(const double& angle);
 	double Get_Volume_posle(void);
 	double Get_Volume_posle_rotate(const double& angle);
+
+	bool belong(const double& x, const double& y);
+	void renew(void); // ќбновить значени€ L
 };
 

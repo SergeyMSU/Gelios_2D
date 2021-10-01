@@ -31,6 +31,10 @@ void Cell::Get_Center(double& x, double& y)
 		}
 		x = x / (1.0 * this->contour.size());
 		y = y / (1.0 * this->contour.size());
+		/*if (this->contour[0]->y < 0.0001)
+		{
+			y = y * (4.0 / 3.0);
+		}*/
 	}
 	else
 	{
@@ -59,6 +63,11 @@ void Cell::Get_Center_posle(double& x, double& y)
 		}
 		x = x / (1.0 * this->contour.size());
 		y = y / (1.0 * this->contour.size());
+
+		/*if (this->contour[0]->y2 < 0.0001)
+		{
+			y = y * (4.0 / 3.0);
+		}*/
 	}
 	else
 	{
@@ -203,4 +212,28 @@ double Cell::Get_Volume_posle_rotate(const double& angle)
 
 	return fabs(A) * (1.0 / (6.0 * A)) * G * pi_ * angle / 180.0;
 
+}
+
+
+bool Cell::belong(const double& x, const double& y)
+{
+	for (auto& i : this->Grans)
+	{
+		if (i->belong(x, y) == false)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void Cell::renew(void)
+{
+	double d = 100000000000.0;
+	for (auto& i : this->Grans)
+	{
+		d = min(d, i->Get_lenght());
+	}
+	d = min(d, sqrt(kv(this->contour[0]->x - this->contour[2]->x) + kv(this->contour[0]->y - this->contour[2]->y)));
+	this->L = d;
 }
