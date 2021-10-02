@@ -46,6 +46,9 @@ struct Parametr
 	double I_u = 0.0;
 	double I_v = 0.0;
 	double I_T = 0.0;
+	double II_u = 0.0;
+	double II_v = 0.0;
+	double II_T = 0.0;
 	double M_u = 0.0;   // Мультифлюид источники
 	double M_v = 0.0;
 	double M_T = 0.0;

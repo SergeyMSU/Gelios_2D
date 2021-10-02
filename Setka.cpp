@@ -1566,7 +1566,7 @@ void Setka::Print_Tecplot_MK(void)
 	fout.open(name_f);
 	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
 		"\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Ro_H4\", \"P_H4\"," << //
-		" \"Vx_H4\", \"Vy_H4\", \"RO_H\", \"F_n\", \"F_u\", \"F_v\", \"F_T\", \"I_u\", \"I_v\", \"I_T\", \"M_u\", \"M_v\", \"M_T\",\"H1_n\", \"H1_u\", \"H1_v\", \"H1_T\"," << //
+		" \"Vx_H4\", \"Vy_H4\", \"RO_H\", \"F_n\", \"F_u\", \"F_v\", \"F_T\", \"I_u\", \"I_v\", \"I_T\", \"II_u\", \"II_v\", \"II_T\", \"M_u\", \"M_v\", \"M_T\",\"H1_n\", \"H1_u\", \"H1_v\", \"H1_T\"," << //
 		"\"H2_n\", \"H2_u\", \"H2_v\", \"H2_T\", \"H3_n\", \"H3_u\", \"H3_v\", \"H3_T\", \"H4_n\", \"H4_u\", \"H4_v\", \"H4_T\", \"k_u\", \"k_v\", \"k_T\",ZONE T = \"HP\"" << endl;
 	for (auto& i : this->All_Cells)
 	{
@@ -1603,6 +1603,7 @@ void Setka::Print_Tecplot_MK(void)
 			(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << //
 			" " << i->par[0].F_n << " " << i->par[0].F_u << " " << i->par[0].F_v << " " << i->par[0].F_T << " " //
 			<< i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T << " " << //
+			i->par[0].II_u << " " << i->par[0].II_v << " " << i->par[0].II_T << " " << //
 			i->par[0].M_u << " " << i->par[0].M_v << " " << i->par[0].M_T << " " << //
 			i->par[0].H_n[0] << " " << i->par[0].H_u[0] << " " << i->par[0].H_v[0] << " " << i->par[0].H_T[0] << " " //
 			<< i->par[0].H_n[1] << " " << i->par[0].H_u[1] << " " << i->par[0].H_v[1] << " " << i->par[0].H_T[1] << " " //
@@ -6519,6 +6520,9 @@ void Setka::M_K_prepare(void)
 		i->par[0].I_u = 0.0;
 		i->par[0].I_v = 0.0;
 		i->par[0].I_T = 0.0;
+		i->par[0].II_u = 0.0;
+		i->par[0].II_v = 0.0;
+		i->par[0].II_T = 0.0;
 		i->par[0].H_n[0] = 0.0;
 		i->par[0].H_n[1] = 0.0;
 		i->par[0].H_n[2] = 0.0;
@@ -6622,10 +6626,10 @@ void Setka::M_K_prepare(void)
 	this->sqv_3 = pi_ * kv(R5_ - 2.0) * exp(-kv(Velosity_inf)) * (1.0 + exp(kv(Velosity_inf)) * sqrtpi_ * Velosity_inf * (1.0 + erf(Velosity_inf)))/(2.0 * sqrtpi_);
 	this->sqv_4 = pi_ * kv(R_m) * 0.5 * (exp(-kv(Velosity_inf))/sqrtpi_ - Velosity_inf * erfc(Velosity_inf));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 135 * 200;
-	this->Number2 = 135 * 10;
-	this->Number3 = 135 * 10;
-	this->Number4 = 135 * 20;
+	this->Number1 = 135 * 6000;
+	this->Number2 = 135 * 100;
+	this->Number3 = 135 * 100;
+	this->Number4 = 135 * 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	Ri.resize(I_);
@@ -6828,6 +6832,10 @@ void Setka::MK_start(void)
 		k->par[0].I_v = sum_s * k->par[0].I_v / no;
 		k->par[0].I_T = sum_s * k->par[0].I_T / no;
 
+		k->par[0].II_u = sum_s * k->par[0].II_u / no;
+		k->par[0].II_v = sum_s * k->par[0].II_v / no;
+		k->par[0].II_T = sum_s * k->par[0].II_T / no;
+
 		if (k->par[0].F_n > 0)
 		{
 			/*k->par[0].I_u = k->par[0].I_u / k->par[0].F_n;
@@ -6884,9 +6892,12 @@ void Setka::MK_start(void)
 		/*k->par[0].I_u = (n_p_LISM_ / Kn_) * (k->par[0].I_u);
 		k->par[0].I_v = (n_p_LISM_ / Kn_) * (k->par[0].I_v);
 		k->par[0].I_T = (n_p_LISM_ / Kn_) * (k->par[0].I_T);*/
-		k->par[0].I_u = (n_p_LISM_) * (-k->par[0].I_u);
-		k->par[0].I_v = (n_p_LISM_) * (-k->par[0].I_v);
+		k->par[0].I_u = (n_p_LISM_) * (k->par[0].I_u);
+		k->par[0].I_v = (n_p_LISM_) * (k->par[0].I_v);
 		k->par[0].I_T = (n_p_LISM_) * (k->par[0].I_T);
+		k->par[0].II_u = (n_p_LISM_) * (k->par[0].II_u);
+		k->par[0].II_v = (n_p_LISM_) * (k->par[0].II_v);
+		k->par[0].II_T = (n_p_LISM_) * (k->par[0].II_T);
 
 		// —читаем мультифдюидные источники
 
@@ -7409,10 +7420,15 @@ void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, doubl
 		now->par[0].H_v[area] += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
 		now->par[0].H_T[area] += t_ex * kvv(Vx, Vy, Vz) * mu;
 
-		now->par[0].I_u += mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * u1 / u;
-		now->par[0].I_v += mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+		now->par[0].I_u += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * u1 / u;
+		now->par[0].I_v += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
 		now->par[0].I_T += mu_ex * 0.5 * (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) * (sigma2(uz_E, cp) / sigma2(uz, cp)) - //
 			uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * skalar / u);
+
+		now->par[0].II_u += -mu_ex * u1;
+		now->par[0].II_v += -mu_ex * (u2 * cos(alpha) + u3 * sin(alpha));
+		now->par[0].II_T += mu_ex * 0.5 * (kvv(Vx, Vy, Vz) - kvv(vx, vy, 0.0));
+
 		now->mut.unlock();
 
 		int area2 = 0;
