@@ -6,6 +6,36 @@ int main()
 {
     std::cout << "Hello World!\n";
     Setka S = Setka();
+
+    // Блок для проверки вычисления интеграллов (лучше не удалять, полезный)
+    //double Vx = -3.0;
+    //double Vy = 1.1;
+    //double Vz = -0.2;
+    //double cp = 2.8;
+    //double vx = -1.9;
+    //double vy = 0.1;
+    //double vz = -0.2;
+    //double alpha = 0.0;
+    //double u = sqrt(kvv(Vx - vx, Vy - vy, Vz - vz));
+    //double uz = S.Velosity_1(u, cp);
+    //double uz_M = S.Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi_);
+    //double uz_E = S.Velosity_3(u, cp);
+    //double u1 = vx - Vx;
+    //double u2 = vy - Vy;
+    //double u3 = vz - Vz;
+    //double skalar = Vx * u1 + Vy * u2 + Vz * u3;
+
+    //cout << -uz_M * (sigma(uz_M) / sigma(uz)) * u1 / u << " " << -uz_M * u1 / u <<  endl;
+    //cout << (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) * (sigma(uz_E) / sigma(uz)) - //
+    //    uz_M * (sigma(uz_M) / sigma(uz)) * skalar / u) << " " << (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz)  - //
+    //        uz_M * skalar / u) << endl;
+    //cout << u << " " << uz << " " << uz_M << " " << uz_E << endl;
+
+    //exit(-1);
+
+
+
+
     S.Download_Setka_ALL_ALPHA("all_save_3_122.txt");   // 96 
     //S.Download_Setka_ALL_ALPHA_2_0("all_save_3_122.txt");
     /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA

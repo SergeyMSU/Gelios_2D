@@ -51,7 +51,8 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Дифференциальное сечение перезарядки
-#define sigma2(x, y) (kv(1.0 - (a_2/(1.0 - a_2 * log(y))) * log(x)))  // Для другого обезразмеривания скорости на cp
+//#define sigma2(x, y) (kv(1.0 - (a_2/(1.0 - a_2 * log(y))) * log(x)))  // Для другого обезразмеривания скорости на cp
+#define sigma2(x, y) (kv(1.0 - a_2 * log(x * y)))  // Для другого обезразмеривания скорости на cp
 
 
 #define n_inner 10  // Сколько ячеек во внутреннем слое

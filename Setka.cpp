@@ -6626,10 +6626,10 @@ void Setka::M_K_prepare(void)
 	this->sqv_3 = pi_ * kv(R5_ - 2.0) * exp(-kv(Velosity_inf)) * (1.0 + exp(kv(Velosity_inf)) * sqrtpi_ * Velosity_inf * (1.0 + erf(Velosity_inf)))/(2.0 * sqrtpi_);
 	this->sqv_4 = pi_ * kv(R_m) * 0.5 * (exp(-kv(Velosity_inf))/sqrtpi_ - Velosity_inf * erfc(Velosity_inf));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 135 * 6000;
-	this->Number2 = 135 * 100;
-	this->Number3 = 135 * 100;
-	this->Number4 = 135 * 400;
+	this->Number1 = 135 * 600 * 7; // 6000;
+	this->Number2 = 135 * 10 * 5; // 100;
+	this->Number3 = 135 * 10 * 5; // 100;
+	this->Number4 = 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	Ri.resize(I_);
@@ -7420,14 +7420,19 @@ void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, doubl
 		now->par[0].H_v[area] += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
 		now->par[0].H_T[area] += t_ex * kvv(Vx, Vy, Vz) * mu;
 
-		now->par[0].I_u += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * u1 / u;
-		now->par[0].I_v += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
-		now->par[0].I_T += mu_ex * 0.5 * (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) * (sigma2(uz_E, cp) / sigma2(uz, cp)) - //
-			uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * skalar / u);
+		now->par[0].I_u += -mu_ex * uz_M * u1 / u;
+		now->par[0].I_v += -mu_ex * uz_M * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+		now->par[0].I_T += mu_ex * (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) - //
+			uz_M * skalar / u);
 
-		now->par[0].II_u += -mu_ex * u1;
+		//now->par[0].I_u += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * u1 / u;
+		//now->par[0].I_v += -mu_ex * uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+		//now->par[0].I_T += mu_ex * (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz) * (sigma2(uz_E, cp) / sigma2(uz, cp)) - //
+		//	uz_M * (sigma2(uz_M, cp) / sigma2(uz, cp)) * skalar / u);
+
+		/*now->par[0].II_u += -mu_ex * u1;
 		now->par[0].II_v += -mu_ex * (u2 * cos(alpha) + u3 * sin(alpha));
-		now->par[0].II_T += mu_ex * 0.5 * (kvv(Vx, Vy, Vz) - kvv(vx, vy, 0.0));
+		now->par[0].II_T += mu_ex * 0.5 * (kvv(Vx, Vy, Vz) - kvv(vx, vy, 0.0));*/
 
 		now->mut.unlock();
 
@@ -7539,6 +7544,13 @@ void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, doubl
 				if (kj == true)
 				{
 					dekard_skorost(y_ex, z_ex, x_ex, Wr[i], Wphi[i], Wthe[i], bb, cc, aa);
+
+					now->mut.lock();
+					now->par[0].II_u += mu3 * (Vx - aa);
+					now->par[0].II_v += mu3 * ((Vy - bb) * cos(alpha) + (Vz - cc) * sin(alpha));
+					now->par[0].II_T += mu3 * 0.5 * (kvv(Vx, Vy, Vz) - kvv(aa, bb, cc));
+					now->mut.unlock();
+
 					Fly_exchenge_Imit_Korol(sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, true, mu_start);
 				}
 			}
@@ -7564,6 +7576,11 @@ void Setka::Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, doubl
 			if (kj == true)
 			{
 				dekard_skorost(y_ex, z_ex, x_ex, Wr[I], Wphi[I], Wthe[I], bb, cc, aa);
+				now->mut.lock();
+				now->par[0].II_u += mu3 * (Vx - aa);
+				now->par[0].II_v += mu3 * ((Vy - bb) * cos(alpha) + (Vz - cc) * sin(alpha));
+				now->par[0].II_T += mu3 * 0.5 * (kvv(Vx, Vy, Vz) - kvv(aa, bb, cc));
+				now->mut.unlock();
 				Fly_exchenge_Imit_Korol(sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, true, mu_start);
 			}
 
