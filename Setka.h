@@ -5,12 +5,17 @@
 #include <string>
 #include <mutex>
 #include "sensor2.h"
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
 
 class Rail;
 class Point;
 class Cell;
 class Gran;
 class Sensor;
+class MKmethod;
 using namespace std;
 
 class Setka
@@ -27,6 +32,7 @@ public:
 
 	vector <Cell*> All_Cells;          // Все ячейки
 	vector <Cell*> All_Cells_Inner;    // Ячейки внутри маленького радиуса (там отдельно считает)
+	vector <Cell*> All_Cells_zero;    // Ячейки в нуле
 
 	vector <Gran*> Line_Contact;     // Контакт
 	vector <Gran*> Line_Inner;       // Внутренняя волна
@@ -39,13 +45,17 @@ public:
 	vector <Cell*> Cell_sphere;      // Ячейки внешнии 
 	vector <Cell*> Cell_side;      // Ячейки боковые
 	vector <Cell*> Cell_back;      // Ячейки задние
+	vector <Cell*> Cell_disk;      // Ячейки диска
+	vector <Cell*> Cell_other;      // Ячейки , которые не считаются
 	Cell* Cell_m;                  // Для 4-го типа вылета частиц
 
 	vector<Sensor*> Sensors;
 	vector<sensor2*> Sensors2;
 	vector <double> Ri;            // Геометрические зоны для расщепления Монте-Карло
-	vector <double> Mu;            // Геометрические зоны для расщепления Монте-Карло
+	double Mu[4][9];
 
+	ofstream f_way;
+	int f_num;
 
 	// Сбор статистики весов
 	double mmu1;
@@ -90,8 +100,8 @@ public:
 	void Inizialization(void);
 
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
-	void Download_Setka_ALL_ALPHA(string name);
-	void Download_Setka_ALL_ALPHA_2_0(string name);
+	void Download_Setka_ALL_ALPHA(string name);       // Старая версия для фалов до 122 включительно
+	void Download_Setka_ALL_ALPHA_2_0(string name);   // Новая функция с какого-то момента.... 
 
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)
@@ -111,7 +121,7 @@ public:
 
 	// Движение сетки
 	void Move_Setka_Calculate(const double& dt);
-	void Move_surface(int ii);  // Вычисление скоростей поверхностей   ii - какие параметры активные par[ii]
+	void Move_surface(int ii, const double& dt);  // Вычисление скоростей поверхностей   ii - какие параметры активные par[ii]
 	void Move_surface_hand(void);  // Ручное движение сетки
 
 	void TVD_prepare(void);
@@ -140,27 +150,31 @@ public:
 
 	// Монте-Карло
 
-	void Init_Velosity(sensor2* sens, const double& A2, vector <double>& mu, vector <double>& Wt, vector <double>& Wp, vector <double>& Wr, const double& the);
-	void Velosity_initial2(sensor2* s, double& Vx, double& Vy, double& Vz); //   Для вылета сзади
-	void Velosity_initial(sensor2* s, double& Vx, double& Vy, double& Vz);  //  Для вылета с плоскости спереди (4 тип)
-	void Init_Pozision(sensor2* sens, const double& A1, double& phi, double& the);    // Моделирование начальных положений на полусфере
+	void Init_Velosity(Sensor* sens, const double& A2, vector <double>& mu, vector <double>& Wt, vector <double>& Wp, vector <double>& Wr, const double& the);
+	void Velosity_initial2(Sensor* s, double& Vx, double& Vy, double& Vz); //   Для вылета сзади
+	void Velosity_initial(Sensor* s, double& Vx, double& Vy, double& Vz);  //  Для вылета с плоскости спереди (4 тип)
+	void Init_Pozision(Sensor* sens, const double& A1, double& phi, double& the);    // Моделирование начальных положений на полусфере
 	double F_mk(const double& gamma, const double& Yr);
 	void MK_start(void);
+	void MK_start_new(void);
 	Cell* Belong_point(int b, const double& x, const double& y);   // Находит граничную ячейку, которой принадлежит точка
-	void Fly_exchenge(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, //
+	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, //
 		double mu, const double& mu_0, bool ExCh);
-	void Fly_exchenge_Split(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
+	void Fly_exchenge_Split(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		const double& mu_0, bool ExCh, int zone);
-	void Change_Velosity(sensor2* s, const double& Ur, const double& Uthe, const double& Uphi, //
+	void Change_Velosity(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
 		const double& Vr, const double& Vthe, const double& Vphi, double& X, double& Y, double& Z, const double& cp);
-	void Change_Velosity_Split(sensor2* s, const double& Ur, const double& Uthe, const double& Uphi, //
+	void Change_Velosity_Split(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
 		const double& Vr, const double& Vthe, const double& Vphi, vector <double>& Wr, vector <double>& Wthe,//
-		vector <double>& Wphi, vector <double>& mu_, const double& cp, const double& r, int I);
+		vector <double>& Wphi, vector <double>& mu_, const double& cp, const double& r, int I,//
+		const double& x_ex = 0.0, const double& y_ex = 0.0, const double& z_ex = 0.0);
 	double w_c_v_s(const double& r, const double& v, int i);
-	void Fly_exchenge_Imit(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
-		 double KSI, double I_do, int area, const double& mu_start); // Имитационный метод
-	void Fly_exchenge_Imit_Korol(sensor2* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
-		 int area, bool ExCh, const double& mu_start);  // Смотри описание функции в коде функции
+	void Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
+		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
+	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		 int area, bool ExCh, const double& mu_start, int to_I, bool georaschep);  // Смотри описание функции в коде функции
+	int geo_zones(const double& r, const double& k = 1.0);
+
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);
 	double Velosity_2(const double& u, const double& cp);

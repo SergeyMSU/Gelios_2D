@@ -59,7 +59,8 @@ struct Parametr
 	double k_u = 0.0;
 	double k_v = 0.0;
 	double k_T = 0.0;
-
+	int num_atoms[4];   // „исло перезар€док в €чейке
+	double w_m[7];       // —редние веса по сортам
 };
 
 class Point;
@@ -78,11 +79,14 @@ public:
 	vector <Point*> contour;    // √арантируетс€ расположение точек по кругу
 	vector <Gran*> Grans;
 	int number;
+	int zona;
 	Cell_type type;
 	mutex mut;                 // ћьютекс дл€ записи в €чейку
 
 	Cell(Point* A, Point* B, Point* C, Point* D);
 	Cell(void);
+
+	void Initial(void);
 
 	void Get_Center(double& x, double& y);
 	void Get_Center_posle(double& x, double& y);

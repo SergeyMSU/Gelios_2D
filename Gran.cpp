@@ -144,7 +144,6 @@ bool Gran::belong_gran(const double& x, const double& y)
 	}
 }
 
-
 void Gran::Get_Center(double& x, double& y)
 {
 	x = (this->A->x + this->B->x) / 2.0;
@@ -214,7 +213,7 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		double x, y;
 		this->Get_Center(x, y);
 		double dist = sqrt(x * x + y * y);
-		double ro = (389.988 * 389.988) / (chi_ * chi_);
+		double ro = (389.988 * 389.988) / (chi_ * chi_); 
 		double P_E = ro * chi_ * chi_ / (ggg * 10.0 * 10.0);
 		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));
 		//par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
@@ -222,8 +221,15 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		//	par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 		//	par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 		//	par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4};
-		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
-		0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real* x / dist, chi_real* y / dist,//
+
+		//par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
+		//0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real* x / dist, chi_real* y / dist,//
+		//	0.000001, 0.0000001, par2.u_H2, par2.v_H2 , //
+		//	0.000001, 0.0000001, par2.u_H3, par2.v_H3,//
+		//	0.000001, 0.0000001, par2.u_H4, par2.v_H4 };
+
+		par = { ro / kv(chi_real / chi_) / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real / chi_) / (dist * dist),//
+		0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
 			0.000001, 0.0000001, par2.u_H2, par2.v_H2 , //
 			0.000001, 0.0000001, par2.u_H3, par2.v_H3,//
 			0.000001, 0.0000001, par2.u_H4, par2.v_H4 };
@@ -350,7 +356,7 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		double dist = sqrt(x * x + y * y);
 		double ro = (389.988 * 389.988) / (chi_ * chi_);
 		double P_E = ro * chi_ * chi_ / (ggg * 5.0 * 5.0);
-		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
+		par = { ro / kv(chi_real / chi_) / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * (chi_real / chi_) * x / dist, chi_ * (chi_real / chi_) * y / dist, ro / kv(chi_real / chi_) / (dist * dist),//
 		0.000001, 0.000001, chi_real * x / dist, chi_real * y / dist, par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };

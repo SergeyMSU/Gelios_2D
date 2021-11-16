@@ -8,6 +8,7 @@
 #include "Solvers.h"
 #include "sensor.h"
 #include "sensor2.h"
+#include "MKmethod.h"
 #include <mutex>
 
 #include <vector>
@@ -36,23 +37,28 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define ggg (5.0/3.0)
 #define g1 (ga - 1.0)
 #define kv(x) ( (x)*(x) )
+#define pow3(x) ( (x)*(x)*(x) )
+#define pow4(x) ( (x)*(x)*(x)*(x) )
+#define pow5(x) ( (x)*(x)*(x)*(x)*(x) )
+#define pow6(x) ( (x)*(x)*(x)*(x)*(x)*(x) )
+#define pow7(x) ( (x)*(x)*(x)*(x)*(x)*(x)*(x) )
 #define kvv(x,y,z)  (kv(x) + kv(y) + kv(z))
 
 #define pi_ 3.14159265358979323846
 #define sqrtpi_ 1.77245385
 
-#define Velosity_inf -2.54127 //-4.54127 //-2.54127
+#define Velosity_inf -2.54338 //-4.54127 //-2.54127
 #define M_inf 1.968
 #define chi_ 2.0 //36.1059 // 36.1059
 #define chi_real 36.1059
-#define kurant  0.3
-#define Kn_  242.944										// Число Кнудсена
+#define kurant  0.1
+#define Kn_  163.472  // 242.944										// Число Кнудсена
 #define a_2 0.10263
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Дифференциальное сечение перезарядки
 //#define sigma2(x, y) (kv(1.0 - (a_2/(1.0 - a_2 * log(y))) * log(x)))  // Для другого обезразмеривания скорости на cp
-#define sigma2(x, y) (kv(1.0 - a_2 * log(x * y)))  // Для другого обезразмеривания скорости на cp
+#define sigma2(x, y) (kv(1.0 - a_2 * log((x) * (y))))  // Для другого обезразмеривания скорости на cp
 
 
 #define n_inner 10  // Сколько ячеек во внутреннем слое
@@ -68,11 +74,14 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define R3_ 150.0
 #define R4_ 600.0
 #define R5_ 2200.0
+#define Rmax_ (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
-#define I_ 7 //5 // Количество сортов атомов
-#define geo_accur 0.1    // Точность геометрии вдоль траектории
+#define I_ 8 //5 // Количество зон 
 #define weight_ 0.25     // Веса для атомов
 #define gam(i) ( 1.0/(kv(R5_ - 2.0)/kv(Ri[(i)]) - 1.0) )
 #define R_m 4.0   // Для улучшения статистики на оси происходит запуск с диска этого радиуса
-#define Ur_m 0.5   // Критерий расщепления
+#define Ur_m 0.0   // Критерий расщепления
+#define geo_step 20.0   // Сколько раз атом попадает в одну ячейку
+#define geo_accur 15.0    // Точность геометрии вдоль траектории
+#define Weyght 1000000.0  // Для весов чтобы не было потери точности

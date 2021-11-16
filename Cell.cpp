@@ -10,12 +10,22 @@ Cell::Cell(Point* A, Point* B, Point* C, Point* D)
 	this->contour.push_back(D);
 	this->number = -1;
 	this->type = C_no;
+	this->Initial();
 }
 
 Cell::Cell(void)
 {
 	this->number = -1;
 	this->type = C_no;
+	this->Initial();
+}
+
+void Cell::Initial(void)
+{
+	this->par[0].num_atoms[0] = 0;
+	this->par[0].num_atoms[1] = 0;
+	this->par[0].num_atoms[2] = 0;
+	this->par[0].num_atoms[3] = 0;
 }
 
 void Cell::Get_Center(double& x, double& y)
