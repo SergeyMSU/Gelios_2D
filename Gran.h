@@ -33,6 +33,9 @@ public:
     Gran* Gran_copy;     // Грань - копия, но с другой нормалью. Введена для удобства
     double a;
     double b;
+    double aa;           // aa * x + bb * y + cc = 0
+    double bb;
+    double cc;
     bool parallel;       // true если грань параллельна оси У
     bool main_gran;      // true - для основной грани, false для фантомной
     int koef;            // коеффициент для умножения уравнения прямой для определения с какой стороны точка  (y - ax - b = 0)

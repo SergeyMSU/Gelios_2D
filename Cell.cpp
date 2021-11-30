@@ -224,9 +224,28 @@ double Cell::Get_Volume_posle_rotate(const double& angle)
 
 }
 
-
 bool Cell::belong(const double& x, const double& y)
 {
+	// Попробуем быструю проверку
+	if (x < this->x_min)
+	{
+		return false;
+	}
+	if (x > this->x_max)
+	{
+		return false;
+	}
+	if (y < this->y_min)
+	{
+		return false;
+	}
+	if (y > this->y_max)
+	{
+		return false;
+	}
+	// Если это не сработало, то нужно проверять точнее
+	
+	
 	for (auto& i : this->Grans)
 	{
 		if (i->belong(x, y) == false)
@@ -246,4 +265,30 @@ void Cell::renew(void)
 	}
 	d = min(d, sqrt(kv(this->contour[0]->x - this->contour[2]->x) + kv(this->contour[0]->y - this->contour[2]->y)));
 	this->L = d;
+
+	// Теперь найдём "коробку", внутри которой лежит ячейка
+	this->x_min = this->contour[0]->x;
+	this->x_max = this->contour[0]->x;
+	this->y_min = this->contour[0]->y;
+	this->y_max = this->contour[0]->y;
+
+	for (auto& i : this->contour)
+	{
+		if (x_min > i->x)
+		{
+			x_min = i->x;
+		}
+		if (x_max < i->x)
+		{
+			x_max = i->x;
+		}
+		if (y_min > i->y)
+		{
+			y_min = i->y;
+		}
+		if (y_max < i->y)
+		{
+			y_max = i->y;
+		}
+	}
 }

@@ -5,17 +5,28 @@
 int main()
 {
     std::cout << "Hello World!\n";
+
     /*double Vx, Vy, Vz;
     dekard_skorost(y, z, x, Wr[i], Wp[i], Wt[i], Vy, Vz, Vx);
     dekard_skorost(100.0, 100.0, 100.0, -1.0, 0.0, 0.1, Vy, Vz, Vx);*/
     //cout << Vx << " " << Vy << " " << Vz << endl;
 
-    /*Setka A;
-    Sensor* sens = new Sensor(1, 2, 3);
-    MKmethod MK = MKmethod();
-    cout << A.Velosity_1(0.0000001, 3.0) << endl;
-    cout << sigma(A.Velosity_1(0.0000001, 3.0)) << endl;
-    exit(-1);*/
+    //Setka A;
+    //vector<double> v1(6);
+    //vector<double> v2(6);
+    //vector<double> v3(6);
+    //vector<double> v4(6);
+    //vector<double> v5(6);
+
+    ////cout << MK.f2(-2.0, 0.0, -1.0, 0.1) << endl;
+
+    //MK.Change_Velosity(sens, -2.3, 0.3, 0.0, -1.1, 0.2, 0.03, v1, v2, v3, v4, 1.0, 800.0, 0);
+    //cout << v1[0] << endl;
+    //cout << v2[0] << endl;
+    //cout << v3[0] << endl;
+    //cout << v4[0] << endl;
+
+    //exit(-1);
 
     /*double Sum5 = 0.0;
     for (int i = 0; i < 10000000; i++)
@@ -32,112 +43,32 @@ int main()
 
     exit(-10);*/
 
-    // Делаем датчики
 
-    //ofstream fout;
-    //string name_f = "datchik3.txt";
-    //fout.open(name_f);
+    //Sensor* sens = new Sensor(13, 21, 78);
+    //Sensor* sens2 = new Sensor(13, 21, 78);
+    //MKmethod MK = MKmethod();
+    //vector<double> v1(9);
+    //vector<double> v2(9);
+    //vector<double> v3(9);
+    //vector<double> v4(9);
+    //vector<double> v5(9);
 
-    //Sensor* sens1 = new Sensor(15236, 12353, 96755);
-    ///*Sensor* sens2 = new Sensor(0, 1, 0);
-    //Sensor* sens3 = new Sensor(15236, 12353, 96755);
-    //fout << sens1->a1_ << " " << sens1->a2_ << " " << sens1->a3_ << endl;
-    //fout << sens2->a1_ << " " << sens2->a2_ << " " << sens2->a3_ << endl;
-    //fout << sens3->a1_ << " " << sens3->a2_ << " " << sens3->a3_ << endl;*/
-    //fout << sens1->a1_ << " " << sens1->a2_ << " " << sens1->a3_ << endl;
-    //int a, b, c;
-    //for (int i = 0; i < 272; i++)
-    //{
-    //    cout << i << endl;
-    //    for (int j = 0; j < 1000000000; j++)
-    //    {
-    //        sens1->MakeRandom();
-    //        if (sens1->a1_ == 15236 && sens1->a2_ == 12353 && sens1->a3_ == 96755)
-    //        {
-    //            cout << "STOP" << endl;
-    //            exit(-1);
-    //        }
-    //        if (sens1->a1_ == 1 && sens1->a2_ == 0 && sens1->a3_ == 123)
-    //        {
-    //            cout << "STOP" << endl;
-    //            exit(-1);
-    //        }
-    //        if (sens1->a1_ == 0 && sens1->a2_ == 1 && sens1->a3_ == 0)
-    //        {
-    //            cout << "STOP" << endl;
-    //            exit(-1);
-    //        }
+    ////MK.Init_Parametrs2(sens,  v1, v2, v3, v4, v5);
+    //MK.Change_Velosity2(sens, -2.3, 0.3, 0.0, -1.1, 0.2, 0.03, v1, v2, v3, v4, 1.0, 800.0, 0);
+    //cout << v1[0] << endl;
+    //cout << v2[0] << endl;
+    //cout << v3[0] << endl;
+    //cout << v4[0] << endl;
 
-    //    }
-    //    fout << sens1->a1_ << " " << sens1->a2_ << " " << sens1->a3_ << endl;
-    //    //fout << sens2->a1_ << " " << sens2->a2_ << " " << sens2->a3_ << endl;
-    //    //fout << sens3->a1_ << " " << sens3->a2_ << " " << sens3->a3_ << endl;
-    //}
-    //fout.close();
+
+    //cout << endl;
+    //MK.Change_Velosity(sens2, -2.3, 0.3, 0.0, -1.1, 0.2, 0.03, v1, v2, v3, v4, 1.0, 800.0, 0);
+    //cout << v1[0] << endl;
+    //cout << v2[0] << endl;
+    //cout << v3[0] << endl;
+    //cout << v4[0] << endl;
+    //
     //exit(-1);
-
-    //vector<double> v1(6);
-    //vector<double> v2(6);
-    //vector<double> v3(6);
-    //vector<double> v4(6);
-    //vector<double> v5(6);
-    //double Sum1 = 0.0;
-    //double Sum2 = 0.0;
-    //double Sum3 = 0.0;
-    //double Sum4 = 0.0;
-    //double Sum5 = 0.0;
-    //double Sum6 = 0.0;
-    //double m1 = 0.0;
-    //double m2 = 0.0;
-    //double m3 = 0.0;
-    //double m4 = 0.0;
-    //double m5 = 0.0;
-    //double m6 = 0.0;
-
-    //cout << MK.f2(-2.0, 0.0, -1.0, 0.1) << endl;
-
-    /*for (int i = 0; i < 100000; i++)
-    {
-        MK.Init_Parametrs(sens, v1, v2, v3, v4, v5);
-        Sum6 += v5[5];
-        m6 += 1.0;
-        Sum5 += v5[4];
-        m5 += 1.0;
-        Sum1 += v5[3];
-        m1 += 1.0;
-        Sum2 += v5[2];
-        m2 += 1.0;
-        Sum3 += v5[1];
-        m3 += 1.0;
-        Sum4 += v5[0];
-        m4 += 1.0;
-    }
-
-    cout << Sum6 / m6 << endl;
-    cout << Sum5 / m5 << endl;
-    cout << Sum1 / m1 << endl;
-    cout << Sum2 / m2 << endl;
-    cout << Sum3 / m3 << endl;
-    cout << Sum4 / m4 << endl;*/
-
-    //exit(-1);
-
-   // cout << MK.Get_Int002(-4.47265e-05, 1.23034) << endl;
-    /*double a, b, c;
-    double a2, b2, c2;
-    spherical_skorost(1, 1, 1, 1, 2, 3, a, b, c);
-    spherical_skorost(1, 1, 1, 3, 4, 1, a2, b2, c2);
-    cout << sqrt(kvv(1, 2, 3)) << endl;
-    cout << sqrt(kvv(a, b, c)) << endl;
-    cout << sqrt(kvv(1 - 3, 2 - 4, 3 - 1)) << endl;
-    cout << sqrt(kvv(a - a2, b - b2, c - c2)) << endl;
-    exit(-1);*/
-    /*MK.Change_Velosity2(sens, -2.3, 0.3, 0.0, -1.1, 0.2, 0.03, v1, v2, v3, v4, 1.0, 800.0, 5);
-    for (int i = 0; i < 6; i++)
-    {
-        cout << v4[i] << endl;
-    }*/
-    
 
     Setka S;
 
@@ -171,9 +102,68 @@ int main()
     /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
 
 
-    S.Download_Setka_ALL_ALPHA_2_0("all_save_4_138.txt"); // 125 до движения поверхностей
+    S.Download_Setka_ALL_ALPHA_2_0("all_save_4_144.txt"); // 125 до движения поверхностей
     //S.Print_Tecplot_MK();
     //exit(-1);
+
+    if (false)
+    {
+        // Добавим фантомные грани
+        for (auto& i : S.All_Gran)
+        {
+            if (i->type == Axis)
+            {
+                auto G3 = new Gran(i->B, i->A, Axis);
+                G3->main_gran = false;
+                G3->Sosed = i->Master;
+                G3->Gran_copy = i;
+                i->Gran_copy = G3;
+                S.All_Gran_copy.push_back(G3);
+            }
+
+            if (i->type == Upper_wall)
+            {
+                auto G3 = new Gran(i->B, i->A, Upper_wall);
+                G3->main_gran = false;
+                G3->Sosed = i->Master;
+                G3->Gran_copy = i;
+                i->Gran_copy = G3;
+                S.All_Gran_copy.push_back(G3);
+            }
+
+            if (i->type == Extern)
+            {
+                auto G3 = new Gran(i->B, i->A, Extern);
+                G3->main_gran = false;
+                G3->Sosed = i->Master;
+                G3->Gran_copy = i;
+                i->Gran_copy = G3;
+                S.All_Gran_copy.push_back(G3);
+            }
+
+            if (i->type == Input)
+            {
+                auto G3 = new Gran(i->B, i->A, Input);
+                G3->main_gran = false;
+                G3->Sosed = i->Master;
+                G3->Gran_copy = i;
+                i->Gran_copy = G3;
+                S.All_Gran_copy.push_back(G3);
+            }
+        }
+
+        int num = 0;
+        for (auto& i : S.All_Gran)
+        {
+            i->number = num;
+            num++;
+        }
+        for (auto& i : S.All_Gran_copy)
+        {
+            i->number = num;
+            num++;
+        }
+    }
 
     /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
     /// 126 - счёт монте-карло с большим числом частиц    ALPHA_2_0
@@ -297,38 +287,71 @@ int main()
     }*/
 
     S.TVD_prepare();
-    //S.M_K_prepare();   // Нужно комментить, если не считается монте-карло, т.к. там удаляются источники
+    S.M_K_prepare();   // Нужно комментить, если не считается монте-карло, т.к. там удаляются источники
     //S.Print_TVD();
 
 
     S.Proverka();
     //S.Print_cell_type();
-    ofstream fout;
-    string name_f = "111.txt";
-    fout.open(name_f);
-    for (auto& i : S.All_Gran)  
+
+    // Блок просмотра
+    if (false)
     {
-        if (i->Gran_copy == nullptr)
+        ofstream fout;
+        string name_f = "111.txt";
+        fout.open(name_f);
+
+        //int jk = 0;
+        //for (auto& i : S.All_Gran)
+        //{
+        //    if (i->Sosed_down != nullptr)
+        //    {
+        //        jk++;
+        //    }
+        //}
+
+        //fout << "TITLE = \"HP\" ";
+        //fout << " VARIABLES = \"X\", \"Y\", \"Z\"  ZONE T= \"HP\", N=  " << jk * 2;
+        //fout << " , E= " << jk;
+        //fout << " , F=FEPOINT, ET=LINESEG  " << endl;
+        //int jkk = 0;
+        //for (auto& i : S.All_Gran)
+        //{
+        //    if (i->Sosed_down != nullptr)
+        //    {
+        //        double x, y, n1, n2;
+        //        i->Get_Center(x, y);
+        //        i->Sosed_down->Get_Center(n1, n2);
+        //        fout << x << " " << y << " " << jkk << endl;
+        //        fout << n1 << " " << n2 << " " << jkk << endl;
+        //        jkk++;
+        //        /*if (x < 37.2 && x > 36.8 && y < 1.4 && y > 1.0)
+        //        {
+        //            cout << x << " " << y << endl;
+        //            cout << n1 << " " << n2 << endl;
+        //        }*/
+        //    }
+        //}
+        //for (int i = 0; i < jk; i++)
+        //{
+        //    fout << 2 * i + 1 << " " << 2 * i + 2 << endl;
+        //}
+
+            for (auto& i : S.All_Gran)
         {
-            double x, y, n1, n2;
-            i->Get_Center(x, y);
-            i->Get_normal(n1, n2);
-            fout << x << " " << y << " " << 1 << endl;
-            fout << x + 0.1 * n1 << " " << y + 0.1 * n2 << " " << 1 << endl;
+            if (i->Sosed_down == nullptr)
+            {
+                double x, y, n1, n2;
+                i->Get_Center(x, y);
+                i->Get_normal(n1, n2);
+                fout << x << " " << y << " " << 2 << endl;
+                fout << x + 0.1 * n1 << " " << y + 0.1 * n2 << " " << 2 << endl;
+            }
         }
+        exit(-1);
     }
-    for (auto& i : S.All_Gran_copy)
-    {
-        if (i->Gran_copy == nullptr)
-        {
-            double x, y, n1, n2;
-            i->Get_Center(x, y);
-            i->Get_normal(n1, n2);
-            fout << x << " " << y << " " << 2 << endl;
-            fout << x + 0.1 * n1 << " " << y + 0.1 * n2 << " " << 2 << endl;
-        }
-    }
-    exit(-1);
+
+    
 
 
     // Если мы хотим подвинуть сетку до начала счёта то помогает следующий блок кода
@@ -371,7 +394,7 @@ int main()
     //S.Init_conditions();
 
     // Монте-карло блок
-    //S.MK_start_new();
+    S.MK_start_new();
     /*cout << 1.0 * S.mmu1 / (1.0 * S.mn1) << " " << S.mn1 << endl;
     cout << S.mmu2 / (1.0 * S.mn2) << " " << S.mn2 << endl;
     cout << S.mmu3 / (1.0 * S.mn3) << " " << S.mn3 << endl;
@@ -383,13 +406,13 @@ int main()
     }*/
     //S.Go_stationary_5_komponent_inner(200000);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 6; i++)
     {
         //S.Go_stationary_5_komponent_inner_MK(20000);
-        //S.Go_stationary_5_komponent_inner(100000);
+        //S.Go_stationary_5_komponent_inner(50000);
         //S.Go_stationary_5_komponent_inner(200000);
-        //S.Go_5_komponent_MK(200000);
-        S.Go_5_komponent(50000);
+        //S.Go_5_komponent_MK(20000);
+        //S.Go_5_komponent(100000);
     }
     //S.Go_5_komponent(150000);
     //S.Go_5_komponent(100000);
@@ -401,7 +424,7 @@ int main()
     S.Print_cell2();
     S.Print_Gran();
     S.Print_connect();
-    S.Save_Setka_ALL_ALPHA("all_save_4_139.txt");
+    S.Save_Setka_ALL_ALPHA("all_save_4_146.txt");
     
 
 }

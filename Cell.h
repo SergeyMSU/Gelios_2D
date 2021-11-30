@@ -80,8 +80,13 @@ public:
 	vector <Gran*> Grans;
 	int number;
 	int zona;
+	int zona_alpha;
 	Cell_type type;
 	mutex mut;                 // ћьютекс дл€ записи в €чейку
+	double x_min;
+	double x_max;
+	double y_min;
+	double y_max;
 
 	Cell(Point* A, Point* B, Point* C, Point* D);
 	Cell(void);

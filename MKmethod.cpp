@@ -5,7 +5,7 @@ MKmethod::MKmethod(void)
 	double Yr = fabs(Velosity_inf);
 	this->A0_ = this->A0(Yr);     // Сразу посчитаем константу, чтобы постоянно не считать. 
 	this->A1_ = 1.0 + (1.0 + 1.0 / (2.0 * kv(Yr))) * erf(Yr) + exp(-kv(Yr)) / (sqrtpi_ * Yr);
-	this->num_area = I_; // I_;
+	this->num_area = 0; // I_;
 	this->R_[0] = 1.0;                 // Здесь задаются радиусы
 	this->R_[1] = 3.0;
 	this->R_[2] = 10.0;
@@ -278,6 +278,12 @@ double MKmethod::F(const double& X, const double& gam, const double& Y)
 	return A * (B + C - D);
 }
 
+double MKmethod::FF(const double& gam, const double& Yr)
+// Из препринта Маламы
+{
+	return gam * ((0.5 + kv(Yr)) * (1.0 + erf(-Yr)) - exp(-kv(Yr)) * Yr / sqrtpi_);
+}
+
 double MKmethod::F0(const double& X, const double& Y)
 {
 
@@ -400,6 +406,26 @@ double MKmethod::h_mho(const double& x, const double& c)
 
 double MKmethod::play_mho(Sensor* sens, const double& c)
 {
+	//cout << c << endl;
+	double x;
+	do
+	{
+		x = sens->MakeRandom() * pi_;
+	} while (exp(2.0 * c * cos(x)) < sens->MakeRandom() * exp(2.0 * fabs(c)) );
+
+	if (sens->MakeRandom() < 0.5)
+	{
+		return x;
+	}
+	else
+	{
+		return (2.0 * pi_ - x);
+	}
+}
+
+double MKmethod::play_mho2(Sensor* sens, const double& c)
+{
+	cout << c << endl;
 	double cc = c;
 	bool minus = false;
 	if (c < 0.0)
@@ -437,29 +463,19 @@ double MKmethod::play_mho(Sensor* sens, const double& c)
 		do
 		{
 			ksi1 = sens->MakeRandom();
-			//ksi1 = 0.8;
 			if (ksi1 < p1 / p)
 			{
-				//cout << "A" << endl;
-				//tt = 1;
-				//kappa = 1.13;
 				ksi2 = sens->MakeRandom();
-				//ksi2 = 0.4;
 				x = (pi_ * ec - sqrtpi_ * sqrt(-4.0 * ec * ksi2 * p1 + pi_ * kv(ec) + 4.0 * ksi2 * p1)) / (2.0 * (exp(2.0 * cc) - 1.0));
 				//cout << x << endl;
 			}
 			else
 			{
-				//cout << "B" << endl;
-				//tt = 2;
-				//kappa = 1.0;
-				ksi2 = sens->MakeRandom(); // -p1 / p;
-				//ksi2 = 0.4;
+				ksi2 = sens->MakeRandom();
 				if (fabs(cc - ln2 / 2.0) < 0.001)
 				{
 					//cout << "B1" << endl;
 					x = 0.5 * pi_ * exp(2.0 * ksi2 * p2 / pi_);
-					//cout << x << endl;
 				}
 				else
 				{
@@ -781,7 +797,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 
 		Wt_[this->num_area] = Y * sqrt(1.0 - kv(X_[this->num_area])) + sqrt(-log(ksi5)) * cos(2.0 * pi_ * ksi6);
 		Wp_[this->num_area] = sqrt(-log(ksi5)) * sin(2.0 * pi_ * ksi6);
-	//} while (kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) < gg * kv(Wr_[this->num_area]));
+	//} while(Wr_[this->num_area] < 0.0 && kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) < gg * kv(Wr_[this->num_area]));
 
 	/*mu_[this->num_area] = 1.0;
 	for (int i = 0; i < this->num_area; i++)
@@ -798,21 +814,197 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 	if (this->num_area == 0)
 	{
 		mu_[this->num_area] = 1.0;
+		//cout << "A " << endl;
 		return true;
 	}
 	else
 	{
-		if (kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) > this->gam_[this->num_area - 1] * kv(Wr_[this->num_area]))
+		if (Wr_[this->num_area] >= 0.0 || kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) > this->gam_[this->num_area - 1] * kv(Wr_[this->num_area]))
 		{
 			mu_[this->num_area] = 1.0;
-			//cout << 1 << endl;
+			//cout << "B" << endl;
 		}
 		else
 		{
 			mu_[this->num_area] = 0.0;  // Чтобы не запускать этот атом
-			//cout << 0 << endl;
+			//cout << "C" << endl;
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool MKmethod::Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_)
+// Алгоритм Маламы из препринта
+{
+	double Y = fabs(Velosity_inf);
+
+	double p1 = erf(Y) / (this->A1_ * kv(Y));
+	double ksi1, ksi2, ksi3;
+	double X, h;
+
+	// Разыграли X
+	ksi1 = sens->MakeRandom();
+	if (p1 >= ksi1)
+	{
+		do
+		{
+			ksi2 = sens->MakeRandom();
+			ksi3 = sens->MakeRandom();
+			X = (1.0 / Y) * sqrt(-log(ksi2)) * cos(ksi3 * pi_ / 2.0);
+		} while (X >= 1.0);
+	}
+	else
+	{
+		do
+		{
+			ksi2 = sens->MakeRandom();
+			ksi3 = sens->MakeRandom();
+			X = sqrt(ksi2);
+			h = (1.0 + erf(X * Y)) / (1.0 + erf(Y));
+		} while (h <= ksi3);
+	}
+
+	for (int i = 0; i <= this->num_area; i++)
+	{
+		X_[i] = X;
+	}
+
+	double Yr = -Y * X;
+	double Yt = Y * sqrt(1.0 - kv(X));
+	double e1, e2, e3;
+
+	this->A2_ = exp(-kv(Y * X)) / sqrtpi_ + Y * X * (1.0 + erf(X * Y));
+
+	e1 = sqrtpi_ * kv(Yr);
+	e2 = 2.0 * fabs(Yr);
+	e3 = 0.5 * sqrtpi_;
+
+	double p2, p4, p5;
+
+	p1 = e1 / (e1 + e2 + e3);
+	p2 = e2 / (e1 + e2 + e3);
+
+	double ksi4, ksi5, ksi6, ksi7, ksi8;
+	double z = 0.0;
+	double Wa = 0.0;
+	double V = 0.0;
+	double gam1, gam2;
+
+	for (int i = 0; i < this->num_area; i++)
+	{
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		// Разыграли Wr
+		do
+		{
+			ksi1 = sens->MakeRandom();
+			if (p1 > ksi1)
+			{
+				ksi2 = sens->MakeRandom();
+				ksi3 = sens->MakeRandom();
+				z = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+			}
+			else if (p1 + p2 > ksi1)
+			{
+				ksi2 = sens->MakeRandom();
+				if (ksi2 <= 0.5)
+				{
+					z = -sqrt(-log(2.0 * ksi2));
+				}
+				else
+				{
+					z = sqrt(-log(2.0 * (1.0 - ksi2)));
+				}
+			}
+			else
+			{
+				ksi2 = sens->MakeRandom();
+				ksi3 = sens->MakeRandom();
+				ksi4 = sens->MakeRandom();
+				ksi5 = sens->MakeRandom();
+				z = sign(ksi5 - 0.5) * sqrt(-log(ksi2) - log(ksi3) * kv(cos(pi_ * ksi4)));
+			}
+
+			Wr_[i] = z + Yr;
+			h = kv(Yr + z) / kv(fabs(Yr) + fabs(z));
+			ksi6 = sens->MakeRandom();
+		} while (h <= ksi6 || z > -Yr);
+
+		ksi7 = sens->MakeRandom();
+		ksi8 = sens->MakeRandom();
+		V = 2.0 * pi_ * ksi7;
+		Wa = sqrt(gam1 * kv(Wr_[i]) + ksi8 * (gam2 - gam1) * kv(Wr_[i]));
+
+		Wt_[i] = Wa * cos(V);
+		Wp_[i] = Wa * sin(V);
+
+		mu_[i] = ((this->FF(gam2, Yr) - this->FF(gam1, Yr)) / this->A2_) * fabs(Wr_[i]) * exp(-kv(Wt_[i] - Yt) - kv(Wp_[i]));
+	}
+
+	// Разыгрываем основной атом
+
+	double gg = 0.0;
+	if (this->num_area > 0)
+	{
+		gg = this->gam_[this->num_area - 1];
+	}
+
+	double p4_ = sqrtpi_ * fabs(Yr) / (1.0 + sqrtpi_ * fabs(Yr));                  // Для розыгрыша основного атома на границе по препринту Маламы
+	do
+	{
+		do
+		{
+			ksi1 = sens->MakeRandom();
+			ksi2 = sens->MakeRandom();
+			ksi3 = sens->MakeRandom();
+			if (p4_ > ksi1)
+			{
+				z = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+			}
+			else
+			{
+				if (ksi2 <= 0.5)
+				{
+					z = -sqrt(-log(2.0 * ksi2));
+				}
+				else
+				{
+					z = sqrt(-log(2.0 * (1.0 - ksi2)));
+				}
+			}
+
+			Wr_[this->num_area] = z + Yr;
+			h = fabs(Yr + z) / (fabs(Yr) + fabs(z));
+			ksi4 = sens->MakeRandom();
+		} while (h <= ksi4 || z >= -Yr);
+
+		double ksi5, ksi6;
+		ksi5 = sens->MakeRandom();
+		ksi6 = sens->MakeRandom();
+		//ksi7 = sens->MakeRandom();
+
+		Wt_[this->num_area] = Yt + sqrt(-log(ksi5)) * cos(2.0 * pi_ * ksi6);
+		Wp_[this->num_area] = sqrt(-log(ksi5)) * sin(2.0 * pi_ * ksi6);
+	} while (Wr_[this->num_area] < 0.0 && kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) < gg * kv(Wr_[this->num_area]));
+
+
+	mu_[this->num_area] = 1.0;
+
+	for (int i = 0; i < this->num_area; i++)
+	{
+		mu_[this->num_area] = mu_[this->num_area] - mu_[i];
+		//cout << i << " " << mu_[i] << endl;
 	}
 
 	return true;
@@ -954,7 +1146,6 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 	for (int i = 0; i < I; i++)
 	{
 		ksi = sens->MakeRandom();
-		//cout << "ksi  " << ksi << endl;
 		Wr1 = -3.0;
 		Wr2 = 0.0;
 		if (i == 0)
@@ -973,7 +1164,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 			Wr1 = Wr1 - 1.0;
 		}
 		int k = 0;
-		while (fabs(Wr2 - Wr1) > 0.00001)     // Деление пополам, иначе разваливается
+		while (fabs(Wr2 - Wr1) > 0.000001)     // Деление пополам, иначе разваливается
 		{
 			Wr0 = (Wr1 + Wr2) / 2.0;
 			if (this->Hvr(gam1, gam2, Wr0, Ur, Uthe, ksi) < 0)
@@ -996,11 +1187,11 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		{
 			cout << Wr0 << endl;
 		}*/
-		if (std::fpclassify(Wr1) != FP_NORMAL && std::fpclassify(Wr1) != FP_ZERO)
+		/*if (std::fpclassify(Wr1) != FP_NORMAL && std::fpclassify(Wr1) != FP_ZERO)
 		{
 			cout << Wr1 << "    ERROR  Wr0 537" << endl;
 			exit(-1);
-		}
+		}*/
 	}
 
 	double W1, W2, Wa, ksi1, ksi2;
@@ -1076,7 +1267,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		//cout << (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) << endl;
 		//exit(-4);
 
-		if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
+		/*if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
 		{
 			cout << mu_[i] << "    ERROR  mu_[i] 604" << endl;
 			cout << "f2(0.0, gam1, Ur, Uthe) = " << f2(0.0, gam1, Ur, Uthe) << endl;
@@ -1087,7 +1278,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 			cout << "Uthe = " << Uthe << endl;
 
 			exit(-1);
-		}
+		}*/
 
 		//cout << mu_[i] << "  " << i << endl;
 	}
@@ -1121,10 +1312,10 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		if (p4 < ksi1)
 		{
 			om1 = 1.0 - 2.0 * ksi4;
-			//om2 = sqrt(1.0 - kv(om1)) * cos(2.0 * pi_ * ksi5);
-			//om3 = sqrt(1.0 - kv(om1)) * sin(2.0 * pi_ * ksi5);
+			om2 = sqrt(1.0 - kv(om1)) * cos(2.0 * pi_ * ksi5);
+			om3 = sqrt(1.0 - kv(om1)) * sin(2.0 * pi_ * ksi5);
 			// Более экономичный алгоритм
-			do
+			/*do
 			{
 				om2 = 1.0 - 2.0 * sens->MakeRandom();
 				om3 = 1.0 - 2.0 * sens->MakeRandom();
@@ -1132,7 +1323,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 			} while (D > 1);
 			ko = sqrt((1.0 - kv(om1)) / D);
 			om2 = om2 * ko;
-			om3 = om3 * ko;
+			om3 = om3 * ko;*/
 
 			lo = sqrt(-log(ksi2 * ksi3));
 			y1 = lo * om1;
@@ -1154,7 +1345,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		uuu = sqrt(kvv(u1, u2, u3));
 		yy = sqrt(kvv(y1, y2, y3));
 		h = ((uuu * sigma2(uuu, cp)) / (sigma2(X, cp) * (X + yy)));
-	} while (h < ksi6);// || (v1 < 0.0 && kv(v2) + kv(v3) < gg * kv(v1)));
+	} while (h < ksi6); // || (v1 < 0.0 && kv(v2) + kv(v3) < gg * kv(v1)));
 
 
 	Wr_[I] = v1;
@@ -1209,6 +1400,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		//cout << 0 << endl;
 		return false;
 	}
+
 	return true;
 }
 
@@ -1390,7 +1582,7 @@ bool MKmethod::Change_Velosity2(Sensor* sens, const double& Ur, const double& Ut
 		uuu = sqrt(kvv(u1, u2, u3));
 		yy = sqrt(kvv(y1, y2, y3));
 		h = ((uuu * sigma2(uuu, cp)) / (sigma2(x, cp) * (x + yy)));
-	} while (h <= ksi6 || (v1 <= 0 && kvv(v2, v3, 0.0) < gg * kv(v1)));
+	} while (h < ksi6 || (v1 <= 0 && kvv(v2, v3, 0.0) < gg * kv(v1)));
 	//cout << v2 << endl;
 	Wr_[I] = v1;
 	Wthe_[I] = v2;

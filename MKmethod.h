@@ -10,6 +10,7 @@ public:
 	double gam_[8];       // все гамма для запуска с границы
 	double A0_;         // Главный интегралл сразу посчитанный 
 	double A1_;         // Главный интегралл сразу посчитанный 
+	double A2_;         // Главный интегралл сразу посчитанный 
 	int num_area;      // Количество зон (именно количество дополнительных зон)
 	double Int_[501];
 	double Int_002[51][50];
@@ -25,7 +26,9 @@ public:
 	// розыгрыш начальных параметров запуска
 	bool Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
 	// Возвращает false, если не нужно запускать основной атом
+	bool Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
 	int Init(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, double& X_);
+	double FF(const double& gam, const double& Yr);
 
 	// Розыгрыш скорости при перезарядке
 	bool Change_Velosity(Sensor* sens, const double& Ur, const double& Uthe, const double& Uphi, //
@@ -49,6 +52,7 @@ public:
 
 	void TEST(void);   // Функция - тестирующая разные вспомогательные функции, нужна была для отладки
 	double play_mho(Sensor* sens, const double& c);
+	double play_mho2(Sensor* sens, const double& c);
 	// Разыгрываем \mho 
 	double norm_mho(const double& c);
 	double h_mho(const double& x, const double& c);

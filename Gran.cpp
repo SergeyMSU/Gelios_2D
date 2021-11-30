@@ -83,6 +83,13 @@ void Gran::renew(void)
 	{
 		this->koef = 0;
 	}
+
+	this->aa = A->y - B->y;
+	this->bb = B->x - A->x;
+	double nnn = sqrt(kvv(0.0, this->aa, this->bb));
+	this->aa = this->aa / nnn;
+	this->bb = this->bb / nnn;
+	this->cc = -this->aa * A->x - this->bb * A->y;
 }
 
 bool Gran::belong(const double& x, const double& y)
@@ -122,7 +129,7 @@ bool Gran::belong_gran(const double& x, const double& y)
 {
 	if (this->parallel == false)
 	{
-		if (fabs(y - this->a * x - this->b)/(sqrt(1.0 + kv(this->a))) <= 0.00001)
+		if (fabs(y - this->a * x - this->b)/(sqrt(1.0 + kv(this->a))) <= 0.0001)
 		{
 			return true;
 		}
@@ -133,7 +140,7 @@ bool Gran::belong_gran(const double& x, const double& y)
 	}
 	else
 	{
-		if (fabs(x - this->A->x) <= 0.00001 && max(this->A->y, this->B->y) >= y && min(this->A->y, this->B->y) <= y)
+		if (fabs(x - this->A->x) <= 0.0001 && max(this->A->y, this->B->y) >= y && min(this->A->y, this->B->y) <= y)
 		{
 			return true;
 		}
@@ -256,7 +263,50 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 	{
 		if (this->Sosed_down == nullptr)
 		{
-			par = this->Master->par[i];
+			bool b = false;
+			for (auto& i : this->Master->Grans)
+			{
+				if (i->type == Axis)
+				{
+					b = true;
+					break;
+				}
+			}
+			if (b == true)
+			{
+				double x, y, x2, y2, dist1, dist2, dist3;
+				par = this->Master->par[i];
+				this->Get_Center(x, y);
+				//cout << x << " " << y << endl;
+				auto par2 = this->Master->par[i];
+				auto par1 = this->Master->par[i];
+				par1.v = -par1.v;
+				par1.v_H1 = -par1.v_H1;
+				par1.v_H2 = -par1.v_H2;
+				par1.v_H3 = -par1.v_H3;
+				par1.v_H4 = -par1.v_H4;
+				auto par3 = this->Sosed->par[i];
+				this->Master->Get_Center(x2, y2);
+				//cout << x2 << " " << y2 << endl;
+				dist2 = sqrt(kv(x - x2) + kv(y - y2));
+				this->Sosed->Get_Center(x2, y2);
+				//cout << x2 << " " << y2 << endl;
+				dist3 = sqrt(kv(x - x2) + kv(y - y2));
+				this->Master->Get_Center(x2, y2);
+				y2 = -y2;
+				//cout << x2 << " " << y2 << endl;
+				dist1 = sqrt(kv(x - x2) + kv(y - y2));
+				par.v = linear(-dist1, par1.v, -dist2, par2.v, dist3, par3.v, 0.0);
+				par.v_H1 = linear(-dist1, par1.v_H1, -dist2, par2.v_H1, dist3, par3.v_H1, 0.0);
+				par.v_H2 = linear(-dist1, par1.v_H2, -dist2, par2.v_H2, dist3, par3.v_H2, 0.0);
+				par.v_H3 = linear(-dist1, par1.v_H3, -dist2, par2.v_H3, dist3, par3.v_H3, 0.0);
+				par.v_H4 = linear(-dist1, par1.v_H4, -dist2, par2.v_H4, dist3, par3.v_H4, 0.0);
+				//cout << " __________ " << endl;
+			}
+			else
+			{
+				par = this->Master->par[i];
+			}
 			return;
 		}
 		double x, y, x2, y2, dist1, dist2, dist3;
@@ -322,6 +372,8 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		this->Get_Center(x, y);
 		//cout << x << " " << y << endl;
 		auto par2 = this->Master->par[i];
+		//auto par3 = this->Master->par[i];
+		//par3.v = -par3.v;
 		auto par1 = this->Sosed_down->par[i];
 		this->Master->Get_Center(x2, y2);
 		dist2 = sqrt(kv(x - x2) + kv(y - y2));
@@ -385,8 +437,68 @@ void Gran::Get_par_TVD_radial(Parametr& par, int i)
 	{
 		if (this->Sosed_down == nullptr)
 		{
-			par = this->Master->par[i];
-			return;
+				bool b = false;
+				for (auto& i : this->Master->Grans)
+				{
+					if (i->type == Axis)
+					{
+						b = true;
+						break;
+					}
+				}
+				if (b == true)
+				{
+					double x, y, x2, y2, dist1, dist2, dist3;
+					this->Get_Center(x, y);
+					double phi = polar_angle(x, y);
+					double r = sqrt(kv(x) + kv(y));
+					auto par2 = this->Master->par[i];
+					auto par1 = this->Master->par[i];
+					par1.v = -par1.v;
+					par1.v_H1 = -par1.v_H1;
+					par1.v_H2 = -par1.v_H2;
+					par1.v_H3 = -par1.v_H3;
+					par1.v_H4 = -par1.v_H4;
+					auto par3 = this->Sosed->par[i];
+					this->Master->Get_Center(x2, y2);
+					double r2 = sqrt(kv(x2) + kv(y2));
+					double phi2 = polar_angle(x2, y2);
+					dist2 = sqrt(kv(x - x2) + kv(y - y2));
+					this->Sosed->Get_Center(x2, y2);
+					double r3 = sqrt(kv(x2) + kv(y2));
+					dist3 = sqrt(kv(x - x2) + kv(y - y2));
+					double phi3 = polar_angle(x2, y2);
+					this->Master->Get_Center(x2, y2);
+					y2 = -y2;
+					double phi1 = polar_angle(x2, y2);
+					double r1 = sqrt(kv(x2) + kv(y2));
+					dist1 = sqrt(kv(x - x2) + kv(y - y2));
+
+					double fr1 = par1.u_H1 * cos(phi1) + par1.v_H1 * sin(phi1);
+					double ff1 = -par1.u_H1 * sin(phi1) + par1.v_H1 * cos(phi1);
+
+					double fr2 = par2.u_H1 * cos(phi2) + par2.v_H1 * sin(phi2);
+					double ff2 = -par2.u_H1 * sin(phi2) + par2.v_H1 * cos(phi2);
+
+					double fr3 = par3.u_H1 * cos(phi3) + par3.v_H1 * sin(phi3);
+					double ff3 = -par3.u_H1 * sin(phi3) + par3.v_H1 * cos(phi3);
+
+
+					double fr = linear(-dist1, fr1, -dist2, fr2, dist3, fr3, 0.0);
+					par.ro = linear(-dist1, par1.ro * kv(r1), -dist2, par2.ro * kv(r2), dist3, par3.ro * kv(r3), 0.0) / kv(r);
+					par.p = linear(-dist1, par1.p * pow(r1, 2.0 * ggg), -dist2, par2.p * pow(r2, 2.0 * ggg), dist3, par3.p * pow(r3, 2.0 * ggg), 0.0) / pow(r, 2.0 * ggg);
+					par.p_H1 = linear(-dist1, par1.p_H1, -dist2, par2.p_H1, dist3, par3.p_H1, 0.0);
+					par.ro_H1 = linear(-dist1, par1.ro_H1 * pow(r1, H_pow), -dist2, par2.ro_H1 * pow(r2, H_pow), dist3, par3.ro_H1 * pow(r3, H_pow), 0.0) / pow(r, H_pow);
+					//par.ro_H1 = linear(-dist1, par1.ro_H1, -dist2, par2.ro_H1, dist3, par3.ro_H1, 0.0);
+					par.u_H1 = fr * cos(phi) - ff2 * sin(phi);
+					par.v_H1 = fr * sin(phi) + ff2 * cos(phi);
+				}
+				else
+				{
+					par = this->Master->par[i];
+				}
+				return;
+			
 		}
 		double x, y, x2, y2, dist1, dist2, dist3;
 		this->Get_Center(x, y);

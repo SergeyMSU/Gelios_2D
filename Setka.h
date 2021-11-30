@@ -53,7 +53,10 @@ public:
 	vector<sensor2*> Sensors2;
 	vector <double> Ri;            // Геометрические зоны для расщепления Монте-Карло
 	double Mu[4][9];
-
+	double Mu_stat[4][9][12];      // Считаем статистику для весов
+	int Num_stat[4][9][12];      // Считаем статистику для весов
+	double Sinus[12];
+	mutex m_m;
 	ofstream f_way;
 	int f_num;
 
@@ -172,8 +175,9 @@ public:
 	void Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
-		 int area, bool ExCh, const double& mu_start, int to_I, bool georaschep);  // Смотри описание функции в коде функции
+		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep); // Смотри описание функции в коде функции
 	int geo_zones(const double& r, const double& k = 1.0);
+	int alpha_zones(const double& x, const double& y);
 
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);
