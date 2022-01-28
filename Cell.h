@@ -61,6 +61,12 @@ struct Parametr
 	double k_T = 0.0;
 	int num_atoms[4];   // „исло перезар€док в €чейке
 	double w_m[7];       // —редние веса по сортам
+	double I1_mf[4];
+	double I2_mf[4];
+	double I3_mf[4];
+	double I1_mc[4];
+	double I2_mc[4];
+	double I3_mc[4];
 };
 
 class Point;
@@ -102,5 +108,7 @@ public:
 
 	bool belong(const double& x, const double& y);
 	void renew(void); // ќбновить значени€ L
+
+	void Calc_Sourse(void);  // ‘ункци€ вычисл€юща€ источники
 };
 

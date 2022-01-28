@@ -105,6 +105,9 @@ public:
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
 	void Download_Setka_ALL_ALPHA(string name);       // Старая версия для фалов до 122 включительно
 	void Download_Setka_ALL_ALPHA_2_0(string name);   // Новая функция с какого-то момента.... 
+	void Copy(Setka* S); // Копирует сетку S (положения разрывов), при этом сетки разного разрешения
+	// Для того, чтобы копировать сетки, они должны находиться в одном масштабе (левая и правая граница должна быть такая-же)
+	// потому что это параметр не сетки, а параметр самой программы. #define
 
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)
@@ -117,6 +120,7 @@ public:
 	void Print_point_connect(void); // Посмотреть, как связаны узлы с ячейками
 	void Print_Tecplot(void);
 	void Print_Tecplot_MK(void);
+	void Print_Sourse(void);
 
 
 
@@ -138,16 +142,22 @@ public:
 	void Save_G_D_5_komponent(void);
 	void Download_G_D_5_komponent(void);
 	void Go_stationary_5_komponent_inner(int step);
+	void Go_stationary_5_komponent_inner_2(int step);
 	void Go_stationary_5_komponent_inner_MK(int step);  // Источники берутся из Монте-Карло
 	void Go_stationary(int step);
 	void Go_stationary_TVD(int step);
 	void Go_stationary_5_komponent(int step);
 	void Go(int step); // Выделение разрывов  Газовая динамика
 	void Go_5_komponent(int step);
+	void Go_5_komponent_2(int step);  // Другой способ записи законов сохранения и, соответственно многое поменялось
 	void Go_5_komponent_MK(int step);  // Версия с источниками из Монте-Карло
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
 		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok = false);
+	double HLLC_2d_Korolkov_b_s_2(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
+		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
+		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok = false);
+		// Функция возвращает не потоки, а сами большие величины в ячейке. 
 	void Init_conditions(void);
 
 

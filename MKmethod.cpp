@@ -5,15 +5,16 @@ MKmethod::MKmethod(void)
 	double Yr = fabs(Velosity_inf);
 	this->A0_ = this->A0(Yr);     // Сразу посчитаем константу, чтобы постоянно не считать. 
 	this->A1_ = 1.0 + (1.0 + 1.0 / (2.0 * kv(Yr))) * erf(Yr) + exp(-kv(Yr)) / (sqrtpi_ * Yr);
-	this->num_area = 0; // I_;
+	this->num_area = I_; // I_;
 	this->R_[0] = 1.0;                 // Здесь задаются радиусы
-	this->R_[1] = 3.0;
-	this->R_[2] = 10.0;
-	this->R_[3] = 30.0;
-	this->R_[4] = 100.0;
-	this->R_[5] = 250.0;
-	this->R_[6] = 500.0;                 // Здесь задаются радиусы
-	this->R_[7] = 1000.0;
+	this->R_[1] = 2.61;
+	this->R_[2] = 6.84;
+	this->R_[3] = 17.92;
+	this->R_[4] = 46.9;
+	this->R_[5] = 122.7;
+	this->R_[6] = 321.23;                 // Здесь задаются радиусы
+	this->R_[7] = 840.65;
+
 
 	for (int i = 0; i < this->num_area; i++)
 	{

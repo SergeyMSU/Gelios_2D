@@ -94,6 +94,11 @@ void Gran::renew(void)
 
 bool Gran::belong(const double& x, const double& y)
 {
+	if (this->type == Axis)
+	{
+		return true;
+	}
+
 	if (this->parallel == false)
 	{
 		if (this->koef * (y - this->a * x - this->b) <= 0.0)
@@ -175,6 +180,18 @@ void Gran::Get_normal(double& n1, double& n2)
 	return;
 }
 
+void Gran::Get_normal_posle(double& n1, double& n2)
+{
+	double t1 = this->B->x2 - this->A->x2;
+	double t2 = this->B->y2 - this->A->y2;
+	double n = sqrt(kv(t1) + kv(t2));
+	t1 = t1 / n;
+	t2 = t2 / n;
+	n1 = t2;
+	n2 = -t1;
+	return;
+}
+
 double Gran::Get_square(void)
 {
 	return sqrt(kv(this->B->x - this->A->x) + kv(this->B->y - this->A->y));
@@ -195,7 +212,7 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	else if (this->type == Extern)  // Не надо менять
 	{
 		par = this->Master->par[i];
-		par.p = par.p / 1000000.0;
+		//par.p = par.p / 1000000.0;
 		if (par.u >= 0.0)
 		{
 			par.u = -0.01;
@@ -216,12 +233,12 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	}
 	else if (this->type == Inner_sphere)
 	{
-		auto par2 = this->Sosed->par[i];
+		auto par2 = this->Master->par[i];   // this->Sosed->par[i];
 		double x, y;
 		this->Get_Center(x, y);
 		double dist = sqrt(x * x + y * y);
-		double ro = (389.988 * 389.988) / (chi_ * chi_); 
-		double P_E = ro * chi_ * chi_ / (ggg * 10.0 * 10.0);
+		double ro = 116.667;
+		double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
 		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));
 		//par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
 		//0.0003, (0.0003 * chi_real * chi_real / (ggg * 5.0 * 5.0)) * pow(1.0 / dist, 2.0 * ggg), chi_real* x / dist, chi_real* y / dist,//
@@ -235,11 +252,17 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		//	0.000001, 0.0000001, par2.u_H3, par2.v_H3,//
 		//	0.000001, 0.0000001, par2.u_H4, par2.v_H4 };
 
-		par = { ro / kv(chi_real / chi_) / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real / chi_) / (dist * dist),//
-		0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
-			0.000001, 0.0000001, par2.u_H2, par2.v_H2 , //
-			0.000001, 0.0000001, par2.u_H3, par2.v_H3,//
-			0.000001, 0.0000001, par2.u_H4, par2.v_H4 };
+		//par = { ro / kv(chi_real / chi_) / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real / chi_) / (dist * dist),//
+		//0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
+		//	0.00000001, 0.0000001, par2.u_H2, par2.v_H2 , //
+		//	0.00000001, 0.0000001, par2.u_H3, par2.v_H3,//
+		//	0.00000001, 0.0000001, par2.u_H4, par2.v_H4 };
+
+		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real) / (dist * dist),//
+		0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
+			par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
+			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
+			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 
 
 		//cout << par.ro << " " << dist << endl;
@@ -357,9 +380,9 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 	else if (this->type == Extern)  // Не надо менять
 	{
 		par = this->Master->par[i];
-		if (par.u >= -2.5)
+		if (par.u >= 0.0)
 		{
-			par.u = -2.5;
+			par.u = -0.01;
 		}
 	}
 	else if (this->type == Upper_wall)  // Не надо менять
@@ -402,14 +425,14 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 	}
 	else if (this->type == Inner_sphere)
 	{
-		auto par2 = this->Sosed->par[i];
+		auto par2 = this->Master->par[i];   // this->Sosed->par[i];
 		double x, y;
 		this->Get_Center(x, y);
 		double dist = sqrt(x * x + y * y);
-		double ro = (389.988 * 389.988) / (chi_ * chi_);
-		double P_E = ro * chi_ * chi_ / (ggg * 5.0 * 5.0);
-		par = { ro / kv(chi_real / chi_) / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * (chi_real / chi_) * x / dist, chi_ * (chi_real / chi_) * y / dist, ro / kv(chi_real / chi_) / (dist * dist),//
-		0.000001, 0.000001, chi_real * x / dist, chi_real * y / dist, par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
+		double ro = 116.667;
+		double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
+		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * (chi_real / chi_) * x / dist, chi_ * (chi_real / chi_) * y / dist, ro / kv(chi_real) / (dist * dist),//
+		0.0000001, 0.000001, chi_real * x / dist, chi_real * y / dist, par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 

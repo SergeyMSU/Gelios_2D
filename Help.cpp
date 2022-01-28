@@ -11,6 +11,14 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 	return;
 }
 
+void polar_provorot(const double& phi, double& u, double& v)
+{
+	double uu = u, vv = v;
+	u = uu * cos(phi) - vv * sin(phi);
+	v = uu * sin(phi) + vv * cos(phi);
+	return;
+}
+
 //double max(const double& x, const double& y)
 //{
 //	if (x >= y)
@@ -80,9 +88,21 @@ double sign(const double& x)
 
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& x3, const double& t3, const double& y)
 // Главное значение с параметрами 2
+// Строим линии между 1 и 2,  2 и 3, потом находим минмодом значение в y
 {
-	double d = minmod((t1 - t2) / (x1 - x2), (t2 - t3) / (x2 - x3));
-	return  (d * (y - x2) + t2);
+	if (true)
+	{
+		double d = minmod((t1 - t2) / (x1 - x2), (t2 - t3) / (x2 - x3));
+		return  (d * (y - x2) + t2);
+	}
+	else
+	{
+		// Новая процедура с сжатием
+		double dUl = (t2 - t1) / (x2 - x1);
+		double dUr = (t3 - t2) / (x3 - x2);
+		return t2 + 0.5 * ((1.0 - eta_) * minmod(dUl, betta_ * dUr) + (1.0 + eta_) * minmod(betta_ * dUl, dUr)) * (y - x2);
+	}
+
 }
 
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& y)
@@ -120,4 +140,12 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 	Vr = Vx * sin(the_1) * cos(phi_1) + Vy * sin(the_1) * sin(phi_1) + Vz * cos(the_1);
 	Vtheta = Vx * cos(the_1) * cos(phi_1) + Vy * cos(the_1) * sin(phi_1) - Vz * sin(the_1);
 	Vphi = -Vx * sin(phi_1) + Vy * cos(phi_1);
+}
+
+
+double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, const double& r2,//
+	const double& x3, const double& r3, const double& x4, const double& r4)
+{
+	return (pi_ / 3.0) * ((r4 - r2) * (x3 * (r2 + r4 + r3) - x1 * (r2 + r4 + r1)) - //
+		(r3 - r1) * (x4 * (r1 + r3 + r4) - x2 * (r1 + r3 + r2)));
 }

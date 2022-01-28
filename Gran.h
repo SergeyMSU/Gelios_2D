@@ -45,6 +45,7 @@ public:
     void Get_Center(double& x, double& y);
     void Get_Center_posle(double& x, double& y);
     void Get_normal(double& n1, double& n2);
+    void Get_normal_posle(double& n1, double& n2);
     double Get_square(void);
     double Get_lenght(void);
     double Get_square_rotate(const double& angle);

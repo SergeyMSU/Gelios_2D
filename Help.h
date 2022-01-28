@@ -31,6 +31,9 @@ void dekard_skorost(double x, double y, double z, double Vr, double Vphi, double
 void dekard_skorost2(double r2, double the_2, double phi_2, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz);
 void spherical_skorost(const double& x, const double& y, const double& z, const double& Vx,//
 	const double& Vy, const double& Vz, double& Vr, double& Vphi, double& Vtheta);
+double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, const double& r2,//
+	const double& x3, const double& r3, const double& x4, const double& r4);
+void polar_provorot(const double& phi, double& u, double& v);
 //double max(const double& x, const double& y);
 
 #define ga (5.0/3.0)          // Показатель адиабаты
@@ -48,12 +51,12 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define sqrtpi_ 1.77245385
 
 #define Velosity_inf -2.54338 //-4.54127 //-2.54127
-#define M_inf 1.968
+#define M_inf 1.97009
 #define chi_ 2.0 //36.1059 // 36.1059
-#define chi_real 36.1059
+#define chi_real 36.1275
 #define kurant  0.1
-#define Kn_  163.472  // 242.944										// Число Кнудсена
-#define a_2 0.10263
+#define Kn_  242.785  // 163.472  // 242.944										// Число Кнудсена
+#define a_2 0.102578  // 0.10263
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Дифференциальное сечение перезарядки
@@ -61,20 +64,20 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define sigma2(x, y) (kv(1.0 - a_2 * log((x) * (y))))  // Для другого обезразмеривания скорости на cp
 
 
-#define n_inner 10  // Сколько ячеек во внутреннем слое
-#define m_inner 16  // Сколько ячеек во внутреннем слое  (до какой ячейки внутреений слой считается)
-#define zazor 1.3   // Длина зазора между контактом и близжайшими точками 
-#define zazor2 2.0   // Длина зазора между внешней волной и близжайшими точками 
-#define s_k 0.03   // Сжатие области 4 к поверхностям
-#define alpha_rot 1.0  // Угор вращения (полный сектор), то есть в одну сторону на половину угла и в другую
+#define n_inner 20  // Сколько ячеек во внутреннем слое
+//#define m_inner 16  // Сколько ячеек во внутреннем слое  (до какой ячейки внутреений слой считается)
+#define zazor 3.0   // Длина зазора между контактом и близжайшими точками 
+#define zazor2 7.0   // Длина зазора между внешней волной и близжайшими точками 
+#define s_k 0.025   // Сжатие области 4 к поверхностям
+#define alpha_rot 0.1  // Угор вращения (полный сектор), то есть в одну сторону на половину угла и в другую
 #define R1_ 1.0
-#define R11_ 27.0
-#define R111_ 37.0
+#define R11_ 38.0    // Действует! До какой внутренней границы не двигаем ячейки
+#define R111_ 50.0
 #define R2_ 100.0
 #define R3_ 150.0
 #define R4_ 600.0
 #define R5_ 2200.0
-#define Rmax_ (1300.0)   // Максимальный радиус для Монте-Карло
+#define Rmax_ 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
 #define I_ 8 //5 // Количество зон по радиусу
@@ -86,3 +89,5 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 #define geo_step 100.0   // Сколько раз атом попадает в одну ячейку
 #define geo_accur 100.0    // Точность геометрии вдоль траектории
 #define Weyght 1000000.0  // Для весов чтобы не было потери точности
+#define eta_ 0.5    // параметр точности
+#define betta_ 1.0  // сжатие

@@ -151,7 +151,7 @@ double Cell::Get_Volume_rotate(const double& angle)
 	}
 	A = A * 0.5;
 
-	return fabs(A) * (1.0 / (6.0 * A)) * G * pi_ * angle / 180.0;
+	return fabs(A) * (1.0 / (6.0 * A)) * G * pi_ * angle / 180.0;   // В градусах можно подавать угол
 	
 }
 
@@ -235,7 +235,7 @@ bool Cell::belong(const double& x, const double& y)
 	{
 		return false;
 	}
-	if (y < this->y_min)
+	if (y < this->y_min - 0.001)
 	{
 		return false;
 	}
@@ -291,4 +291,156 @@ void Cell::renew(void)
 			y_max = i->y;
 		}
 	}
+}
+
+void Cell::Calc_Sourse(void)
+{
+	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+	double U_H1, U_H2, U_H3, U_H4;
+	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+	double nu_H1, nu_H2, nu_H3, nu_H4;
+	double q2_1, q2_2, q3;
+	double u, v, ro, p, Q;
+
+	double u_H1 = this->par[0].H_u[0], v_H1 = this->par[0].H_v[0], ro_H1 = this->par[0].H_n[0], p_H1 = 0.5 * this->par[0].H_T[0] * this->par[0].H_n[0];
+	double u_H2 = this->par[0].H_u[1], v_H2 = this->par[0].H_v[1], ro_H2 = this->par[0].H_n[1], p_H2 = 0.5 * this->par[0].H_T[1] * this->par[0].H_n[1];
+	double u_H3 = this->par[0].H_u[2], v_H3 = this->par[0].H_v[2], ro_H3 = this->par[0].H_n[2], p_H3 = 0.5 * this->par[0].H_T[2] * this->par[0].H_n[2];
+	double u_H4 = this->par[0].H_u[3], v_H4 = this->par[0].H_v[3], ro_H4 = this->par[0].H_n[3], p_H4 = 0.5 * this->par[0].H_T[3] * this->par[0].H_n[3];
+
+
+	u = this->par[0].u;
+	v = this->par[0].v;
+	ro = this->par[0].ro;
+	p = this->par[0].p;
+	Q = this->par[0].Q;
+	
+
+	if (ro <= 0.0)
+	{
+		ro = 0.0000001;
+		p = 0.0;
+	}
+	if (ro_H1 <= 0.0)
+	{
+		ro_H1 = 0.0000001;
+		p_H1 = 0.0;
+	}
+	if (ro_H2 <= 0.0)
+	{
+		ro_H2 = 0.0000001;
+		p_H2 = 0.0;
+	}
+	if (ro_H3 <= 0.0)
+	{
+		ro_H3 = 0.0000001;
+		p_H3 = 0.0;
+	}
+	if (ro_H4 <= 0.0)
+	{
+		ro_H4 = 0.0000001;
+		p_H4 = 0.0;
+	}
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->par[0].I1_mc[0] = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u));
+	this->par[0].I1_mc[1] = (n_p_LISM_ / Kn_) * (nu_H2 * (u_H2 - u));
+	this->par[0].I1_mc[2] = (n_p_LISM_ / Kn_) * (nu_H3 * (u_H3 - u));
+	this->par[0].I1_mc[3] = (n_p_LISM_ / Kn_) * (nu_H4 * (u_H4 - u));
+
+	this->par[0].I2_mc[0] = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v));
+	this->par[0].I2_mc[1] = (n_p_LISM_ / Kn_) * (nu_H2 * (v_H2 - v));
+	this->par[0].I2_mc[2] = (n_p_LISM_ / Kn_) * (nu_H3 * (v_H3 - v));
+	this->par[0].I2_mc[3] = (n_p_LISM_ / Kn_) * (nu_H4 * (v_H4 - v));
+
+	
+	this->par[0].I3_mc[0] = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)));
+	this->par[0].I3_mc[1] = (n_p_LISM_ / Kn_) * (nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)));
+	this->par[0].I3_mc[2] = (n_p_LISM_ / Kn_) * (nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)));
+	this->par[0].I3_mc[3] = (n_p_LISM_ / Kn_) * (nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+	// Теперь считаем Мультифлюидные источники
+
+	u_H1 = this->par[0].u_H1, v_H1 = this->par[0].v_H1, ro_H1 = this->par[0].ro_H1, p_H1 = this->par[0].p_H1;
+	u_H2 = this->par[0].u_H2, v_H2 = this->par[0].v_H2, ro_H2 = this->par[0].ro_H2, p_H2 = this->par[0].p_H2;
+	u_H3 = this->par[0].u_H3, v_H3 = this->par[0].v_H3, ro_H3 = this->par[0].ro_H3, p_H3 = this->par[0].p_H3;
+	u_H4 = this->par[0].u_H4, v_H4 = this->par[0].v_H4, ro_H4 = this->par[0].ro_H4, p_H4 = this->par[0].p_H4;
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->par[0].I1_mf[0] = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u));
+	this->par[0].I1_mf[1] = (n_p_LISM_ / Kn_) * (nu_H2 * (u_H2 - u));
+	this->par[0].I1_mf[2] = (n_p_LISM_ / Kn_) * (nu_H3 * (u_H3 - u));
+	this->par[0].I1_mf[3] = (n_p_LISM_ / Kn_) * (nu_H4 * (u_H4 - u));
+
+	this->par[0].I2_mf[0] = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v));
+	this->par[0].I2_mf[1] = (n_p_LISM_ / Kn_) * (nu_H2 * (v_H2 - v));
+	this->par[0].I2_mf[2] = (n_p_LISM_ / Kn_) * (nu_H3 * (v_H3 - v));
+	this->par[0].I2_mf[3] = (n_p_LISM_ / Kn_) * (nu_H4 * (v_H4 - v));
+
+
+	this->par[0].I3_mf[0] = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)));
+	this->par[0].I3_mf[1] = (n_p_LISM_ / Kn_) * (nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+		(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)));
+	this->par[0].I3_mf[2] = (n_p_LISM_ / Kn_) * (nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+		(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)));
+	this->par[0].I3_mf[3] = (n_p_LISM_ / Kn_) * (nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+		(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
 }
