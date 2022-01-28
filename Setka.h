@@ -128,6 +128,8 @@ public:
 
 	// ƒвижение сетки
 	void Move_Setka_Calculate(const double& dt);
+	void Move_Setka_Calculate_2(const double& dt);
+	// здесь внутренн€€ ударна€ волны выдел€етс€ только до Pi/2, а внешн€€ до -500 а.е. примерно
 	void Move_surface(int ii, const double& dt);  // ¬ычисление скоростей поверхностей   ii - какие параметры активные par[ii]
 	void Move_surface_hand(void);  // –учное движение сетки
 

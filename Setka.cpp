@@ -2171,7 +2171,7 @@ void Setka::Copy(Setka* S)
 		}
 	}
 
-	this->Move_Setka_Calculate(1.0);
+	this->Move_Setka_Calculate_2(1.0);
 
 	for (auto& i : this->All_Points)
 	{
@@ -2188,7 +2188,7 @@ void Setka::Copy(Setka* S)
 
 	this->Line_Contact[this->Line_Contact.size() - 1]->B->Vy = this->Line_Contact[this->Line_Contact.size() - 1]->A->Vy + //
 		(this->Line_Contact[this->Line_Contact.size() - 1]->A->y - this->Line_Contact[this->Line_Contact.size() - 1]->B->y);
-	this->Move_Setka_Calculate(1.0);
+	this->Move_Setka_Calculate_2(1.0);
 	
 	for (auto& i : this->All_Points)
 	{
@@ -3724,7 +3724,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	}
 }
 
-void Setka::Move_Setka_Calculate(const double& dt)
+void Setka::Move_Setka_Calculate_2(const double& dt)
 {
 	double Vx, Vy, V;
 	double R2, r, R3, R4;
@@ -3852,13 +3852,17 @@ void Setka::Move_Setka_Calculate(const double& dt)
 		}
 	}
 
+
+	auto i_ = this->A_Rails[this->A_Rails.size() - 1];
+	double R_distant_shok_1 = sqrt(kv(i_->Key_point[0]->x2) + kv(i_->Key_point[0]->y2));
+
 	for (int jj = 0; jj < this->B_Rails.size(); jj++)
 	{
 		auto i = this->B_Rails[jj];
-		// Подвинем ключевые точки
+		// Подвинем ключевые точки   0 - внутренняя ударная волна
 		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
-		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
-		i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
+		i->Key_point[0]->x2 = R_distant_shok_1 * cos(i->s);
+		i->Key_point[0]->y2 = R_distant_shok_1 * sin(i->s);
 
 		V = i->Key_point[1]->Vx * 0.0 + i->Key_point[1]->Vy * 1.0;
 		i->Key_point[1]->x2 = i->Key_point[0]->x2;
@@ -3969,6 +3973,399 @@ void Setka::Move_Setka_Calculate(const double& dt)
 	for (auto& i : this->C_Rails)
 	{
 		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
+		i->Key_point[0]->x2 = R_distant_shok_1 * cos(i->s);
+		i->Key_point[0]->y2 = R_distant_shok_1 * sin(i->s);
+
+		i->Key_point[1]->x2 = Left_; // i->Key_point[1]->x;
+		i->Key_point[1]->y2 = i->Key_point[1]->y;
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		R2 = i->Key_point[0]->x2;
+
+		R3 = i->Key_point[1]->x2;
+
+		x = pow(R3 / (R2), 1.0 / (i->M2));
+
+		for (int j = i->M1; j < i->All_point.size(); j++)
+		{
+			r = R2  * pow(x, j + 1 - i->M1);
+			i->All_point[j]->x2 = r;
+			i->All_point[j]->y2 = i->Key_point[0]->y2;
+		}
+	}
+
+	for (int jj = 0; jj < this->D_Rails.size(); jj++)
+	{
+		double x;
+		// Подвинем ключевые точки
+		auto i = this->D_Rails[jj];
+		V = i->Key_point[1]->Vy;
+		i->Key_point[1]->x2 = i->Key_point[0]->x2;
+		/*if (jj > 16)
+		{
+			i->Key_point[1]->y2 = y_Outer + (247.0 - y_Outer) * (jj - 16.0) / (this->D_Rails.size() - 1.0 - 16.0);
+		}
+		else
+		{
+			i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
+		}*/
+		i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
+		/*if (jj > 22)
+		{
+			i->Key_point[1]->y2 = this->D_Rails[22]->Key_point[1]->y2;
+		}*/
+
+		V = i->Key_point[2]->Vy;
+		i->Key_point[2]->x2 = i->Key_point[0]->x2;
+		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
+
+		if (jj > n_outer_shock)
+		{
+			i->Key_point[2]->y2 = this->D_Rails[jj - 1]->Key_point[2]->y2;
+		}
+
+		i->Key_point[3]->x2 = i->Key_point[0]->x2;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+		R2 = i->Key_point[0]->y2;
+
+		R3 = i->Key_point[1]->y2;
+
+		for (int j = 0; j < this->M2 - 1; j++)
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);
+			i->All_point[j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[j + 1]->y2 = r;
+		}
+
+		//i->All_point[1 + i->M2 - 2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку до контакта 
+		//i->All_point[1 + i->M2 - 2]->y2 = R3;
+		R3 = i->Key_point[1]->y2;
+
+		//i->All_point[1 + i->M2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку после контакта 
+		//i->All_point[1 + i->M2]->y2 = R3;
+
+		R4 = i->Key_point[2]->y2;
+
+		for (int j = 0; j < this->M3 - 1; j++)
+		{
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			i->All_point[this->M2 + j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[this->M2 + j + 1]->y2 = r;
+		}
+
+		//double x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+		for (int j = 0; j < this->M4; j++)
+		{
+			//double x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.22 * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			i->All_point[this->M2 + this->M3 + j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[this->M2 + this->M3 + j + 1]->y2 = r;
+		}
+
+
+	}
+}
+
+void Setka::Move_Setka_Calculate(const double& dt)
+{
+	double Vx, Vy, V;
+	double R2, r, R3, R4;
+
+	//double y_Outer = this->D_Rails[16]->Key_point[1]->y;
+
+	for (int jj = 0; jj < this->A_Rails.size(); jj++)
+	{
+		auto i = this->A_Rails[jj];
+		// Подвинем ключевые точки
+		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
+		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
+		i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
+
+		V = i->Key_point[1]->Vx * cos(i->s) + i->Key_point[1]->Vy * sin(i->s);
+		i->Key_point[1]->x2 = i->Key_point[1]->x + dt * V * cos(i->s);
+		i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V * sin(i->s);
+
+		V = i->Key_point[2]->Vx * cos(i->s) + i->Key_point[2]->Vy * sin(i->s);
+		i->Key_point[2]->x2 = i->Key_point[2]->x + dt * V * cos(i->s);
+		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V * sin(i->s);
+
+		i->Key_point[3]->x2 = i->Key_point[3]->x;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++) 
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++) 
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		//x = pow(R2 / R1_, 1.0 / (i->M1 - 1));
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+
+		//R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2)) - zazor;
+		R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
+
+		for (int j = 0; j < i->M2 - 1; j++)  // Передвинули точки до контакта
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);         // Равномерное распределение точек
+			i->All_point[i->M1 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + j]->y2 = r * sin(i->s);
+		}
+
+		//i->All_point[i->M1 + i->M2 - 2]->x2 = R3 * cos(i->s);   // Устанавливаем точку до контакта 
+		//i->All_point[i->M1 + i->M2 - 2]->y2 = R3 * sin(i->s);
+		R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
+
+		//i->All_point[i->M1 + i->M2]->x2 = R3 * cos(i->s);   // Устанавливаем точку после контакта 
+		//i->All_point[i->M1 + i->M2]->y2 = R3 * sin(i->s);
+
+		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
+
+
+		for (int j = 0; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
+		{
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);         // Равномерное распределение точек
+			i->All_point[i->M1 + i->M2 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + i->M2 + j]->y2 = r * sin(i->s);
+		}
+
+		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
+
+		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+		for (int j = 0; j < i->M4; j++)
+		{
+			//x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.03 * x) * (R5_ - R4);
+			//r = R4 *  pow( 1.0 * (j + 2), x * (j + 1));  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			//r = R4 + (R5_ - R4) * (j) / (i->M4 - 1);   // равномерно
+			x = (j + 1) * 1.0 / (i->M4);
+			double dd = 1.5708 / sqrt(1.0 - 1.0 / 1.76);
+			r = R4 + pow(x, 1.76 * (1.0 - kv(i->s / dd))) * (R5_ - R4);
+			//r = r + (j + 1) * dd;
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r * sin(i->s);
+		}
+	}
+
+	for (int jj = 0; jj < this->B_Rails.size(); jj++)
+	{
+		auto i = this->B_Rails[jj];
+		// Подвинем ключевые точки
+		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
+		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
+		i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
+
+		V = i->Key_point[1]->Vx * 0.0 + i->Key_point[1]->Vy * 1.0;
+		i->Key_point[1]->x2 = i->Key_point[0]->x2;
+		i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
+
+		V = i->Key_point[2]->Vx * 0.0 + i->Key_point[2]->Vy * 1.0;
+		i->Key_point[2]->x2 = i->Key_point[0]->x2;
+		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
+
+		i->Key_point[3]->x2 = i->Key_point[0]->x2;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+
+		R2 = i->Key_point[0]->y2;
+		R3 = i->Key_point[1]->y2;
+
+		for (int j = 0; j < i->M2 - 1; j++)
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);
+			i->All_point[i->M1 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + j]->y2 = r;
+		}
+
+		//i->All_point[i->M1 + i->M2 - 2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку до контакта 
+		//i->All_point[i->M1 + i->M2 - 2]->y2 = R3 ;
+		R3 = i->Key_point[1]->y2;
+
+		//i->All_point[i->M1 + i->M2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку после контакта 
+		//i->All_point[i->M1 + i->M2]->y2 = R3 ;
+
+		R4 = i->Key_point[2]->y2;
+
+		for (int j = 0; j < i->M3 - 1; j++)
+		{
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			i->All_point[i->M1 + i->M2 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + i->M2 + j]->y2 = r;
+		}
+
+		//x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+
+		for (int j = 0; j < i->M4; j++)
+		{
+			//x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * (0.03 + 0.19 * jj / (this->B_Rails.size() - 1.0)) * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r;
+		}
+
+	}
+
+	for (auto& i : this->C_Rails)
+	{
+		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
 		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
 		i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
 
@@ -4031,7 +4428,7 @@ void Setka::Move_Setka_Calculate(const double& dt)
 
 		for (int j = i->M1; j < i->All_point.size(); j++)
 		{
-			r = R2  * pow(x, j + 1 - i->M1);
+			r = R2 * pow(x, j + 1 - i->M1);
 			i->All_point[j]->x2 = r;
 			i->All_point[j]->y2 = i->Key_point[0]->y2;
 		}
@@ -6235,8 +6632,7 @@ void Setka::Go(int step)
 
 	for (int st = 0; st < step; st++)
 	{
-		this->Init_conditions();
-		if (st % 1000 == 0 && st > 0)
+		if (st % 10000 == 0 && st > 0)
 		{
 			cout << st << " " << T[now2] << " " << xx << " " << yy << endl;
 		}
@@ -6245,8 +6641,8 @@ void Setka::Go(int step)
 		double time = 10000000;
 		T[now2] = 100000000;
 
-		this->Move_surface(now1);
-		this->Move_Setka_Calculate(T[now1]);
+		//this->Move_surface(now1);
+		//this->Move_Setka_Calculate(T[now1]);
 
 #pragma omp parallel for
 		for (int num_cell = 0; num_cell < this->All_Cells.size(); num_cell++)
@@ -6265,7 +6661,7 @@ void Setka::Go(int step)
 			double W;
 			//cout << "A3" << endl;
 
-			if (sqrt(kv(x) + kv(y)) < 100.0)
+			if (sqrt(kv(x) + kv(y)) <= 70.0)
 			{
 				continue;
 			}

@@ -17,26 +17,49 @@ int main()
     exit(-1);*/
 
     Setka* SS, * K;
-    if (false)
+    if (true)
     {
-        SS = new Setka(40, 7, 11, 20, 40, 20, 40, 35);    // n_inner 30
+        SS = new Setka(40, 7, 11, 20, 50, 30, 40, 25);    // n_inner 30
         K = new Setka();
-        K->Download_Setka_ALL_ALPHA_2_0("vers3_11.txt");
+        K->Download_Setka_ALL_ALPHA_2_0("vers6_11.txt");
         SS->Copy(K);
     }
 
-    SS = new Setka();
+    //SS = new Setka();
     //SS->Download_Setka_ALL_ALPHA_2_0("vers3_10.txt");    // n_inner 30
     //SS->Download_Setka_ALL_ALPHA_2_0("vers2_16.txt");
-    SS->Download_Setka_ALL_ALPHA_2_0("vers6_6.txt");  // 10
+    //SS->Download_Setka_ALL_ALPHA_2_0("vers6_6.txt");  // 10
+
     SS->TVD_prepare();
     SS->Proverka();
     SS->Print_cell2();
     SS->Print_Gran();
-    exit(-1);
+    //exit(-1);
     // Подготовка массивов для внутренней области счёта. НЕ УДАЛЯТЬ
     for (auto i : SS->All_Cells)
     {
+        if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+        {
+            //Для счёта монте-карло
+           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
+           //i->par[0].v = i->par[0].v * (chi_real / chi_);
+           //i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
+           //i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
+
+           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
+           //i->par[1].v = i->par[1].v * (chi_real / chi_);
+           //i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
+           //i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
+
+
+           // для счёта плазмы
+           i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+           i->par[0].v = i->par[0].v / (chi_real / chi_);
+           i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+           i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+        }
+
+
         if (i->type == C_centr)
         {
             i->par[0].ro_H2 = i->par[1].ro_H2 = 0.0000001;
@@ -63,6 +86,14 @@ int main()
             SS->All_Cells_Inner.push_back(i);
         }
 
+        if (sqrt(x * x + y * y) <= 70.0)
+        {
+            i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
+            i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
+            i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
+            i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
+        }
+
         if (i->type == C_centr)
         {
             SS->All_Cells_zero.push_back(i);
@@ -79,18 +110,19 @@ int main()
         i->count = 0;
     }*/
 
-    for (int k = 0; k < 25; k++)
+    for (int k = 0; k < 7; k++)
     {
         cout << "Global step = " << k + 1 << endl;
-        SS->Go_stationary_5_komponent_inner_2(300000);
-        SS->Go_5_komponent_2(200000);
+        //SS->Go_stationary_5_komponent_inner_2(300000);
+        //SS->Go_5_komponent_2(200000);
+        SS->Go(200000);
     }
                                                                                                                                                                     
     SS->Print_cell2();                    
     SS->Print_Gran();
     SS->Print_Tecplot_MK();
 
-    SS->Save_Setka_ALL_ALPHA("vers6_11.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_1_gaz_dinamic.txt");
     exit(-1);
     
     

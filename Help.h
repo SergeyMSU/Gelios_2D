@@ -52,8 +52,8 @@ void polar_provorot(const double& phi, double& u, double& v);
 
 #define Velosity_inf -2.54338 //-4.54127 //-2.54127
 #define M_inf 1.97009
-#define chi_ 2.0 //36.1059 // 36.1059
-#define chi_real 36.1275
+#define chi_ 1.0 //36.1059 // 36.1059
+#define chi_real 36.12
 #define kurant  0.1
 #define Kn_  242.785  // 163.472  // 242.944										// „исло  нудсена
 #define a_2 0.102578  // 0.10263
@@ -65,6 +65,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 
 
 #define n_inner 20  // —колько €чеек во внутреннем слое
+#define n_outer_shock 11  // ƒо какой точки выдел€ть ударную волну (зависит от разрешени€ сетки)
 //#define m_inner 16  // —колько €чеек во внутреннем слое  (до какой €чейки внутреений слой считаетс€)
 #define zazor 3.0   // ƒлина зазора между контактом и близжайшими точками 
 #define zazor2 7.0   // ƒлина зазора между внешней волной и близжайшими точками 
@@ -72,7 +73,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define alpha_rot 0.1  // ”гор вращени€ (полный сектор), то есть в одну сторону на половину угла и в другую
 #define R1_ 1.0
 #define R11_ 38.0    // ƒействует! ƒо какой внутренней границы не двигаем €чейки
-#define R111_ 50.0
+#define R111_ 50.0 
 #define R2_ 100.0
 #define R3_ 150.0
 #define R4_ 600.0
