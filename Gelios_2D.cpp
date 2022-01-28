@@ -7,9 +7,9 @@ int main()
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
     // SS = new Setka(15, 5, 7, 15, 30, 10, 20, 20);   //  vers2_15   n_inner 15
     // SS = new Setka(30, 7, 11, 20, 60, 20, 40, 40);    // vers3_   n_inner 30
-    // SS = new Setka(34, 7, 11, 20, 60, 20, 50, 60);    // vers4_7    n_inner 30
-    // SS = new Setka(40, 10, 15, 25, 60, 30, 60, 60);    // vers5_7   n_inner 30
-
+    // SS = new Setka(34, 7, 11, 20, 60, 20, 50, 60);    // vers4_7    n_inner 30   результаты одинаковыс с 3
+    // SS = new Setka(40, 10, 15, 25, 60, 30, 60, 60);    // vers5_7   n_inner 30   не досчитал, вроде какие-то проблемы с устойчивостью
+    // Привет
    /* double u = 0.0;
     double v = 1.0;
     polar_provorot(pi_ * alpha_rot / 360.0, u, v);
