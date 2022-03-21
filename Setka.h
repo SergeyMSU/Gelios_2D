@@ -112,6 +112,7 @@ public:
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)
 	void Print_Gran();
+	void Print_Gran(string name);
 	void Print_Gran_type();
 	void Print_cell(void);   // Печатает ячейки (но много лишних узлов выписывает, т.к. просто каждую ячейку рисует и линии накладываются
 	void Print_cell_type(void);
@@ -146,13 +147,17 @@ public:
 	void Go_stationary_5_komponent_inner(int step);
 	void Go_stationary_5_komponent_inner_2(int step);
 	void Go_stationary_5_komponent_inner_MK(int step);  // Источники берутся из Монте-Карло
+	void Go_stationary_5_komponent_inner_MK2(int step);
 	void Go_stationary(int step);
 	void Go_stationary_TVD(int step);
 	void Go_stationary_5_komponent(int step);
 	void Go(int step); // Выделение разрывов  Газовая динамика
+	void Go_2(int step);
+	void Go_3(int step);
 	void Go_5_komponent(int step);
 	void Go_5_komponent_2(int step);  // Другой способ записи законов сохранения и, соответственно многое поменялось
 	void Go_5_komponent_MK(int step);  // Версия с источниками из Монте-Карло
+	void Go_5_komponent__MK2(int step);
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
 		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok = false);

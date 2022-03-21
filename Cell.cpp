@@ -26,9 +26,12 @@ void Cell::Initial(void)
 	this->par[0].num_atoms[1] = 0;
 	this->par[0].num_atoms[2] = 0;
 	this->par[0].num_atoms[3] = 0;
+	this->axis_ = false;
+	this->y_ax = 0.0;
 }
 
-void Cell::Get_Center(double& x, double& y)
+void Cell::Get_Center2(double& x, double& y)
+// Среднее арифметическое вершин
 {
 	if (this->contour.size() == 4)
 	{
@@ -60,7 +63,54 @@ void Cell::Get_Center(double& x, double& y)
 	}
 }
 
+void Cell::Get_Center(double& x, double& y)
+// Центр масс - барицентр многоугольника
+{
+	double A = 0.0;
+	double Gx = 0.0;
+	double Gy = 0.0;
+	int k = 0;
+	for (int i = 0; i < this->contour.size(); i++)
+	{
+		auto a = this->contour[i];
+		k = i + 1;
+		if (k == this->contour.size()) k = 0;
+		auto b = this->contour[k];
+		A = A + (a->x * b->y - a->y * b->x);
+		Gx = Gx + (a->x + b->x) * (a->x * b->y - a->y * b->x);
+		Gy = Gy + (a->y + b->y) * (a->x * b->y - a->y * b->x);
+	}
+	A = A * 0.5;
+	Gx = Gx / (6.0 * A);
+	Gy = Gy / (6.0 * A);
+	x = Gx;
+	y = Gy;
+}
+
 void Cell::Get_Center_posle(double& x, double& y)
+{
+	double A = 0.0;
+	double Gx = 0.0;
+	double Gy = 0.0;
+	int k = 0;
+	for (int i = 0; i < this->contour.size(); i++)
+	{
+		auto a = this->contour[i];
+		k = i + 1;
+		if (k == this->contour.size()) k = 0;
+		auto b = this->contour[k];
+		A = A + (a->x2 * b->y2 - a->y2 * b->x2);
+		Gx = Gx + (a->x2 + b->x2) * (a->x2 * b->y2 - a->y2 * b->x2);
+		Gy = Gy + (a->y2 + b->y2) * (a->x2 * b->y2 - a->y2 * b->x2);
+	}
+	A = A * 0.5;
+	Gx = Gx / (6.0 * A);
+	Gy = Gy / (6.0 * A);
+	x = Gx;
+	y = Gy;
+}
+
+void Cell::Get_Center_posle2(double& x, double& y)
 {
 	if (this->contour.size() == 4)
 	{
@@ -235,7 +285,7 @@ bool Cell::belong(const double& x, const double& y)
 	{
 		return false;
 	}
-	if (y < this->y_min - 0.001)
+	if (y < this->y_min - 0.001/ RR_)
 	{
 		return false;
 	}
@@ -258,7 +308,7 @@ bool Cell::belong(const double& x, const double& y)
 
 void Cell::renew(void)
 {
-	double d = 100000000000.0;
+	double d = 10000000000000000.0;
 	for (auto& i : this->Grans)
 	{
 		d = min(d, i->Get_lenght());
@@ -444,3 +494,168 @@ void Cell::Calc_Sourse(void)
 	this->par[0].I3_mf[3] = (n_p_LISM_ / Kn_) * (nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
 		(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
 }
+
+void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
+{
+	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+	double U_H1, U_H2, U_H3, U_H4;
+	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+	double nu_H1, nu_H2, nu_H3, nu_H4;
+
+	double u_H1 = this->par[0].H_u[0], v_H1 = this->par[0].H_v[0], ro_H1 = this->par[0].H_n[0], p_H1 = 0.5 * this->par[0].H_T[0] * this->par[0].H_n[0];
+	double u_H2 = this->par[0].H_u[1], v_H2 = this->par[0].H_v[1], ro_H2 = this->par[0].H_n[1], p_H2 = 0.5 * this->par[0].H_T[1] * this->par[0].H_n[1];
+	double u_H3 = this->par[0].H_u[2], v_H3 = this->par[0].H_v[2], ro_H3 = this->par[0].H_n[2], p_H3 = 0.5 * this->par[0].H_T[2] * this->par[0].H_n[2];
+	double u_H4 = this->par[0].H_u[3], v_H4 = this->par[0].H_v[3], ro_H4 = this->par[0].H_n[3], p_H4 = 0.5 * this->par[0].H_T[3] * this->par[0].H_n[3];
+
+
+	if (ro_H1 <= 0.0)
+	{
+		ro_H1 = 0.0000001;
+		p_H1 = 0.0;
+	}
+	if (ro_H2 <= 0.0)
+	{
+		ro_H2 = 0.0000001;
+		p_H2 = 0.0;
+	}
+	if (ro_H3 <= 0.0)
+	{
+		ro_H3 = 0.0000001;
+		p_H3 = 0.0;
+	}
+	if (ro_H4 <= 0.0)
+	{
+		ro_H4 = 0.0000001;
+		p_H4 = 0.0;
+	}
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->par[0].M_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+		+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+	this->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+		+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+	this->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+		nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+		nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+		nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+
+	q1 = this->par[0].M_u * this->par[0].k_u;
+	q2 = this->par[0].M_v * this->par[0].k_v;
+	q3 = this->par[0].M_T * this->par[0].k_T;
+}
+
+void Cell::Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
+{
+	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+	double U_H1, U_H2, U_H3, U_H4;
+	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+	double nu_H1, nu_H2, nu_H3, nu_H4;
+
+	double u_H1 = this->par[0].H_u2[0], v_H1 = this->par[0].H_v2[0], ro_H1 = this->par[0].H_n2[0], p_H1 = 0.5 * this->par[0].H_T2[0] * this->par[0].H_n2[0];
+	double u_H2 = this->par[0].H_u2[1], v_H2 = this->par[0].H_v2[1], ro_H2 = this->par[0].H_n2[1], p_H2 = 0.5 * this->par[0].H_T2[1] * this->par[0].H_n2[1];
+	double u_H3 = this->par[0].H_u2[2], v_H3 = this->par[0].H_v2[2], ro_H3 = this->par[0].H_n2[2], p_H3 = 0.5 * this->par[0].H_T2[2] * this->par[0].H_n2[2];
+	double u_H4 = this->par[0].H_u2[3], v_H4 = this->par[0].H_v2[3], ro_H4 = this->par[0].H_n2[3], p_H4 = 0.5 * this->par[0].H_T2[3] * this->par[0].H_n2[3];
+
+
+	if (ro_H1 <= 0.0)
+	{
+		ro_H1 = 0.0000001;
+		p_H1 = 0.0;
+	}
+	if (ro_H2 <= 0.0)
+	{
+		ro_H2 = 0.0000001;
+		p_H2 = 0.0;
+	}
+	if (ro_H3 <= 0.0)
+	{
+		ro_H3 = 0.0000001;
+		p_H3 = 0.0;
+	}
+	if (ro_H4 <= 0.0)
+	{
+		ro_H4 = 0.0000001;
+		p_H4 = 0.0;
+	}
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->par[0].M_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+		+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+	this->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+		+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+	this->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+		nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+		nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+		nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+
+	q1 = this->par[0].M_u * this->par[0].k_u2;
+	q2 = this->par[0].M_v * this->par[0].k_v2;
+	q3 = this->par[0].M_T * this->par[0].k_T2;
+}
+
+
+

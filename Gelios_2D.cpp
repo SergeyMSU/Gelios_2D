@@ -5,6 +5,56 @@
 int main()
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
+
+    //Проверка распадника
+    //double P[4];
+    //double PQ;
+    //auto RR = new Setka();
+    //double a, b, c;
+    //double ro1 = 1.0;
+    //double p1 = 1.0;
+    //double u1 = 1.0;
+    //double ro2 = 2.0;
+    //double p2 = 1.0;
+    //double u2 = 1.0;
+    //double n1 = 1.0;
+    //double w = 3.1;
+
+
+    //RR->HLLC_2d_Korolkov_b_s(ro1, 1.0, p1, u1, 0.0,// 
+    //    ro2, 1.0, p2, u2, 0.0,//
+    //    w, P, PQ, n1, 0.0, 10.0, 1, a, b, c);
+    //for (int i = 0; i < 4; i++)
+    //{
+    //    cout << P[i] << endl;
+    //}
+
+    //exit(-1);
+
+    //ofstream fout;
+    //fout.open("Source_3_cp12.txt");
+
+    //Setka* CC;
+    //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
+    //MKmethod* MK;
+    //MK = new MKmethod();
+    //double u = 0.0, cp = 12.0;
+    //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
+    //{
+    //    double skalar = 20.0;
+    //    double u1 = 0.8;
+    //    double uz = CC->Velosity_1(u, cp);
+    //    double uz_M = CC->Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi_);
+    //    double uz_E = CC->Velosity_3(u, cp);
+    //    double AA = (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz));
+    //    double BB = (-0.5 * MK->int_3(u, cp) / MK->int_1(u, cp));
+    //    cout << u << " " << u/MK->int_1(u, cp) << endl;
+    //    //cout << u << " " << BB << endl;
+    //}
+
+
+    //exit(-1);
+
     // SS = new Setka(15, 5, 7, 15, 30, 10, 20, 20);   //  vers2_15   n_inner 15
     // SS = new Setka(30, 7, 11, 20, 60, 20, 40, 40);    // vers3_   n_inner 30
     // SS = new Setka(34, 7, 11, 20, 60, 20, 50, 60);    // vers4_7    n_inner 30   результаты одинаковыс с 3
@@ -16,25 +66,30 @@ int main()
     cout << u << " " << v << endl;
     exit(-1);*/
 
-    Setka* SS, * K;
-    if (true)
+    Setka* SS, * K, *SS2;
+    if (false)
     {
-        SS = new Setka(40, 7, 11, 20, 50, 30, 40, 25);    // n_inner 30
+        SS = new Setka(80, 20, 15, 20, 50, 30, 40, 25);    // n_inner 30
         K = new Setka();
-        K->Download_Setka_ALL_ALPHA_2_0("vers6_11.txt");
+        K->Download_Setka_ALL_ALPHA_2_0("vers7_19_gaz_dinamic.txt");
         SS->Copy(K);
     }
 
-    //SS = new Setka();
-    //SS->Download_Setka_ALL_ALPHA_2_0("vers3_10.txt");    // n_inner 30
-    //SS->Download_Setka_ALL_ALPHA_2_0("vers2_16.txt");
-    //SS->Download_Setka_ALL_ALPHA_2_0("vers6_6.txt");  // 10
+    SS = new Setka();
+
+    //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
+    
+    //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
+    SS->Download_Setka_ALL_ALPHA_2_0("vers7_104.txt");  // 17       IEX
+
 
     SS->TVD_prepare();
     SS->Proverka();
-    SS->Print_cell2();
-    SS->Print_Gran();
-    //exit(-1);
+    //SS->Print_cell2();
+    //SS->Print_Gran();
+    //SS->Print_Gran("sur7_101.txt");
+    //exit(-2);
+
     // Подготовка массивов для внутренней области счёта. НЕ УДАЛЯТЬ
     for (auto i : SS->All_Cells)
     {
@@ -53,27 +108,32 @@ int main()
 
 
            // для счёта плазмы
-           i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
-           i->par[0].v = i->par[0].v / (chi_real / chi_);
-           i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
-           i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+           //i->par[1].v = i->par[0].v / (chi_real / chi_);
+           //i->par[1].ro = i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+           //i->par[1].Q = i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
         }
 
 
         if (i->type == C_centr)
         {
-            i->par[0].ro_H2 = i->par[1].ro_H2 = 0.0000001;
-            i->par[0].p_H2 = i->par[1].p_H2 = 0.0000001;
+            i->par[0].ro_H1 = i->par[1].ro_H1 = 0.00000001;
+            i->par[0].p_H1 = i->par[1].p_H1 = 0.00000001;
+            i->par[0].u_H1 = i->par[1].u_H1 = 0.0;
+            i->par[0].v_H1 = i->par[1].v_H1 = 0.0;
+
+            i->par[0].ro_H2 = i->par[1].ro_H2 = 0.00000001;
+            i->par[0].p_H2 = i->par[1].p_H2 = 0.00000001;
             i->par[0].u_H2 = i->par[1].u_H2 = 0.0;
             i->par[0].v_H2 = i->par[1].v_H2 = 0.0;
 
-            i->par[0].ro_H3 = i->par[1].ro_H3 = 0.0000001;
-            i->par[0].p_H3 = i->par[1].p_H3 = 0.0000001;
+            i->par[0].ro_H3 = i->par[1].ro_H3 = 0.00000001;
+            i->par[0].p_H3 = i->par[1].p_H3 = 0.00000001;
             i->par[0].u_H3 = i->par[1].u_H3 = 0.0;
             i->par[0].v_H3 = i->par[1].v_H3 = 0.0;
 
-            i->par[0].ro_H4 = i->par[1].ro_H4 = 0.0000001;
-            i->par[0].p_H4 = i->par[1].p_H4 = 0.0000001;
+            i->par[0].ro_H4 = i->par[1].ro_H4 = 0.00000001;
+            i->par[0].p_H4 = i->par[1].p_H4 = 0.00000001;
             i->par[0].u_H4 = i->par[1].u_H4 = 0.0;
             i->par[0].v_H4 = i->par[1].v_H4 = 0.0;
         }
@@ -86,13 +146,19 @@ int main()
             SS->All_Cells_Inner.push_back(i);
         }
 
-        if (sqrt(x * x + y * y) <= 70.0)
-        {
-            i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
-            i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
-            i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
-            i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
-        }
+        //if (x < -700 && y < 200)
+        //{
+        //    i->par[1].u = i->par[0].u = Velosity_inf;       // Перенормировка
+        //    i->par[1].v = i->par[0].v = 0.0;
+        //}
+
+        //if (sqrt(x * x + y * y) <= 80.0)
+        //{
+        //    i->par[1].u = i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
+        //    i->par[1].v = i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
+        //    i->par[1].ro = i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
+        //    i->par[1].p = i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
+        //}
 
         if (i->type == C_centr)
         {
@@ -100,29 +166,61 @@ int main()
         }
     }
 
-    /*SS->Move_Setka_Calculate(0.0);
-    for (auto& i : SS->All_Points)
-    {
-        i->x = i->x2;
-        i->y = i->y2;
-        i->Vx = 0.0;
-        i->Vy = 0.0;
-        i->count = 0;
-    }*/
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    SS->MK_start_new();
 
-    for (int k = 0; k < 7; k++)
+    SS2 = new Setka();
+    SS2->Download_Setka_ALL_ALPHA_2_0("vers7_103.txt");  // 84 до добавления источников 
+    if (true)
+    {
+        for (int i = 0; i < SS->All_Cells.size(); i++)
+        {
+            auto A1 = SS->All_Cells[i];
+            auto A2 = SS2->All_Cells[i];
+
+            A1->par[0].H_n2[0] = A2->par[0].H_n[0];
+            A1->par[0].H_n2[1] = A2->par[0].H_n[1];
+            A1->par[0].H_n2[2] = A2->par[0].H_n[2];
+            A1->par[0].H_n2[3] = A2->par[0].H_n[3];
+
+            A1->par[0].H_u2[0] = A2->par[0].H_u[0];
+            A1->par[0].H_u2[1] = A2->par[0].H_u[1];
+            A1->par[0].H_u2[2] = A2->par[0].H_u[2];
+            A1->par[0].H_u2[3] = A2->par[0].H_u[3];
+
+            A1->par[0].H_v2[0] = A2->par[0].H_v[0];
+            A1->par[0].H_v2[1] = A2->par[0].H_v[1];
+            A1->par[0].H_v2[2] = A2->par[0].H_v[2];
+            A1->par[0].H_v2[3] = A2->par[0].H_v[3];
+
+            A1->par[0].H_T2[0] = A2->par[0].H_T[0];
+            A1->par[0].H_T2[1] = A2->par[0].H_T[1];
+            A1->par[0].H_T2[2] = A2->par[0].H_T[2];
+            A1->par[0].H_T2[3] = A2->par[0].H_T[3];
+
+            A1->par[0].k_u2 = A2->par[0].k_u;
+            A1->par[0].k_v2 = A2->par[0].k_v;
+            A1->par[0].k_T2 = A2->par[0].k_T;
+        }
+    }
+    delete SS2;
+
+    for (int k = 0; k < 20; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
-        //SS->Go_stationary_5_komponent_inner_2(300000);
-        //SS->Go_5_komponent_2(200000);
-        SS->Go(200000);
+        //SS->Go_stationary_5_komponent_inner_2(50000);
+        //SS->Go_5_komponent_2(50000);
+        SS->Go_stationary_5_komponent_inner_MK2(50000);
+        SS->Go_5_komponent__MK2(50000);
     }
-                                                                                                                                                                    
-    SS->Print_cell2();                    
-    SS->Print_Gran();
-    SS->Print_Tecplot_MK();
 
-    SS->Save_Setka_ALL_ALPHA("vers7_1_gaz_dinamic.txt");
+    SS->Print_cell2();
+    SS->Print_Gran("surface7_105.txt");
+    SS->Print_Tecplot_MK();
+    SS->Print_Sourse();
+    //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_105.txt");
+
     exit(-1);
     
     

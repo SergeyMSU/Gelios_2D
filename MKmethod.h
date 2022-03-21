@@ -71,6 +71,20 @@ public:
 	double Get_Int02(const double& Ur, const double& uu);
 	double Get_Int055(const double& Ur, const double& uu);
 
+	// Табличное вычисление интеграллов (новое)
+	double int_1(const double& x, const double& cp);
+	double int_2(const double& x, const double& cp);
+	double int_3(const double& x, const double& cp);
+	double int_1_f1(const double& x);
+	double int_1_f2(const double& x);
+	double int_1_f3(const double& x);
+	double int_2_f1(const double& x);
+	double int_2_f2(const double& x);
+	double int_2_f3(const double& x);
+	double int_3_f1(const double& x);
+	double int_3_f2(const double& x);
+	double int_3_f3(const double& x);
+
 	double Lin_Interpolate(const double& x1, const double& y1, const double& x2, const double& y2, const double& x);
 
 	// Для розыгрыша на сфере

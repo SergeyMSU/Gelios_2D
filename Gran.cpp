@@ -13,7 +13,7 @@ Gran::Gran(Point* A, Point* B, Gran_type type)
 	this->main_gran = true;
 	this->Sosed_down = nullptr;
 	this->Sosed_up = nullptr;
-	if (fabs(A->x - B->x) > 0.00001)
+	if (fabs(A->x - B->x) > 0.00001 / RR_)
 	{
 		this->parallel = false;
 		this->a = (A->y - B->y) / (A->x - B->x);
@@ -50,7 +50,7 @@ Gran::Gran(Point* A, Point* B, Gran_type type)
 
 void Gran::renew(void)
 {
-	if (fabs(A->x - B->x) > 0.00001)
+	if (fabs(A->x - B->x) > 0.00001 /RR_)
 	{
 		this->parallel = false;
 		this->a = (A->y - B->y) / (A->x - B->x);
@@ -134,7 +134,7 @@ bool Gran::belong_gran(const double& x, const double& y)
 {
 	if (this->parallel == false)
 	{
-		if (fabs(y - this->a * x - this->b)/(sqrt(1.0 + kv(this->a))) <= 0.0001)
+		if (fabs(y - this->a * x - this->b) / (sqrt(1.0 + kv(this->a))) <= 0.0001 / RR_)
 		{
 			return true;
 		}
@@ -145,7 +145,7 @@ bool Gran::belong_gran(const double& x, const double& y)
 	}
 	else
 	{
-		if (fabs(x - this->A->x) <= 0.0001 && max(this->A->y, this->B->y) >= y && min(this->A->y, this->B->y) <= y)
+		if (fabs(x - this->A->x) <= 0.0001 / RR_ && max(this->A->y, this->B->y) >= y && min(this->A->y, this->B->y) <= y)
 		{
 			return true;
 		}
@@ -213,9 +213,9 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	{
 		par = this->Master->par[i];
 		//par.p = par.p / 1000000.0;
-		if (par.u >= 0.0)
+		if (par.u >= 0.0)                                                         // ОТСОС ЖИДКОСТИ!!!!!!!!!!!!!!!!!!!!!!!!!!
 		{
-			par.u = -0.01;
+			par.u = -0.1;
 		}
 	}
 	else if (this->type == Upper_wall)  // Не надо менять
@@ -240,6 +240,7 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		double ro = 116.667;
 		double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
 		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));
+		double r_0 = 1.0/ RR_;
 		//par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
 		//0.0003, (0.0003 * chi_real * chi_real / (ggg * 5.0 * 5.0)) * pow(1.0 / dist, 2.0 * ggg), chi_real* x / dist, chi_real* y / dist,//
 		//	par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
@@ -258,14 +259,14 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		//	0.00000001, 0.0000001, par2.u_H3, par2.v_H3,//
 		//	0.00000001, 0.0000001, par2.u_H4, par2.v_H4 };
 
-		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real) / (dist * dist),//
+		par = { ro * r_0 * r_0 / (dist * dist), P_E * pow(r_0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real) / (dist * dist),//
 		0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
 			par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 
 
-		//cout << par.ro << " " << dist << endl;
+		//cout << "Gran.cpp    " << par.ro << " " << dist << endl;
 	}
 	else if (this->type == Input)
 	{
@@ -300,7 +301,7 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 				double x, y, x2, y2, dist1, dist2, dist3;
 				par = this->Master->par[i];
 				this->Get_Center(x, y);
-				//cout << x << " " << y << endl;
+				//cout << "Gran.cpp    " << x << " " << y << endl;
 				auto par2 = this->Master->par[i];
 				auto par1 = this->Master->par[i];
 				par1.v = -par1.v;
@@ -310,21 +311,21 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 				par1.v_H4 = -par1.v_H4;
 				auto par3 = this->Sosed->par[i];
 				this->Master->Get_Center(x2, y2);
-				//cout << x2 << " " << y2 << endl;
+				//cout << "Gran.cpp    " << x2 << " " << y2 << endl;
 				dist2 = sqrt(kv(x - x2) + kv(y - y2));
 				this->Sosed->Get_Center(x2, y2);
-				//cout << x2 << " " << y2 << endl;
+				//cout << "Gran.cpp    " << x2 << " " << y2 << endl;
 				dist3 = sqrt(kv(x - x2) + kv(y - y2));
 				this->Master->Get_Center(x2, y2);
 				y2 = -y2;
-				//cout << x2 << " " << y2 << endl;
+				//cout << "Gran.cpp    " << x2 << " " << y2 << endl;
 				dist1 = sqrt(kv(x - x2) + kv(y - y2));
 				par.v = linear(-dist1, par1.v, -dist2, par2.v, dist3, par3.v, 0.0);
 				par.v_H1 = linear(-dist1, par1.v_H1, -dist2, par2.v_H1, dist3, par3.v_H1, 0.0);
 				par.v_H2 = linear(-dist1, par1.v_H2, -dist2, par2.v_H2, dist3, par3.v_H2, 0.0);
 				par.v_H3 = linear(-dist1, par1.v_H3, -dist2, par2.v_H3, dist3, par3.v_H3, 0.0);
 				par.v_H4 = linear(-dist1, par1.v_H4, -dist2, par2.v_H4, dist3, par3.v_H4, 0.0);
-				//cout << " __________ " << endl;
+				//cout << "Gran.cpp    " << " __________ " << endl;
 			}
 			else
 			{
@@ -351,13 +352,15 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		par.Q = linear(-dist1, par1.Q, -dist2, par2.Q, dist3, par3.Q, 0.0);
 		if (par.ro <= 0.0)
 		{
-			cout << x << " " << y << " " << x2 << " " << y2 << " " << par1.ro << " " << par2.ro << " " << par3.ro << endl;
+			cout << "Gran.cpp    " << "Get par  354" << endl;
+			cout << "Gran.cpp    " << x << " " << y << " " << x2 << " " << y2 << " " << par1.ro << " " << par2.ro << " " << par3.ro << endl;
 			exit(-1);
 		}
 
 		if (par.p <= 0.0)
 		{
-			cout << x << " " << y << " " << x2 << " " << y2 << " " << par1.p << " " << par2.p << " " << par3.p << endl;
+			cout << "Gran.cpp    " << "Get par  361" << endl;
+			cout << "Gran.cpp    " << x << " " << y << " " << x2 << " " << y2 << " " << par1.p << " " << par2.p << " " << par3.p << endl;
 			exit(-1);
 		}
 		par.ro_H1 = linear(-dist1, par1.ro_H1, -dist2, par2.ro_H1, dist3, par3.ro_H1, 0.0);
@@ -393,7 +396,7 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 	{
 		double x, y, x2, y2, dist1, dist2;
 		this->Get_Center(x, y);
-		//cout << x << " " << y << endl;
+		//cout << "Gran.cpp    " << x << " " << y << endl;
 		auto par2 = this->Master->par[i];
 		//auto par3 = this->Master->par[i];
 		//par3.v = -par3.v;
@@ -401,7 +404,7 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		this->Master->Get_Center(x2, y2);
 		dist2 = sqrt(kv(x - x2) + kv(y - y2));
 		this->Sosed_down->Get_Center(x2, y2);
-		//cout << x2 << " " << y2 << endl;
+		//cout << "Gran.cpp    " << x2 << " " << y2 << endl;
 		dist1 = sqrt(kv(x - x2) + kv(y - y2));
 
 		par = par2;
@@ -431,13 +434,15 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		double dist = sqrt(x * x + y * y);
 		double ro = 116.667;
 		double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
-		par = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * (chi_real / chi_) * x / dist, chi_ * (chi_real / chi_) * y / dist, ro / kv(chi_real) / (dist * dist),//
-		0.0000001, 0.000001, chi_real * x / dist, chi_real * y / dist, par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
+		double r_0 = 1.0 / RR_;
+		par = { ro * r_0 * r_0 / (dist * dist), P_E * pow(r_0 / dist, 2.0 * ggg), chi_ * x * (chi_real / chi_) / dist, chi_ * y * (chi_real / chi_) / dist, ro / kv(chi_real) / (dist * dist),//
+		0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
+			par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 
 
-		//cout << par.ro << " " << dist << endl;
+		//cout << "Gran.cpp    " << par.ro << " " << dist << endl;
 	}
 	else if (this->type == Input)
 	{
