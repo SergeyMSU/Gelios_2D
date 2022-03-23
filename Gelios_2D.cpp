@@ -80,7 +80,7 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers7_104.txt");  // 17       IEX
+    SS->Download_Setka_ALL_ALPHA_2_0("vers7_107.txt");  // 17       IEX
 
 
     SS->TVD_prepare();
@@ -170,7 +170,7 @@ int main()
     SS->MK_start_new();
 
     SS2 = new Setka();
-    SS2->Download_Setka_ALL_ALPHA_2_0("vers7_103.txt");  // 84 до добавления источников 
+    SS2->Download_Setka_ALL_ALPHA_2_0("vers7_106.txt");  // 84 до добавления источников 
     if (true)
     {
         for (int i = 0; i < SS->All_Cells.size(); i++)
@@ -205,7 +205,7 @@ int main()
     }
     delete SS2;
 
-    for (int k = 0; k < 20; k++)  // 10
+    for (int k = 0; k < 0; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
@@ -215,11 +215,11 @@ int main()
     }
 
     SS->Print_cell2();
-    SS->Print_Gran("surface7_105.txt");
+    SS->Print_Gran("surface7_108.txt");
     SS->Print_Tecplot_MK();
     SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers7_105.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_108.txt");
 
     exit(-1);
     

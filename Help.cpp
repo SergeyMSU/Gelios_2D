@@ -34,6 +34,11 @@ void polar_provorot(const double& phi, double& u, double& v)
 
 double polar_angle(const double& x, const double& y)
 {
+	if (fabs(x) + fabs(y) < 0.000001/RR_)
+	{
+		return 0.0;
+	}
+
 	if (x < 0)
 	{
 		return atan(y / x) + 1.0 * pi_;

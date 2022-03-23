@@ -49,6 +49,11 @@ public:
 		const double& y_ex = 0.0, const double& z_ex = 0.0);  // Мой алгоритм (по первому Маламы) с табличным вычислением весов
 	// Возвращает false, если не нужно запускать основной атом
 
+	double for_Wr_1(const double& Z, const double& gam, const double& ur);
+	double H_Wr_1(const double& gam1, const double& gam2, const double& V, const double& ur, const double& p, const double& ksi);
+	double for_Wr_2(const double& Z, const double& gam, const double& ur, const double& ut);
+	double H_Wr_2(const double& gam1, const double& gam2, const double& V, const double& ur, const double& ut, const double& p, const double& ksi);
+
 
 	void TEST(void);   // Функция - тестирующая разные вспомогательные функции, нужна была для отладки
 	double play_mho(Sensor* sens, const double& c);

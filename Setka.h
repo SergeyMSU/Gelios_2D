@@ -193,6 +193,8 @@ public:
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep); // Смотри описание функции в коде функции
+	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
+		double I_do, const double& mu_start);
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
 
