@@ -1887,72 +1887,11 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 	for (int i = 0; i < I; i++)
 	{
 		gamma_[i] = 1.0 / (kv(r / this->R_[i]) - 1.0);
-		/*if (gamma_[i] < 0.0)
-		{
-			cout << "EROR  882   gam < 0" << endl;
-		}*/
 	}
 
-	/*for (int i = 0; i < I; i++)
-	{
-		gamma_[i] = 1.0 / (kv(1.0 / this->alpha_[i]) - 1.0);
-	}*/
-
-	double ksi, gam1, gam2, Wr1, Wr2, Wr0 = -1.0;
-	// Разыграем Wr
-	for (int i = 0; i < I; i++)
-	{
-		ksi = sens->MakeRandom();
-		Wr1 = -3.0;
-		Wr2 = 0.0;
-		if (i == 0)
-		{
-			gam1 = 0.0;
-			gam2 = gamma_[i];
-		}
-		else
-		{
-			gam1 = gamma_[i - 1];
-			gam2 = gamma_[i];
-		}
-
-		while (this->Hvr(gam1, gam2, Wr1, Ur, Uthe, ksi) >= 0.0)
-		{
-			Wr1 = Wr1 - 1.0;
-		}
-		int k = 0;
-		while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
-		{
-			Wr0 = (Wr1 + Wr2) / 2.0;
-			if (this->Hvr(gam1, gam2, Wr0, Ur, Uthe, ksi) < 0)
-			{
-				Wr1 = Wr0;
-			}
-			else
-			{
-				Wr2 = Wr0;
-			}
-			k++;
-		}
-		Wr_[i] = Wr1;
-		/*if (Wr_[i] >= 0)
-		{
-			cout << "ERROR 541 hfgfh   Wr >= 0" << endl;
-			exit(-1);
-		}*/
-		/*if (i == 1)
-		{
-			cout << Wr0 << endl;
-		}*/
-		/*if (std::fpclassify(Wr1) != FP_NORMAL && std::fpclassify(Wr1) != FP_ZERO)
-		{
-			cout << Wr1 << "    ERROR  Wr0 537" << endl;
-			exit(-1);
-		}*/
-	}
-
-	double W1, W2, Wa, ksi1, ksi2;
-	// Разыгрываем  Wa
+	double ksi, gam1, gam2, Wr1, Wr2, Wr0 = -1.0, ksi1, ksi2, W1, W2, Wa;
+	int met = 0;
+	// Разыграем Wr  Wa
 	for (int i = 0; i < I; i++)
 	{
 		if (i == 0)
@@ -1965,38 +1904,86 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 			gam1 = gamma_[i - 1];
 			gam2 = gamma_[i];
 		}
+		double p1 = this->for_Wr_1(0.0, gam2, Ur) - this->for_Wr_1(0.0, gam1, Ur);
+		double p2 = this->for_Wr_2(0.0, gam2, Ur, Uthe) - this->for_Wr_2(0.0, gam1, Ur, Uthe);
 
-		do
+		if (sens->MakeRandom() < p1 / (p1 + p2))
 		{
-			ksi1 = sens->MakeRandom();
-			ksi2 = sens->MakeRandom();
+			met = 1;
+			ksi = sens->MakeRandom();
+			Wr1 = -3.0;
+			Wr2 = 0.0;
+
+			while (this->H_Wr_1(gam1, gam2, Wr1, Ur, p1, ksi) >= 0.0)
+			{
+				Wr1 = Wr1 - 1.0;
+			}
+			int k = 0;
+			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				Wr0 = (Wr1 + Wr2) / 2.0;
+				if (this->H_Wr_1(gam1, gam2, Wr0, Ur, p1, ksi) < 0)
+				{
+					Wr1 = Wr0;
+				}
+				else
+				{
+					Wr2 = Wr0;
+				}
+				k++;
+			}
+			Wr_[i] = Wr1;
+		}
+		else
+		{
+			met = 2;
+			ksi = sens->MakeRandom();
+			Wr1 = -3.0;
+			Wr2 = 0.0;
+
+			while (this->H_Wr_2(gam1, gam2, Wr1, Ur, Uthe, p2, ksi) >= 0.0)
+			{
+				Wr1 = Wr1 - 1.0;
+			}
+			int k = 0;
+			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				Wr0 = (Wr1 + Wr2) / 2.0;
+				if (this->H_Wr_2(gam1, gam2, Wr0, Ur, Uthe, p2, ksi) < 0)
+				{
+					Wr1 = Wr0;
+				}
+				else
+				{
+					Wr2 = Wr0;
+				}
+				k++;
+			}
+			Wr_[i] = Wr1;
+		}
+
+		
+		if (met == 1)
+		{
+			ksi = sens->MakeRandom();
 			W1 = sqrt(gam1 * kv(Wr_[i]));
 			W2 = sqrt(gam2 * kv(Wr_[i]));
-			Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
-		} while ((1.0 + kv(Uthe * Wa)) / (1.0 + kv(Uthe * W2)) < ksi2);
-		Wa_[i] = Wa;
-		/*if (std::fpclassify(Wa) != FP_NORMAL && std::fpclassify(Wa) != FP_ZERO)
+			Wa_[i] = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+		}
+		else
 		{
-			cout << Wa << "    ERROR  Wa 568" << endl;
-			exit(-1);
-		}*/
+			do
+			{
+				ksi1 = sens->MakeRandom();
+				ksi2 = sens->MakeRandom();
+				W1 = sqrt(gam1 * kv(Wr_[i]));
+				W2 = sqrt(gam2 * kv(Wr_[i]));
+				Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+			} while (kv(Uthe * Wa) / kv(Uthe * W2) < ksi2);
+		}
 	}
 
-	// Разыгрываем  Mho
-	//for (int i = 0; i < I; i++)
-	//{
-	//	Mho_[i] = play_mho(sens, Uthe * Wa_[i]);
-	//	/*if (std::fpclassify(Mho_[i]) != FP_NORMAL && std::fpclassify(Mho_[i]) != FP_ZERO)
-	//	{
-	//		cout << Mho_[i] << "    ERROR  Mho_[i] 579" << endl;
-	//		cout << "Uthe  " << Uthe << endl;
-	//		cout << "Wa_[i]  " << Wa_[i] << endl;
-	//		cout << Uthe * Wa_[i] << endl;
-	//		exit(-1);
-	//	}*/
-	//}
-
-	// Считаем веса
+	// Считаем веса и Mho
 	for (int i = 0; i < I; i++)
 	{
 		double c = Uthe * Wa_[i];
@@ -2035,29 +2022,6 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 		{
 			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 		}
-		//mu_[i] = (u * sigma2(u, cp) / (IS)) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (this->norm_mho(c)) / (1.0 + kv(c));
-		//cout << IS << " " << uu * sigma2(uu, cp) << endl;
-
-		//cout << "mu = " << mu_[i] << endl;
-		//cout << u << " " << uu << " " << gam1 << " " << gam2 << " " << Uthe << " " << Ur << " " << Wa_[i] << "  " << cp << endl;
-		//cout << f2(0.0, gam1, Ur, Uthe) -  f2(0.0, gam2, Ur, Uthe) << endl;
-		//cout << (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) << endl;
-		//exit(-4);
-
-		/*if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
-		{
-			cout << mu_[i] << "    ERROR  mu_[i] 604" << endl;
-			cout << "f2(0.0, gam1, Ur, Uthe) = " << f2(0.0, gam1, Ur, Uthe) << endl;
-			cout << "f2(0.0, gam2, Ur, Uthe) = " << f2(0.0, gam2, Ur, Uthe) << endl;
-			cout << "gam1 = " << gam1 << endl;
-			cout << "gam2 = " << gam2 << endl;
-			cout << "Ur = " << Ur << endl;
-			cout << "Uthe = " << Uthe << endl;
-
-			exit(-1);
-		}*/
-
-		//cout << mu_[i] << "  " << i << endl;
 	}
 
 
