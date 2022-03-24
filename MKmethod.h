@@ -57,9 +57,12 @@ public:
 
 	void TEST(void);   // Функция - тестирующая разные вспомогательные функции, нужна была для отладки
 	double play_mho(Sensor* sens, const double& c);
-	double play_mho2(Sensor* sens, const double& c);
+	double play_mho2(Sensor* sens, const double& c, const double& p, const double& p1);
 	// Разыгрываем \mho 
-	double norm_mho(const double& c);
+	double norm_mho(const double& c);  // Ряд функции Бесселя
+	double norm_mho2(const double& c); // Ряд функции Struvel
+	double mho_H1(const double& c, const double& k, const double& ksi);
+	double mho_H2(const double& c, const double& k, const double& ksi);
 	double h_mho(const double& x, const double& c);
 
 

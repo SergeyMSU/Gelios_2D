@@ -36,8 +36,9 @@ int main()
 
     //Setka* CC;
     //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
-    //MKmethod* MK;
-    //MK = new MKmethod();
+    MKmethod* MK;
+    MK = new MKmethod();
+    cout << MK->norm_mho2(5.0) << endl;
     //double u = 0.0, cp = 12.0;
     //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
     //{
@@ -53,7 +54,7 @@ int main()
     //}
 
 
-    //exit(-1);
+    exit(-1);
 
     // SS = new Setka(15, 5, 7, 15, 30, 10, 20, 20);   //  vers2_15   n_inner 15
     // SS = new Setka(30, 7, 11, 20, 60, 20, 40, 40);    // vers3_   n_inner 30

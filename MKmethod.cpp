@@ -1,5 +1,7 @@
 #include "MKmethod.h"
 
+using namespace std;
+
 MKmethod::MKmethod(void)
 {
 	double Yr = fabs(Velosity_inf);
@@ -424,7 +426,7 @@ double MKmethod::play_mho(Sensor* sens, const double& c)
 	}
 }
 
-double MKmethod::play_mho2(Sensor* sens, const double& c)
+double MKmethod::play_mho2(Sensor* sens, const double& c, const double& p, const double& p1)
 {
 	//cout << c << endl;
 	double cc = c;
@@ -435,77 +437,56 @@ double MKmethod::play_mho2(Sensor* sens, const double& c)
 		cc = -c;
 	}
 
-	double ec = exp(2.0 * cc);
-	double ln2 = log(2.0);
-	double p1 = 0.25 * pi_ * ec + pi_/4.0;
-	double p2;
-	if (fabs(cc - ln2 / 2.0) < 0.001)
-	{
-		p2 = 0.5 * pi_ * ln2;
-	}
-	else
-	{
-		p2 = pi_ * ln2 * (1.0 - 2.0 * exp(-2.0 * cc)) / (2.0 * (2.0 * cc - ln2));
-	}
-	double p = p1 + p2;
-	//cout << p1 << " " << p2 << endl;
-	//cout << p1 << " " << p2 << " " << p << endl;
-	//cout << c - ln2 / 2.0 << endl;
 	double x = 0.0;
-	double k = 0.0;
-	double ksi1, ksi2;
-	//int tt = 0;
-	if (cc < 0.0001)
+	double ksi, k1, k2, k0;
+
+	if (sens->MakeRandom() <= p1 / p)
 	{
-		x = sens->MakeRandom() * pi_ / 2.0;
+		do
+		{
+			ksi = sens->MakeRandom();
+			k1 = 0.0;
+			k2 = pi_ / 2.0;
+
+			while (fabs(k2 - k1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				k0 = (k1 + k2) / 2.0;
+				if (this->mho_H1(c, k0, ksi) < 0)
+				{
+					k1 = k0;
+				}
+				else
+				{
+					k2 = k0;
+				}
+			}
+			x = k0;
+		} while (sens->MakeRandom() > exp(2.0 * c * cos(x)) / (pi_ * sqrt(pi_ / (2.0 * c)) * exp(2.0 * c) / 4.0 * erf(2.0 * sqrt(2.0 * c) * x / pi_)));
 	}
 	else
 	{
 		do
 		{
-			ksi1 = sens->MakeRandom();
-			if (ksi1 < p1 / p)
+			ksi = sens->MakeRandom();
+			k1 = pi_ / 2.0;
+			k2 = pi_;
+
+			while (fabs(k2 - k1) > 0.0001)     // Деление пополам, иначе разваливается
 			{
-				ksi2 = sens->MakeRandom();
-				x = (pi_ * ec - sqrtpi_ * sqrt(-4.0 * ec * ksi2 * p1 + pi_ * kv(ec) + 4.0 * ksi2 * p1)) / (2.0 * (exp(2.0 * cc) - 1.0));
-				//cout << x << endl;
-			}
-			else
-			{
-				ksi2 = sens->MakeRandom();
-				if (fabs(cc - ln2 / 2.0) < 0.001)
+				k0 = (k1 + k2) / 2.0;
+				if (this->mho_H2(c, k0, ksi) < 0)
 				{
-					//cout << "B1" << endl;
-					x = 0.5 * pi_ * exp(2.0 * ksi2 * p2 / pi_);
+					k1 = k0;
 				}
 				else
 				{
-					//cout << "B2" << endl;
-					x = pow(2.0 * ln2, 1.0 / (2.0 * cc / ln2 - 1.0)) * pow(ec * pow(pi_, -2.0 * cc / ln2) * ((4.0 * cc - 2.0 * ln2) * (-ksi2 * p2 + pi_ * ln2/(4.0 * cc - 2.0 * ln2))),//
-						2.0 * cc / (ln2 - 2.0 * cc) + 1.0);
-					//cout << x << endl;
+					k2 = k0;
 				}
-
-				/*if (std::fpclassify(x) != FP_NORMAL && std::fpclassify(x) != FP_ZERO)
-				{
-					cout << x << "    ERROR  144     " << ksi1 << "  " << c <<  "  " << ec << "  " << p1 <<  endl;
-					cout << pow(2.0 * ln2, 1.0 / (2.0 * c / ln2 - 1.0)) << endl;
-					exit(-1);
-				}*/
-				//cout << x << endl;
 			}
-
-			if (this->h_mho(x, cc) / 1.13 > 1.0)
-			{
-				cout << "ERROR  179" << endl;
-				cout << this->h_mho(x, cc) / 1.13 << endl;
-				cout << "cc = " << cc << endl;
-				exit(-1);
-			}
-
-		} while (this->h_mho(x, cc) / 1.13 < sens->MakeRandom());
+			x = k0;
+		} while (sens->MakeRandom() > exp(2.0 * c * cos(x)) / (-pi_ / (4.0 * c) * (exp(c * (2.0 - 4.0 * x / pi_)) - 1.0)));
 	}
-	//cout << tt << endl;
+	
 
 	if (minus)
 	{
@@ -524,6 +505,17 @@ double MKmethod::play_mho2(Sensor* sens, const double& c)
 	}
 }
 
+double MKmethod::mho_H1(const double& c, const double& k, const double& ksi)
+{
+	return pi_ * sqrt(pi_ / (2.0 * c)) * exp(2.0 * c) / (4.0) * (erf(2.0 * sqrt(2.0 * c) * k / pi_) - ksi * erf(sqrt(2.0 * c)));
+}
+
+double MKmethod::mho_H2(const double& c, const double& k, const double& ksi)
+{
+	return -pi_ / (4.0 * c) * ((exp(c * (2.0 - 4.0 * k / pi_)) - 1.0) - ksi * (exp(-2.0 * c) - 1.0));
+}
+
+
 double MKmethod::norm_mho(const double& c)
 {
 	double s = 1.0;
@@ -535,6 +527,26 @@ double MKmethod::norm_mho(const double& c)
 		cc = cc * c;
 		nn = nn * i;
 		d = kv(cc / nn);
+		s = s + d;
+		if (d < 0.00001)
+		{
+			break;
+		}
+	}
+
+	return s;
+}
+
+double MKmethod::norm_mho2(const double& c)
+{
+	double s = 4.0 * c;
+	double d = 4.0 * c;
+	double cc = 1.0;
+	double nn = 1.0;
+	double fo = 1.0;
+	for (int i = 0; i < 100; i++)
+	{
+		d = d * 4.0 * c * c/ kv(2.0 * i + 3.0);
 		s = s + d;
 		if (d < 0.00001)
 		{
@@ -684,19 +696,23 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 	//exit(-1);
 
 	// Разыгрываем  Mho
-	for (int i = 0; i < this->num_area; i++)
-	{
-		Mho_[i] = play_mho(sens, Y * sqrt(1.0 - kv(X_[i])) * Wa_[i]);
-		/*if (std::fpclassify(Mho_[i]) != FP_NORMAL && std::fpclassify(Mho_[i]) != FP_ZERO)
-		{
-			cout << Mho_[i] << "    ERROR  Mho_[i]  324   " << Y * sqrt(1.0 - kv(X_[i])) * Wa_[i] << endl;
-			exit(-1);
-		}*/
-	}
+	//for (int i = 0; i < this->num_area; i++)
+	//{
+	//	Mho_[i] = play_mho(sens, Y * sqrt(1.0 - kv(X_[i])) * Wa_[i]);
+	//	/*if (std::fpclassify(Mho_[i]) != FP_NORMAL && std::fpclassify(Mho_[i]) != FP_ZERO)
+	//	{
+	//		cout << Mho_[i] << "    ERROR  Mho_[i]  324   " << Y * sqrt(1.0 - kv(X_[i])) * Wa_[i] << endl;
+	//		exit(-1);
+	//	}*/
+	//}
 
 	// Считаем веса
 	for (int i = 0; i < this->num_area; i++)
 	{
+		double c = Y * sqrt(1.0 - kv(X_[i])) * Wa_[i];
+		Mho_[i] = play_mho(sens, c);
+		double p = this->norm_mho(c);
+		double p1 = (pi_ / 2.0) * (pi_);
 		Wt_[i] = Wa_[i] * cos(Mho_[i]);
 		Wp_[i] = Wa_[i] * sin(Mho_[i]);
 		if (i == 0)
@@ -709,8 +725,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 			gam1 = this->gam_[i - 1];
 			gam2 = this->gam_[i];
 		}
-		double c = Y * sqrt(1.0 - kv(X_[i])) * Wa_[i];
-		mu_[i] = (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) * (this->norm_mho(c)) / (this->A0_ * (1.0 + kv(c)));
+		mu_[i] = (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) * (p) / (this->A0_ * (1.0 + kv(c)));
 		//cout << mu_[i] << "     -  " << i <<  endl;
 		//cout << (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) << "  " << this->A0_ << endl;
 		if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
@@ -1323,13 +1338,13 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 			om1 = 1.0 - 2.0 * ksi4;
 			om2 = sqrt(1.0 - kv(om1)) * cos(2.0 * pi_ * ksi5);
 			om3 = sqrt(1.0 - kv(om1)) * sin(2.0 * pi_ * ksi5);
-			// Более экономичный алгоритм
+			// Более экономичный алгоритм   --  выйгрыша нет вроде от него
 			/*do
 			{
 				om2 = 1.0 - 2.0 * sens->MakeRandom();
 				om3 = 1.0 - 2.0 * sens->MakeRandom();
 				D = kv(om2) + kv(om3);
-			} while (D > 1);
+			} while (D > 1.0);
 			ko = sqrt((1.0 - kv(om1)) / D);
 			om2 = om2 * ko;
 			om3 = om3 * ko;*/
