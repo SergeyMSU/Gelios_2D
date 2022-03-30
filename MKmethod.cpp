@@ -711,7 +711,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 	{
 		double c = Y * sqrt(1.0 - kv(X_[i])) * Wa_[i];
 		double p = this->norm_mho(c);
-		if (fabs(c) > 0.1)
+		if (false)//(fabs(c) > 0.1)
 		{
 			double p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
 			Mho_[i] = play_mho2(sens, c, p * pi_, p1);
@@ -736,7 +736,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 		mu_[i] = (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) * (p) / (this->A0_ * (1.0 + kv(c)));
 		//cout << mu_[i] << "     -  " << i <<  endl;
 		//cout << (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) << "  " << this->A0_ << endl;
-		if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
+		/*if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
 		{
 			cout << mu_[i] << "    ERROR  mu_[i]  348" << endl;
 			cout << gam1 << " " << gam2 << endl;
@@ -746,7 +746,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 			cout << this->A0_ << endl;
 			cout << Wa_[i] << endl;
 			exit(-1);
-		}
+		}*/
 	}
 	//exit(-1);
 
@@ -1268,7 +1268,7 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 	{
 		double c = Uthe * Wa_[i];
 		double p = this->norm_mho(c);
-		if (fabs(c) > 0.1)
+		if (false)//(fabs(c) > 0.1)
 		{
 			double p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
 			Mho_[i] = play_mho2(sens, c, p * pi_, p1);
@@ -1891,7 +1891,7 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 
 	double ksi, gam1, gam2, Wr1, Wr2, Wr0 = -1.0, ksi1, ksi2, W1, W2, Wa;
 	int met = 0;
-	// Разыграем Wr  Wa
+	// Разыграем Wr  
 	for (int i = 0; i < I; i++)
 	{
 		if (i == 0)
@@ -1904,17 +1904,16 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 			gam1 = gamma_[i - 1];
 			gam2 = gamma_[i];
 		}
-		double p1 = this->for_Wr_1(0.0, gam2, Ur) - this->for_Wr_1(0.0, gam1, Ur);
-		double p2 = this->for_Wr_2(0.0, gam2, Ur, Uthe) - this->for_Wr_2(0.0, gam1, Ur, Uthe);
+		double pp1 = this->for_Wr_1(0.0, gam2, Ur) - this->for_Wr_1(0.0, gam1, Ur);
+		double pp2 = this->for_Wr_2(0.0, gam2, Ur, Uthe) - this->for_Wr_2(0.0, gam1, Ur, Uthe);
 
-		if (sens->MakeRandom() < p1 / (p1 + p2))
+		if (sens->MakeRandom() < pp1 / (pp1 + pp2))
 		{
-			met = 1;
 			ksi = sens->MakeRandom();
 			Wr1 = -3.0;
 			Wr2 = 0.0;
 
-			while (this->H_Wr_1(gam1, gam2, Wr1, Ur, p1, ksi) >= 0.0)
+			while (this->H_Wr_1(gam1, gam2, Wr1, Ur, pp1, ksi) >= 0.0)
 			{
 				Wr1 = Wr1 - 1.0;
 			}
@@ -1922,7 +1921,7 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
 			{
 				Wr0 = (Wr1 + Wr2) / 2.0;
-				if (this->H_Wr_1(gam1, gam2, Wr0, Ur, p1, ksi) < 0)
+				if (this->H_Wr_1(gam1, gam2, Wr0, Ur, pp1, ksi) < 0)
 				{
 					Wr1 = Wr0;
 				}
@@ -1936,12 +1935,11 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 		}
 		else
 		{
-			met = 2;
 			ksi = sens->MakeRandom();
 			Wr1 = -3.0;
 			Wr2 = 0.0;
 
-			while (this->H_Wr_2(gam1, gam2, Wr1, Ur, Uthe, p2, ksi) >= 0.0)
+			while (this->H_Wr_2(gam1, gam2, Wr1, Ur, Uthe, pp2, ksi) >= 0.0)
 			{
 				Wr1 = Wr1 - 1.0;
 			}
@@ -1949,7 +1947,7 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
 			{
 				Wr0 = (Wr1 + Wr2) / 2.0;
-				if (this->H_Wr_2(gam1, gam2, Wr0, Ur, Uthe, p2, ksi) < 0)
+				if (this->H_Wr_2(gam1, gam2, Wr0, Ur, Uthe, pp2, ksi) < 0)
 				{
 					Wr1 = Wr0;
 				}
@@ -1961,26 +1959,31 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 			}
 			Wr_[i] = Wr1;
 		}
+	}
 
-		
-		if (met == 1)
+	// Разыгрываем  Wa
+	for (int i = 0; i < I; i++)
+	{
+		if (i == 0)
 		{
-			ksi = sens->MakeRandom();
+			gam1 = 0.0;
+			gam2 = gamma_[i];
+		}
+		else
+		{
+			gam1 = gamma_[i - 1];
+			gam2 = gamma_[i];
+		}
+
+		do
+		{
+			ksi1 = sens->MakeRandom();
+			ksi2 = sens->MakeRandom();
 			W1 = sqrt(gam1 * kv(Wr_[i]));
 			W2 = sqrt(gam2 * kv(Wr_[i]));
-			Wa_[i] = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
-		}
-		else
-		{
-			do
-			{
-				ksi1 = sens->MakeRandom();
-				ksi2 = sens->MakeRandom();
-				W1 = sqrt(gam1 * kv(Wr_[i]));
-				W2 = sqrt(gam2 * kv(Wr_[i]));
-				Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
-			} while (kv(Uthe * Wa) / kv(Uthe * W2) < ksi2);
-		}
+			Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+		} while ((1.0 + kv(Uthe * Wa)) / (1.0 + kv(Uthe * W2)) < ksi2);
+		Wa_[i] = Wa;
 	}
 
 	// Считаем веса и Mho
@@ -1988,7 +1991,7 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 	{
 		double c = Uthe * Wa_[i];
 		double p = this->norm_mho(c);
-		if (fabs(c) > 0.1)
+		if (false)//(fabs(c) > 0.1)
 		{
 			double p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
 			Mho_[i] = play_mho2(sens, c, p * pi_, p1);
@@ -2093,42 +2096,6 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 	Wthe_[I] = v2;
 	Wphi_[I] = v3;
 
-	/*mu_[I] = 1.0;
-	for (int i = 0; i < I; i++)
-	{
-		mu_[I] = mu_[I] - mu_[i];
-	}*/
-
-	//if (mu_[I] < 0.0)
-	//{
-	//	for (int i = 0; i < I; i++)
-	//	{
-	//		cout << "gamma_[i]  " << gamma_[i] << endl;
-	//		cout << "mu_[i]  " << mu_[i] << endl;
-	//	}
-	//	
-	//	for (int i = 0; i < I; i++)
-	//	{
-
-	//		double u = sqrt(kvv(Vr - Wr_[i], Vthe - Wthe_[i], Vphi - Wphi_[i]));
-	//		cout << i << " " << (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) << endl;
-	//	}
-	//	exit(-1);
-	//	//cout << "ERROR  710" << endl;
-	//	//cout << r << endl;
-	//	//cout << mu_[I] << endl;
-	//	for (int i = 0; i <= I; i++)
-	//	{
-	//		double aa, bb, cc;
-	//		dekard_skorost(y_ex, z_ex, x_ex, Wr_[i], Wphi_[i], Wthe_[i], bb, cc, aa);
-	//		for (int ij = 0; ij < 27000; ij++)
-	//		{
-	//			cout << x_ex + ij * aa << " " << sqrt(kvv(y_ex + ij * bb, z_ex + ij * cc, 0.0)) << " " << i << endl;
-	//		}
-	//	}
-	//	exit(-1);
-	//}
-
 	if (Wr_[I] >= 0.0 || kv(Wthe_[I]) + kv(Wphi_[I]) > gg * kv(Wr_[I]))
 	{
 		mu_[I] = 1.0;
@@ -2155,22 +2122,25 @@ double MKmethod::for_Wr_1(const double& Z, const double& gam, const double& ur)
 double MKmethod::H_Wr_1(const double& gam1, const double& gam2, const double& V, const double& ur, const double& p, const double& ksi)
 // Для розыгрыша Wr в перезарядке по-частям (первая часть)
 {
-	return for_Wr_1(V, gam1, ur) - for_Wr_1(V, gam2, ur) - ksi * p;
+	return for_Wr_1(V, gam2, ur) - for_Wr_1(V, gam1, ur) - ksi * p;
 }
 
 double MKmethod::for_Wr_2(const double& Z, const double& gam, const double& ur, const double& ut)
 // Для розыгрыша Wr в перезарядке по-частям (первая часть)
 {
-	return (exp(-ur * ur) * ut * ut / 512.0) * (20.0 * exp(2.0 * ur * Z - 8.0 * Z * Z / 3.0) * (3.0 * ur + 8.0 * Z) / sqrtpi_ - //
-		3.0 * sqrt(6.0) * exp(3.0 * ur * ur / 8.0) * (28.0 + 5.0 * ur * ur) * erfc((3.0 * ur - 8.0 * Z) / (2.0 * sqrt(6.0))));
+	double gam1 = gam + 1.0;  // gam + 1
+	double ur2 = kv(ur);
+	return  1.0 / (4.0 * gam1 * gam1 * gam1 * sqrtpi_) * kv(ut) * exp((-1.0 - gam / gam1) * ur2 - gam1 * Z * Z) * //
+		(2.0 * exp(ur * (gam * ur / gam1 + 2.0 * Z)) * gam * gam1 * (ur + Z + gam * Z) + //
+			exp(ur2 + gam1 * Z * Z) * sqrt(gam1) * sqrtpi_ * (2.0 + gam * (5.0 + 3.0 * gam + 2.0 * ur2)) * //
+			(-1.0 - erf((-ur + Z + gam * Z) / sqrt(gam1))));
 }
 
 double MKmethod::H_Wr_2(const double& gam1, const double& gam2, const double& V, const double& ur, const double& ut, const double& p, const double& ksi)
 // Для розыгрыша Wr в перезарядке по-частям (первая часть)
 {
-	return for_Wr_2(V, gam1, ur, ut) - for_Wr_2(V, gam2, ur, ut) - ksi * p;
+	return for_Wr_2(V, gam2, ur, ut) - for_Wr_2(V, gam1, ur, ut) - ksi * p;
 }
-
 
 double MKmethod::Hvr(const double& gam1, const double& gam2, const double& V, const double& ur, const double& ut, const double& ksi)
 {

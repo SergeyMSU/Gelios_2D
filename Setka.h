@@ -60,6 +60,9 @@ public:
 	ofstream f_way;
 	int f_num;
 
+	mutex mut_1;
+	int k_1;
+
 	// —бор статистики весов
 	double mmu1;
 	double mmu2;

@@ -36,11 +36,13 @@ int main()
 
     //Setka* CC;
     //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
-    //MKmethod* MK;
-    //MK = new MKmethod();
-    //double c = 1.2;
-    //double x = 0.7;
-    //cout << exp(2.0 * c * cos(x)) / (pi_ * sqrt(pi_ / (2.0 * c)) * exp(2.0 * c) / 4.0 * erf(2.0 * sqrt(2.0 * c) * x / pi_)) << endl;
+
+   /* MKmethod* MK;
+    MK = new MKmethod();
+    double c = 1.2;
+    double x = 0.7;
+    cout << MK->for_Wr_2(0.0, 0.4, 1.1, 4.0) - MK->for_Wr_2(0.0, 0.1, 1.1, 4.0) << endl;*/
+
     //double u = 0.0, cp = 12.0;
     //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
     //{
@@ -69,7 +71,7 @@ int main()
     cout << u << " " << v << endl;
     exit(-1);*/
 
-    Setka* SS, * K, *SS2;
+    Setka* SS, * K, *SS2, * SS3;
     if (false)
     {
         SS = new Setka(80, 20, 15, 20, 50, 30, 40, 25);    // n_inner 30
@@ -83,8 +85,8 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers7_107.txt");  // 17       IEX
-
+    SS->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // 17       IEX
+    SS->Init_conditions();
 
     SS->TVD_prepare();
     SS->Proverka();
@@ -93,7 +95,190 @@ int main()
     //SS->Print_Gran("sur7_101.txt");
     //exit(-2);
 
+    /*double xx, yy;
+    SS->All_Cells[34]->Get_Center(xx, yy);
+    cout << xx << " " << yy << endl;
+    cout << SS->All_Cells[34]->number << endl;
+    exit(-1);*/
+
+    /*SS->Line_Outer[2]->B->Vx = -0.0028;
+
+    SS->Move_Setka_Calculate_2(1.0);
+    for (auto& i : SS->All_Points)
+    {
+        i->x = i->x2;
+        i->y = i->y2;
+        i->Vx = 0.0;
+        i->Vy = 0.0;
+        i->count = 0;
+    }*/
+
     // Подготовка массивов для внутренней области счёта. НЕ УДАЛЯТЬ
+    for (auto i : SS->All_Cells)
+    {
+        if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+        {
+            //Для счёта монте-карло
+           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
+           //i->par[0].v = i->par[0].v * (chi_real / chi_);
+           //i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
+           //i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
+
+           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
+           //i->par[1].v = i->par[1].v * (chi_real / chi_);
+           //i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
+           //i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
+
+
+           // для счёта плазмы
+           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+           //i->par[1].v = i->par[0].v / (chi_real / chi_);
+           //i->par[1].ro = i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+           //i->par[1].Q = i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+        }
+
+
+        if (false)//(i->type == C_centr)
+        {
+            i->par[0].ro_H1 = i->par[1].ro_H1 = 0.00000001;
+            i->par[0].p_H1 = i->par[1].p_H1 = 0.00000001;
+            i->par[0].u_H1 = i->par[1].u_H1 = 0.0;
+            i->par[0].v_H1 = i->par[1].v_H1 = 0.0;
+
+            i->par[0].ro_H2 = i->par[1].ro_H2 = 0.00000001;
+            i->par[0].p_H2 = i->par[1].p_H2 = 0.00000001;
+            i->par[0].u_H2 = i->par[1].u_H2 = 0.0;
+            i->par[0].v_H2 = i->par[1].v_H2 = 0.0;
+
+            i->par[0].ro_H3 = i->par[1].ro_H3 = 0.00000001;
+            i->par[0].p_H3 = i->par[1].p_H3 = 0.00000001;
+            i->par[0].u_H3 = i->par[1].u_H3 = 0.0;
+            i->par[0].v_H3 = i->par[1].v_H3 = 0.0;
+
+            i->par[0].ro_H4 = i->par[1].ro_H4 = 0.00000001;
+            i->par[0].p_H4 = i->par[1].p_H4 = 0.00000001;
+            i->par[0].u_H4 = i->par[1].u_H4 = 0.0;
+            i->par[0].v_H4 = i->par[1].v_H4 = 0.0;
+        }
+
+
+        double x, y;
+        i->Get_Center(x, y);
+        if (sqrt(x * x + y * y) <= R111_)
+        {
+            SS->All_Cells_Inner.push_back(i);
+        }
+
+        //if (x < -700 && y < 200)
+        //{
+        //    i->par[1].u = i->par[0].u = Velosity_inf;       // Перенормировка
+        //    i->par[1].v = i->par[0].v = 0.0;
+        //}
+
+        //if (sqrt(x * x + y * y) <= 80.0)
+        //{
+        //    i->par[1].u = i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
+        //    i->par[1].v = i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
+        //    i->par[1].ro = i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
+        //    i->par[1].p = i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
+        //}
+
+        if (i->type == C_centr)
+        {
+            SS->All_Cells_zero.push_back(i);
+        }
+    }
+
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    SS->MK_start_new();
+
+    //SS2 = new Setka();
+    //SS3 = new Setka();
+    //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 до добавления источников 
+    //SS3->Download_Setka_ALL_ALPHA_2_0("vers6_121.txt");  // 84 до добавления источников 
+    if (false)
+    {
+        for (int i = 0; i < SS->All_Cells.size(); i++)
+        {
+            auto A1 = SS->All_Cells[i];
+            auto A2 = SS2->All_Cells[i];
+            auto A3 = SS3->All_Cells[i];
+
+            A1->par[0].H_n2[0] = A2->par[0].H_n[0];
+            A1->par[0].H_n2[1] = A2->par[0].H_n[1];
+            A1->par[0].H_n2[2] = A2->par[0].H_n[2];
+            A1->par[0].H_n2[3] = A2->par[0].H_n[3];
+
+            A1->par[0].H_u2[0] = A2->par[0].H_u[0];
+            A1->par[0].H_u2[1] = A2->par[0].H_u[1];
+            A1->par[0].H_u2[2] = A2->par[0].H_u[2];
+            A1->par[0].H_u2[3] = A2->par[0].H_u[3];
+
+            A1->par[0].H_v2[0] = A2->par[0].H_v[0];
+            A1->par[0].H_v2[1] = A2->par[0].H_v[1];
+            A1->par[0].H_v2[2] = A2->par[0].H_v[2];
+            A1->par[0].H_v2[3] = A2->par[0].H_v[3];
+
+            A1->par[0].H_T2[0] = A2->par[0].H_T[0];
+            A1->par[0].H_T2[1] = A2->par[0].H_T[1];
+            A1->par[0].H_T2[2] = A2->par[0].H_T[2];
+            A1->par[0].H_T2[3] = A2->par[0].H_T[3];
+
+            A1->par[0].k_u2 = A2->par[0].k_u;
+            A1->par[0].k_v2 = A2->par[0].k_v;
+            A1->par[0].k_T2 = A2->par[0].k_T;
+
+            A1->par[0].H_n3[0] = A3->par[0].H_n[0];
+            A1->par[0].H_n3[1] = A3->par[0].H_n[1];
+            A1->par[0].H_n3[2] = A3->par[0].H_n[2];
+            A1->par[0].H_n3[3] = A3->par[0].H_n[3];
+
+            A1->par[0].H_u3[0] = A3->par[0].H_u[0];
+            A1->par[0].H_u3[1] = A3->par[0].H_u[1];
+            A1->par[0].H_u3[2] = A3->par[0].H_u[2];
+            A1->par[0].H_u3[3] = A3->par[0].H_u[3];
+
+            A1->par[0].H_v3[0] = A3->par[0].H_v[0];
+            A1->par[0].H_v3[1] = A3->par[0].H_v[1];
+            A1->par[0].H_v3[2] = A3->par[0].H_v[2];
+            A1->par[0].H_v3[3] = A3->par[0].H_v[3];
+
+            A1->par[0].H_T3[0] = A3->par[0].H_T[0];
+            A1->par[0].H_T3[1] = A3->par[0].H_T[1];
+            A1->par[0].H_T3[2] = A3->par[0].H_T[2];
+            A1->par[0].H_T3[3] = A3->par[0].H_T[3];
+
+            A1->par[0].k_u3 = A3->par[0].k_u;
+            A1->par[0].k_v3 = A3->par[0].k_v;
+            A1->par[0].k_T3 = A3->par[0].k_T;
+        }
+    }
+    //delete SS2;
+    //delete SS3;
+
+
+    for (int k = 0; k < 0; k++)  // 10
+    {
+        cout << "Global step = " << k + 1 << endl;
+        //SS->Go_stationary_5_komponent_inner_2(50000);
+        //SS->Go_5_komponent_2(50000);
+        SS->Go_stationary_5_komponent_inner_MK2(40000);
+        SS->Go_5_komponent__MK2(50000);
+    }
+
+    //SS->Print_cell2();
+    SS->Print_Gran("surface6_131.txt");
+    SS->Print_Tecplot_MK();
+    //SS->Print_Sourse();
+    //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
+    SS->Save_Setka_ALL_ALPHA("vers6_131.txt");
+
+    exit(-1);
+    delete SS;
+    SS = new Setka();
+    SS->Download_Setka_ALL_ALPHA_2_0("vers6_124.txt");
+    SS->TVD_prepare();
+    SS->Proverka();
     for (auto i : SS->All_Cells)
     {
         if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
@@ -168,64 +353,21 @@ int main()
             SS->All_Cells_zero.push_back(i);
         }
     }
-
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
-
-    SS2 = new Setka();
-    SS2->Download_Setka_ALL_ALPHA_2_0("vers7_106.txt");  // 84 до добавления источников 
-    if (true)
+    for (int k = 0; k < 50; k++)  // 10
     {
-        for (int i = 0; i < SS->All_Cells.size(); i++)
-        {
-            auto A1 = SS->All_Cells[i];
-            auto A2 = SS2->All_Cells[i];
-
-            A1->par[0].H_n2[0] = A2->par[0].H_n[0];
-            A1->par[0].H_n2[1] = A2->par[0].H_n[1];
-            A1->par[0].H_n2[2] = A2->par[0].H_n[2];
-            A1->par[0].H_n2[3] = A2->par[0].H_n[3];
-
-            A1->par[0].H_u2[0] = A2->par[0].H_u[0];
-            A1->par[0].H_u2[1] = A2->par[0].H_u[1];
-            A1->par[0].H_u2[2] = A2->par[0].H_u[2];
-            A1->par[0].H_u2[3] = A2->par[0].H_u[3];
-
-            A1->par[0].H_v2[0] = A2->par[0].H_v[0];
-            A1->par[0].H_v2[1] = A2->par[0].H_v[1];
-            A1->par[0].H_v2[2] = A2->par[0].H_v[2];
-            A1->par[0].H_v2[3] = A2->par[0].H_v[3];
-
-            A1->par[0].H_T2[0] = A2->par[0].H_T[0];
-            A1->par[0].H_T2[1] = A2->par[0].H_T[1];
-            A1->par[0].H_T2[2] = A2->par[0].H_T[2];
-            A1->par[0].H_T2[3] = A2->par[0].H_T[3];
-
-            A1->par[0].k_u2 = A2->par[0].k_u;
-            A1->par[0].k_v2 = A2->par[0].k_v;
-            A1->par[0].k_T2 = A2->par[0].k_T;
-        }
-    }
-    delete SS2;
-
-    for (int k = 0; k < 0; k++)  // 10
-    {
-        cout << "Global step = " << k + 1 << endl;
-        //SS->Go_stationary_5_komponent_inner_2(50000);
-        //SS->Go_5_komponent_2(50000);
-        SS->Go_stationary_5_komponent_inner_MK2(50000);
+        cout << "Global step 2 = " << k + 1 << endl;
+        SS->Go_stationary_5_komponent_inner_MK2(30000);
         SS->Go_5_komponent__MK2(50000);
     }
 
-    SS->Print_cell2();
-    SS->Print_Gran("surface7_108.txt");
+    SS->Print_Gran("surface6_125.txt");
     SS->Print_Tecplot_MK();
-    SS->Print_Sourse();
-    //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers7_108.txt");
+    SS->Save_Setka_ALL_ALPHA("vers6_125.txt");
 
     exit(-1);
-    
+
     
     Setka S;
 

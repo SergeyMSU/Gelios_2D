@@ -60,12 +60,19 @@ struct Parametr
 	double H_u2[4];
 	double H_v2[4];
 	double H_T2[4];
+	double H_n3[4];
+	double H_u3[4];
+	double H_v3[4];
+	double H_T3[4];
 	double k_u = 0.0;
 	double k_v = 0.0;
 	double k_T = 0.0;
 	double k_u2 = 0.0;
 	double k_v2 = 0.0;
 	double k_T2 = 0.0;
+	double k_u3 = 0.0;
+	double k_v3 = 0.0;
+	double k_T3 = 0.0;
 	int num_atoms[4];   // Число перезарядок в ячейке
 	double w_m[7];       // Средние веса по сортам
 	double I1_mf[4];
@@ -101,6 +108,10 @@ public:
 	double y_min;
 	double y_max;
 
+	double r_istoch;           // Радиус источников (в какой точке они расположены, нужно для переинтерполяции)
+	Cell* Back;                // ячейка до переинтерполяции
+	Cell* Next;
+
     // Блок переменных чисто для монте-карло
 	bool axis_; // Является ли ячейка граничной с осью (для сноса скорости в монте-карло
 	double y_ax; // Высота центра граничной ячейки над осью
@@ -122,6 +133,7 @@ public:
 	// Посчитать источники Монте-Карло
 	void Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 	void Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
+	void Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 
 	bool belong(const double& x, const double& y);
 	void renew(void); // Обновить значения L

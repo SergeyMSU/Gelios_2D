@@ -497,15 +497,89 @@ void Cell::Calc_Sourse(void)
 
 void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
 {
+	double xx, yy;
+	this->Get_Center(xx, yy);
+	double rr = sqrt(kv(xx) + kv(yy));
+
 	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
 	double U_H1, U_H2, U_H3, U_H4;
 	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
 	double nu_H1, nu_H2, nu_H3, nu_H4;
 
-	double u_H1 = this->par[0].H_u[0], v_H1 = this->par[0].H_v[0], ro_H1 = this->par[0].H_n[0], p_H1 = 0.5 * this->par[0].H_T[0] * this->par[0].H_n[0];
-	double u_H2 = this->par[0].H_u[1], v_H2 = this->par[0].H_v[1], ro_H2 = this->par[0].H_n[1], p_H2 = 0.5 * this->par[0].H_T[1] * this->par[0].H_n[1];
-	double u_H3 = this->par[0].H_u[2], v_H3 = this->par[0].H_v[2], ro_H3 = this->par[0].H_n[2], p_H3 = 0.5 * this->par[0].H_T[2] * this->par[0].H_n[2];
-	double u_H4 = this->par[0].H_u[3], v_H4 = this->par[0].H_v[3], ro_H4 = this->par[0].H_n[3], p_H4 = 0.5 * this->par[0].H_T[3] * this->par[0].H_n[3];
+	double r1, r2;
+	Cell* K_do, * K_posle;
+
+	double u_H1, v_H1, ro_H1, p_H1;
+	double u_H2, v_H2, ro_H2, p_H2;
+	double u_H3, v_H3, ro_H3, p_H3;
+	double u_H4, v_H4, ro_H4, p_H4;
+	double T_H1, T_H2, T_H3, T_H4;
+
+	if (rr > 10.0 / RR_ && rr < 1500.0 / RR_ && xx >= 0.0)
+	{
+		K_do = this->Back;
+		K_posle = this->Next;
+		if (rr < this->r_istoch)
+		{
+			r2 = this->r_istoch;
+			r1 = this->r_istoch;
+			while (r1 > rr)
+			{
+				r1 = K_do->r_istoch;
+				K_do = K_do->Back;
+			}
+			K_do = K_do->Next;
+			K_posle = K_do->Next;
+		}
+		else
+		{
+			r2 = this->r_istoch;
+			r1 = this->r_istoch;
+			while (r2 < rr)
+			{
+				r2 = K_posle->r_istoch;
+				K_posle = K_posle->Next;
+			}
+			K_posle = K_posle->Back;
+			K_do = K_posle->Back;
+		}
+
+		r1 = K_do->r_istoch;
+		r2 = K_posle->r_istoch;
+
+		u_H1 = linear(r1, K_do->par[0].H_u[0], r2, K_posle->par[0].H_u[0], rr);
+		u_H2 = linear(r1, K_do->par[0].H_u[1], r2, K_posle->par[0].H_u[1], rr);
+		u_H3 = linear(r1, K_do->par[0].H_u[2], r2, K_posle->par[0].H_u[2], rr);
+		u_H4 = linear(r1, K_do->par[0].H_u[3], r2, K_posle->par[0].H_u[3], rr);
+
+		v_H1 = linear(r1, K_do->par[0].H_v[0], r2, K_posle->par[0].H_v[0], rr);
+		v_H2 = linear(r1, K_do->par[0].H_v[1], r2, K_posle->par[0].H_v[1], rr);
+		v_H3 = linear(r1, K_do->par[0].H_v[2], r2, K_posle->par[0].H_v[2], rr);
+		v_H4 = linear(r1, K_do->par[0].H_v[3], r2, K_posle->par[0].H_v[3], rr);
+
+		ro_H1 = linear(r1, K_do->par[0].H_n[0], r2, K_posle->par[0].H_n[0], rr);
+		ro_H2 = linear(r1, K_do->par[0].H_n[1], r2, K_posle->par[0].H_n[1], rr);
+		ro_H3 = linear(r1, K_do->par[0].H_n[2], r2, K_posle->par[0].H_n[2], rr);
+		ro_H4 = linear(r1, K_do->par[0].H_n[3], r2, K_posle->par[0].H_n[3], rr);
+
+		T_H1 = linear(r1, K_do->par[0].H_T[0], r2, K_posle->par[0].H_T[0], rr);
+		T_H2 = linear(r1, K_do->par[0].H_T[1], r2, K_posle->par[0].H_T[1], rr);
+		T_H3 = linear(r1, K_do->par[0].H_T[2], r2, K_posle->par[0].H_T[2], rr);
+		T_H4 = linear(r1, K_do->par[0].H_T[3], r2, K_posle->par[0].H_T[3], rr);
+
+		p_H1 = 0.5 * T_H1 * ro_H1;
+		p_H2 = 0.5 * T_H2 * ro_H2;
+		p_H3 = 0.5 * T_H3 * ro_H3;
+		p_H4 = 0.5 * T_H4 * ro_H4;
+
+	}
+	else
+	{
+		u_H1 = this->par[0].H_u[0]; v_H1 = this->par[0].H_v[0]; ro_H1 = this->par[0].H_n[0]; p_H1 = 0.5 * this->par[0].H_T[0] * this->par[0].H_n[0];
+		u_H2 = this->par[0].H_u[1]; v_H2 = this->par[0].H_v[1]; ro_H2 = this->par[0].H_n[1]; p_H2 = 0.5 * this->par[0].H_T[1] * this->par[0].H_n[1];
+		u_H3 = this->par[0].H_u[2]; v_H3 = this->par[0].H_v[2]; ro_H3 = this->par[0].H_n[2]; p_H3 = 0.5 * this->par[0].H_T[2] * this->par[0].H_n[2];
+		u_H4 = this->par[0].H_u[3]; v_H4 = this->par[0].H_v[3]; ro_H4 = this->par[0].H_n[3]; p_H4 = 0.5 * this->par[0].H_T[3] * this->par[0].H_n[3];
+	}
 
 
 	if (ro_H1 <= 0.0)
@@ -655,6 +729,87 @@ void Cell::Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, c
 	q1 = this->par[0].M_u * this->par[0].k_u2;
 	q2 = this->par[0].M_v * this->par[0].k_v2;
 	q3 = this->par[0].M_T * this->par[0].k_T2;
+}
+
+void Cell::Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
+{
+	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+	double U_H1, U_H2, U_H3, U_H4;
+	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+	double nu_H1, nu_H2, nu_H3, nu_H4;
+
+	double u_H1 = this->par[0].H_u3[0], v_H1 = this->par[0].H_v3[0], ro_H1 = this->par[0].H_n3[0], p_H1 = 0.5 * this->par[0].H_T3[0] * this->par[0].H_n3[0];
+	double u_H2 = this->par[0].H_u3[1], v_H2 = this->par[0].H_v3[1], ro_H2 = this->par[0].H_n3[1], p_H2 = 0.5 * this->par[0].H_T3[1] * this->par[0].H_n3[1];
+	double u_H3 = this->par[0].H_u3[2], v_H3 = this->par[0].H_v3[2], ro_H3 = this->par[0].H_n3[2], p_H3 = 0.5 * this->par[0].H_T3[2] * this->par[0].H_n3[2];
+	double u_H4 = this->par[0].H_u3[3], v_H4 = this->par[0].H_v3[3], ro_H4 = this->par[0].H_n3[3], p_H4 = 0.5 * this->par[0].H_T3[3] * this->par[0].H_n3[3];
+
+
+	if (ro_H1 <= 0.0)
+	{
+		ro_H1 = 0.0000001;
+		p_H1 = 0.0;
+	}
+	if (ro_H2 <= 0.0)
+	{
+		ro_H2 = 0.0000001;
+		p_H2 = 0.0;
+	}
+	if (ro_H3 <= 0.0)
+	{
+		ro_H3 = 0.0000001;
+		p_H3 = 0.0;
+	}
+	if (ro_H4 <= 0.0)
+	{
+		ro_H4 = 0.0000001;
+		p_H4 = 0.0;
+	}
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->par[0].M_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+		+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+	this->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+		+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+	this->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+		nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+		nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+		nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+
+	q1 = this->par[0].M_u * this->par[0].k_u3;
+	q2 = this->par[0].M_v * this->par[0].k_v3;
+	q3 = this->par[0].M_T * this->par[0].k_T3;
 }
 
 

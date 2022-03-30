@@ -53,9 +53,9 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define Velosity_inf -2.54338 //-4.54127 //-2.54127
 #define M_inf 1.97009
 #define chi_ 1.0 //36.1059 // 36.1059
-#define chi_real 36.12
+#define chi_real 36.1275
 #define kurant  0.1
-#define Kn_  0.5 // 0.3  // 242.785									// Число Кнудсена
+#define Kn_  0.622171 // 0.5  // 242.785									// Число Кнудсена
 #define a_2 0.102578  // 0.10263
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
@@ -94,3 +94,5 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define Weyght 1000000.0  // Для весов чтобы не было потери точности
 #define eta_ 0.5    // параметр точности
 #define betta_ 1.0  // сжатие
+
+#define polusum false  // Берём лт полусумму источников или только один
