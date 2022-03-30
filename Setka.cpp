@@ -1918,11 +1918,12 @@ void Setka::Print_Sourse(void)
 
 void Setka::Print_Tecplot_MK(void)
 {
-	double r_o = 1.0;    // Размер расстояния
-	double ro_o = 1.0; // 0.06;   // Размер плотности
-	double ro_o_H = 1.0;    //0.18;   // Размер плотности
+	double r_o = RR_;    // Размер расстояния
+	double ro_o = 0.06; // 0.06;   // Размер плотности
+	double ro_o_H = 0.18;    //0.18;   // Размер плотности
 	double p_o = 1.0;    //1.0;   // Размер давления
-	double u_o = 1.0; // 10.38;   // Размер скорости
+	double u_o = 10.3799; // 10.38;   // Размер скорости
+	double T_o = 13054.0;
 
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
@@ -1968,10 +1969,10 @@ void Setka::Print_Tecplot_MK(void)
 			<< i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T << " " << //
 			i->par[0].II_u << " " << i->par[0].II_v << " " << i->par[0].II_T << " " << //
 			i->par[0].M_u << " " << i->par[0].M_v << " " << i->par[0].M_T << " " << //
-			i->par[0].H_n[0] << " " << i->par[0].H_u[0] << " " << i->par[0].H_v[0] << " " << i->par[0].H_T[0] << " " //
-			<< i->par[0].H_n[1] << " " << i->par[0].H_u[1] << " " << i->par[0].H_v[1] << " " << i->par[0].H_T[1] << " " //
-			<< i->par[0].H_n[2] << " " << i->par[0].H_u[2] << " " << i->par[0].H_v[2] << " " << i->par[0].H_T[2] << " " //
-			<< i->par[0].H_n[3] << " " << i->par[0].H_u[3] << " " << i->par[0].H_v[3] << " " << i->par[0].H_T[3] << //
+			i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_u[0] * u_o << " " << i->par[0].H_v[0] * u_o << " " << i->par[0].H_T[0] * T_o << " " //
+			<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_u[1] * u_o << " " << i->par[0].H_v[1] * u_o << " " << i->par[0].H_T[1] * T_o << " " //
+			<< i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_u[2] * u_o << " " << i->par[0].H_v[2] * u_o << " " << i->par[0].H_T[2] * T_o << " " //
+			<< i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " << i->par[0].H_T[3] * T_o << //
 			" " << i->par[0].k_u << " " << i->par[0].k_v << " " << i->par[0].k_T << //
 			" " << i->par[0].w_m[0] << //
 			" " << i->par[0].w_m[1] << //
@@ -1999,16 +2000,6 @@ void Setka::Print_Tecplot_MK(void)
 
 	for (auto& i : this->All_Cells)
 	{
-		double kk;
-		/*if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
-		{
-			kk = (chi_real / chi_);
-		}
-		else
-		{
-			kk = 1.0;
-		}*/
-		kk = 1.0;
 		num++;
 		if (num > this->M1 + this->M2 + this->M3 + this->M4)
 		{
@@ -2032,16 +2023,16 @@ void Setka::Print_Tecplot_MK(void)
 		}
 		double dist = sqrt(kv(x) + kv(y));
 		fout << x * r_o << " " << y * r_o << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
-			" " << i->par[0].ro * ro_o / kv(kk) << " " << 0.06 * (389.988 * 389.988) / (chi_real * chi_real) / (dist * dist) << " " << i->par[0].p * p_o << " " //
-			<< i->par[0].u * u_o * kk << " " << i->par[0].v * u_o * kk << " " << Max << " " << QQ << //
-			" " << i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_T[0] << " "//
-			<< i->par[0].H_u[0] << " " << i->par[0].H_v[0] << " " << Max_H1 << " " << T_H1 << " "//
-			<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_T[1] << " " //
-			<< i->par[0].H_u[1] << " " << i->par[0].H_v[1] << //
-			" " << i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_T[2] << " " //
-			<< i->par[0].H_u[2] << " " << i->par[0].H_v[2] << //
-			" " << i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_T[3] << " " //
-			<< i->par[0].H_u[3] << " " << i->par[0].H_v[3] << " " <<//
+			" " << i->par[0].ro * ro_o  << " " << 0.06 * (389.988 * 389.988) / (chi_real * chi_real) / (dist * dist) << " " << i->par[0].p * p_o << " " //
+			<< i->par[0].u * u_o  << " " << i->par[0].v * u_o << " " << Max << " " << QQ << //
+			" " << i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_T[0] * T_o << " "//
+			<< i->par[0].H_u[0] * u_o << " " << i->par[0].H_v[0] * u_o << " " << Max_H1 << " " << T_H1 << " "//
+			<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_T[1] * T_o << " " //
+			<< i->par[0].H_u[1] * u_o << " " << i->par[0].H_v[1] * u_o << //
+			" " << i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_T[2] * T_o << " " //
+			<< i->par[0].H_u[2] * u_o << " " << i->par[0].H_v[2] * u_o << //
+			" " << i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_T[3] * T_o << " " //
+			<< i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " <<//
 			(i->par[0].H_n[0] + i->par[0].H_n[1] + i->par[0].H_n[2] + i->par[0].H_n[3]) * ro_o_H << //
 			" " << i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T <<  endl;
 
@@ -3832,6 +3823,484 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	}
 }
 
+void Setka::Move_Setka_Calculate_3(const double& dt)
+{
+	// Для тестовой задачи с Дмитрием Борисовичем
+	double Vx, Vy, V;
+	double R2, r, R3, R4;
+
+	//double y_Outer = this->D_Rails[16]->Key_point[1]->y;
+
+	for (int jj = 0; jj < this->A_Rails.size(); jj++)
+	{
+		auto i = this->A_Rails[jj];
+		// Подвинем ключевые точки
+
+		double r = 90.0/RR_;
+
+		i->Key_point[0]->x2 = r * cos(i->s);
+		i->Key_point[0]->y2 = r * sin(i->s);
+
+		//cout << "Setka.cpp    " << jj << " " << i->Key_point[1]->Vx << " " << i->Key_point[1]->Vy << endl;
+		r = 130.0 / RR_ * 0.8 * (cos(i->s) + 1.5) / (cos(i->s) + 1.0);
+
+		i->Key_point[1]->x2 = r * cos(i->s);
+		i->Key_point[1]->y2 = r * sin(i->s);
+
+		r = 245.0 / RR_ * 2.0 * (1.0) / (cos(i->s) + 1.0);
+
+		i->Key_point[2]->x2 = r * cos(i->s);
+		i->Key_point[2]->y2 = r * sin(i->s);
+
+		i->Key_point[3]->x2 = i->Key_point[3]->x;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++) 
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++) 
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		//x = pow(R2 / R1_, 1.0 / (i->M1 - 1));
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+
+		//R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2)) - zazor;
+		R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
+
+		for (int j = 0; j < i->M2 - 1; j++)  // Передвинули точки до контакта
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);         // Равномерное распределение точек
+			i->All_point[i->M1 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + j]->y2 = r * sin(i->s);
+		}
+
+		//i->All_point[i->M1 + i->M2 - 2]->x2 = R3 * cos(i->s);   // Устанавливаем точку до контакта 
+		//i->All_point[i->M1 + i->M2 - 2]->y2 = R3 * sin(i->s);
+		R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
+
+		//i->All_point[i->M1 + i->M2]->x2 = R3 * cos(i->s);   // Устанавливаем точку после контакта 
+		//i->All_point[i->M1 + i->M2]->y2 = R3 * sin(i->s);
+
+		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
+
+
+		for (int j = 0; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
+		{
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);         // Равномерное распределение точек
+			i->All_point[i->M1 + i->M2 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + i->M2 + j]->y2 = r * sin(i->s);
+		}
+
+		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
+
+		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+		for (int j = 0; j < i->M4; j++)
+		{
+			//x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.03 * x) * (R5_ - R4);
+			//r = R4 *  pow( 1.0 * (j + 2), x * (j + 1));  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			//r = R4 + (R5_ - R4) * (j) / (i->M4 - 1);   // равномерно
+			x = (j + 1) * 1.0 / (i->M4);
+			double dd = 1.5708 / sqrt(1.0 - 1.0 / 1.76);
+			r = R4 + pow(x, 1.76 * (1.0 - kv(i->s / dd))) * (R5_ - R4);
+			//r = r + (j + 1) * dd;
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = r * cos(i->s);
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r * sin(i->s);
+		}
+	}
+
+
+	//auto i_ = this->A_Rails[this->A_Rails.size() - 1];
+	//double R_distant_shok_1 = sqrt(kv(i_->Key_point[0]->x2) + kv(i_->Key_point[0]->y2));  // n_inner_shock
+
+	//auto i_ = this->B_Rails[this->B_Rails.size() - 1];
+	//double R_distant_shok_1 = sqrt(kv(i_->Key_point[0]->x) + kv(i_->Key_point[0]->y));
+	//cout << "Setka.cpp    " << R_distant_shok_1 << endl;
+
+	for (int jj = 0; jj < this->B_Rails.size(); jj++)
+	{
+		auto i = this->B_Rails[jj];
+		// Подвинем ключевые точки   0 - внутренняя ударная волна
+
+		double r = 90.0 / RR_;
+		i->Key_point[0]->x2 = r * cos(i->s);
+		i->Key_point[0]->y2 = r * sin(i->s);
+
+		double xx = i->Key_point[0]->x2;
+		double yy = 0.0;
+		double y1, y2;
+		y1 = 0.0;
+		y2 = 3000 / RR_;
+		double y0;
+		double t = 0.0;
+		while (fabs(y1 - y2) > 0.001 / RR_)
+		{
+			y0 = (y1 + y2) / 2.0;
+			t = polar_angle(xx, y0);
+			r = 130.0 / RR_ * 0.8 * (cos(t) + 1.5) / (cos(t) + 1.0);
+			if (kv(xx) + kv(y0) - kv(r) > 0.0)
+			{
+				y2 = y0;
+			}
+			else
+			{
+				y1 = y0;
+			}
+		}
+		yy = y0;
+
+
+		i->Key_point[1]->x2 = xx;
+		i->Key_point[1]->y2 = yy;
+
+		y1 = 0.0;
+		y2 = 3000 / RR_;
+		while (fabs(y1 - y2) > 0.001 / RR_)
+		{
+			y0 = (y1 + y2) / 2.0;
+			t = polar_angle(xx, y0);
+			r = 245.0 / RR_ * 2.0 * (1.0) / (cos(t) + 1.0);
+			if (kv(xx) + kv(y0) - kv(r) > 0.0)
+			{
+				y2 = y0;
+			}
+			else
+			{
+				y1 = y0;
+			}
+		}
+		yy = y0;
+
+
+		i->Key_point[2]->x2 = xx;
+		i->Key_point[2]->y2 = yy;
+
+		i->Key_point[3]->x2 = i->Key_point[0]->x2;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+
+
+		R2 = i->Key_point[0]->y2;
+		R3 = i->Key_point[1]->y2;
+
+		for (int j = 0; j < i->M2 - 1; j++)
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);
+			i->All_point[i->M1 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + j]->y2 = r;
+		}
+
+		//i->All_point[i->M1 + i->M2 - 2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку до контакта 
+		//i->All_point[i->M1 + i->M2 - 2]->y2 = R3 ;
+		R3 = i->Key_point[1]->y2;
+
+		//i->All_point[i->M1 + i->M2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку после контакта 
+		//i->All_point[i->M1 + i->M2]->y2 = R3 ;
+
+		R4 = i->Key_point[2]->y2;
+
+		for (int j = 0; j < i->M3 - 1; j++)
+		{
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			i->All_point[i->M1 + i->M2 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + i->M2 + j]->y2 = r;
+		}
+
+		//x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+
+		for (int j = 0; j < i->M4; j++)
+		{
+			//x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * (0.03 + 0.19 * jj / (this->B_Rails.size() - 1.0)) * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->x2 = i->Key_point[0]->x2;
+			i->All_point[i->M1 + i->M2 + i->M3 + j]->y2 = r;
+		}
+
+	}
+
+	for (auto& i : this->C_Rails)
+	{
+
+		double r = 90.0 / RR_;
+		i->Key_point[0]->x2 = r * cos(i->s);
+		i->Key_point[0]->y2 = r * sin(i->s);
+
+		i->Key_point[1]->x2 = Left_; // i->Key_point[1]->x;
+		i->Key_point[1]->y2 = i->Key_point[1]->y;
+
+		R2 = sqrt(kv(i->Key_point[0]->x2) + kv(i->Key_point[0]->y2));
+
+		//double x;
+		//x = pow(R11_ / R1_, 1.0 / n_inner);
+		//for (int j = 0; j <= n_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R1_ * pow(x, j);
+		//	//r = R1_ + (R11_ - R1_) * j / (n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+
+		//for (int j = n_inner + 1; j <= m_inner; j++)  // Передвинули точки до ударной волны
+		//{
+		//	r = R11_ + (R111_ - R11_) * (j - n_inner) / (m_inner - n_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		//for (int j = m_inner + 1; j < i->M1 - 1; j++)  // Передвинули точки до ударной волны
+		//{
+		//	//r = R11_ * pow(x, j - 7);
+		//	r = R111_ + (R2 - R111_) * (j - m_inner) / (i->M1 - 1 - m_inner);
+		//	i->All_point[j]->x2 = r * cos(i->s);
+		//	i->All_point[j]->y2 = r * sin(i->s);
+		//}
+
+		double x;
+
+		for (int j = 0; j < n_inner; j++)
+		{
+			x = j * 1.0 / (n_inner);
+			r = R1_ + pow(x, 1.3) * (R111_ - R1_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		for (int j = n_inner; j < i->M1 - 1; j++)
+		{
+			x = (j - n_inner) * 1.0 / (i->M1 - 1 - n_inner);
+			r = R111_ + pow(x, 1.05) * (R2 - R111_);
+			//r = R1_ + (R11_ - R1_) * j / (n_inner);
+			i->All_point[j]->x2 = r * cos(i->s);
+			i->All_point[j]->y2 = r * sin(i->s);
+		}
+
+		R2 = i->Key_point[0]->x2;
+
+		R3 = i->Key_point[1]->x2;
+
+		x = pow(R3 / (R2), 1.0 / (i->M2));
+
+		for (int j = i->M1; j < i->All_point.size(); j++)
+		{
+			r = R2 * pow(x, j + 1 - i->M1);
+			i->All_point[j]->x2 = r;
+			i->All_point[j]->y2 = i->Key_point[0]->y2;
+		}
+	}
+
+	for (int jj = 0; jj < this->D_Rails.size(); jj++)
+	{
+		double x;
+		// Подвинем ключевые точки
+
+		auto i = this->D_Rails[jj];
+
+		double xx = i->Key_point[0]->x2;
+		double yy = 0.0;
+		double y1, y2;
+		y1 = 0.0;
+		y2 = 3000 / RR_;
+		double y0;
+		double t = 0.0;
+		while (fabs(y1 - y2) > 0.001 / RR_)
+		{
+			y0 = (y1 + y2) / 2.0;
+			t = polar_angle(xx, y0);
+			r = 130.0 / RR_ * 0.8 * (cos(t) + 1.5) / (cos(t) + 1.0);
+			if (kv(xx) + kv(y0) - kv(r) > 0.0)
+			{
+				y2 = y0;
+			}
+			else
+			{
+				y1 = y0;
+			}
+		}
+		yy = y0;
+
+
+		i->Key_point[1]->x2 = xx;
+		i->Key_point[1]->y2 = yy;
+
+
+		y1 = 0.0;
+		y2 = 3000 / RR_;
+		while (fabs(y1 - y2) > 0.001 / RR_)
+		{
+			y0 = (y1 + y2) / 2.0;
+			t = polar_angle(xx, y0);
+			r = 245.0 / RR_ * 2.0 * (1.0) / (cos(t) + 1.0);
+			if (kv(xx) + kv(y0) - kv(r) > 0.0)
+			{
+				y2 = y0;
+			}
+			else
+			{
+				y1 = y0;
+			}
+		}
+		yy = y0;
+
+
+		i->Key_point[2]->x2 = xx;
+		i->Key_point[2]->y2 = yy;
+
+
+		i->Key_point[3]->x2 = i->Key_point[0]->x2;
+		i->Key_point[3]->y2 = i->Key_point[3]->y;
+
+		R2 = i->Key_point[0]->y2;
+
+		R3 = i->Key_point[1]->y2;
+
+		for (int j = 0; j < this->M2 - 1; j++)
+		{
+			r = R2 + (R3 - R2) * (j + 1) / (i->M2);
+			i->All_point[j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[j + 1]->y2 = r;
+		}
+
+		//i->All_point[1 + i->M2 - 2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку до контакта 
+		//i->All_point[1 + i->M2 - 2]->y2 = R3;
+		R3 = i->Key_point[1]->y2;
+
+		//i->All_point[1 + i->M2]->x2 = i->Key_point[0]->x2;   // Устанавливаем точку после контакта 
+		//i->All_point[1 + i->M2]->y2 = R3;
+
+		R4 = i->Key_point[2]->y2;
+
+		for (int j = 0; j < this->M3 - 1; j++)
+		{
+			//r = R3 + (R4 - R3) * (j) / (i->M3 - 1);
+			//x = (j) / (1.0 * (i->M3 - 1));
+			//r = R3 + (s_k * x + 3.0 * x * x - 3.0 * s_k * x * x - 2.0 * x * x * x + 2.0 * s_k * x * x * x) * (R4 - R3);
+			r = R3 + (R4 - R3) * (j + 1) / (i->M3);
+			i->All_point[this->M2 + j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[this->M2 + j + 1]->y2 = r;
+		}
+
+		//double x = pow(R5_ / R4, 1.0 / (2.0 * this->M4));
+		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
+		//r = R4;
+		for (int j = 0; j < this->M4; j++)
+		{
+			//double x = (j + 1.0) / (1.0 * i->M4);
+			//r = R4 + (kv(x) * kv(x) + (1.0 - x) * 0.22 * x) * (R5_ - R4);
+			//r = R4 * pow(kv(x), j + 1);  //R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			r = R4 + (R5_ - R4) * (j + 1) / (i->M4);
+			i->All_point[this->M2 + this->M3 + j + 1]->x2 = i->Key_point[0]->x2;
+			i->All_point[this->M2 + this->M3 + j + 1]->y2 = r;
+		}
+
+
+	}
+}
+
 void Setka::Move_Setka_Calculate_2(const double& dt)
 {
 	double Vx, Vy, V;
@@ -4641,34 +5110,56 @@ void Setka::Move_Setka_Calculate(const double& dt)
 void Setka::Init_conditions(void)
 {
 	double x, y, dist;
-	double ro = (389.988 * 389.988) / (chi_ * chi_);
-	double P_E = ro * chi_ * chi_ / (ggg * 10.0 * 10.0);
+	double ro = 1.0/RR_;
+
 
 	for (auto& i : this->All_Cells)
 	{
 		i->Get_Center(x, y);
 		dist = sqrt(kv(x) + kv(y));
-		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));
-		//if (dist < 1)//(i->type == C_centr)
-		//{
-		//	i->par[1] = i->par[0] = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
-		//	0.001666666, (0.001666666 * chi_real * chi_real / (ggg * 50.0 * 50.0))* pow(1.0 / dist, 2.0 * ggg), chi_real* x / dist, chi_real* y / dist, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-		//	0.000001, 0.000001, 0.0, 0.0};
-		//}
-		//if (dist <= 110)
-		//{
-		//	i->par[0] = { ro / (dist * dist), P_E * pow(1.0 / dist, 2.0 * ggg), chi_ * x / dist, chi_ * y / dist, ro / (dist * dist),//
-		//(2.0 * (sigma(chi_real) * 389.988) / (2.0 * Kn_ * chi_real))* (1.0 / dist - 0.1 / kv(dist)), 0.000001, chi_real * x / dist, chi_real * y / dist, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-		//	0.000001, 0.000001, 0.0, 0.0};
-		//	i->par[1] = i->par[0];
-		//}
-		//else
-		//{
-		i->par[0] = { 1.0, 1.0, Velosity_inf, 0.0, 100.0,//
-		0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-		0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-		i->par[1] = i->par[0];
-		//}
+
+		double p_inf = 1.0;
+		double ro_inf = 1.0;
+		double v_inf = 2.54338;
+		double rr = 1.0 / RR_;
+		double roe = 116.667;
+		double pe = 913.546;
+		double Ve = 36.1275;
+		
+		if (i->type == C_5)
+		{
+			i->par[0] = { ro_inf, p_inf, Velosity_inf, 0.0, 100.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+			i->par[1] = i->par[0];
+		}
+		else if (i->type == C_4)
+		{
+			double xx = x - 1300.0 / RR_;
+			double yy = y - 0.0;
+			double n = sqrt(kv(xx) + kv(yy));
+			xx = xx / n;
+			yy = yy / n;
+
+			i->par[0] = { 2.0 * ro_inf, 7.0 * p_inf, 0.25 * v_inf * xx, 0.25 * v_inf * yy, 100.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+			i->par[1] = i->par[0];
+		}
+		else if (i->type == C_3 || i->type == C_2)
+		{
+			i->par[0] = { ro_inf / 20.0, p_inf * 10.0, v_inf * x / dist, v_inf * y / dist, 100.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+			i->par[1] = i->par[0];
+		}
+		else 
+		{
+			i->par[0] = { roe * kv(rr/dist), pe * pow(rr / dist,2.0 * ggg), Ve * x / dist, Ve * y / dist, 100.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
+			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+			i->par[1] = i->par[0];
+		}
 	}
 }
 
@@ -10882,10 +11373,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 100; //250  6000;  25
-	this->Number2 = 411 * 2; // 50; // 50;
+	this->Number1 = 411 * 250; //250  6000;  25
+	this->Number2 = 411 * 50; // 50; // 50;
 	this->Number3 = 411 * 5; // 5;
-	this->Number4 = 411 * 3; // 300; //  300  411 * 1650; // 135 * 40; // 400;
+	this->Number4 = 411 * 300; // 300; //  300  411 * 1650; // 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -10924,8 +11415,8 @@ void Setka::M_K_prepare(void)
 	double kas = 1.0; // 1.0    0.3 * 0.4  было 0.01 // 0.00025; //0.001;
 	cout << "Setka.cpp    " << "kas = " << kas << endl;
 	double ss1 = 1.0; // * 0.5;
-	double ss2 = 1.0; // 0.007; // * 0.5;  
-	double ss3 = 1.0; // 0.4; // 0.4;
+	double ss2 = 0.007; // 0.007; // * 0.5;  
+	double ss3 = 0.4; // 0.4; // 0.4;
 
 	//double kas = 0.25 * mu1 * 100.0 * 10.0 * 0.25; // 0.00025; //0.001;
 	//double ss1 = 1.0;
@@ -12662,7 +13153,7 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		spherical_skorost(y_ex, z_ex, x_ex, Vy, Vz, Vx, Vr, Vphi, Vthe);
 		double mu3;
 
-		if (Ur / cp > 3.0)//(area2 == 0 || Ur/cp > 3.0)   // Без геометрического расщепления
+		if (area2 == 0 || Ur/cp > 3.0)   // Без геометрического расщепления
 		{
 			aa:
 			bool kj = true;
@@ -12685,13 +13176,13 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 			if (Wr[0] < 0.0)
 			{
 				//wwt = sqrt(kv(Wphi[0]) + kv(Wthe[0]));
-				//cout << "Setka.cpp    " << "Fly_ex_Korol   "<< "Letit vniz  " << x_ex << " " << rr << " " << mu3 << " " << area << " " << area2 << endl;
-				//goto aa;
+				cout << "Setka.cpp    " << "Fly_ex_Korol   "<< "Letit vniz  " << x_ex << " " << rr << " " << mu3 << " " << area << " " << area2 << endl;
+				goto aa;
 				time_do_peregel = (-aa * x_ex - bb * y_ex - cc * z_ex)/kvv(aa,bb,cc);
 				peregel = sqrt(kvv(x_ex + aa * time_do_peregel, y_ex + bb * time_do_peregel, z_ex + cc * time_do_peregel));
 				ii_z = this->geo_zones(peregel);                     // Номер зоны перегелия атома
 				ii_alp = alpha_zones(x_ex + aa * time_do_peregel, sqrt(kvv(y_ex + bb * time_do_peregel, z_ex + cc * time_do_peregel, 0.0)));
-				//kj = false;   // Убиваем траекторию, иначе может испортить статистику
+				kj = false;   // Убиваем траекторию, иначе может испортить статистику
 			}
 			else
 			{

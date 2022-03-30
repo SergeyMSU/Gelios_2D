@@ -102,7 +102,7 @@ double linear(const double& x1, const double& t1, const double& x2, const double
 	}
 	else
 	{
-		// Новая процедура с сжатием
+		// Новая процедура со сжатием
 		double dUl = (t2 - t1) / (x2 - x1);
 		double dUr = (t3 - t2) / (x3 - x2);
 		return t2 + 0.5 * ((1.0 - eta_) * minmod(dUl, betta_ * dUr) + (1.0 + eta_) * minmod(betta_ * dUl, dUr)) * (y - x2);

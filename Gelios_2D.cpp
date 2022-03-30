@@ -6,6 +6,38 @@ int main()
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
+    Setka* CC;
+
+    CC = new Setka();
+    CC->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");
+
+   
+    CC->Move_Setka_Calculate_3(0.0);
+    for (auto& i : CC->All_Points)
+    {
+        i->x = i->x2;
+        i->y = i->y2;
+        i->Vx = 0.0;
+        i->Vy = 0.0;
+        i->count = 0;
+    }
+
+
+    CC->TVD_prepare();
+    CC->Proverka();
+
+    CC->Init_conditions();
+
+    CC->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    CC->MK_start_new();
+  
+    //CC->Print_Gran("surface6_test.txt");
+    CC->Print_Tecplot_MK();
+    //CC->Print_cell2();
+    CC->Save_Setka_ALL_ALPHA("vers_test1.txt");
+
+    exit(-1);
+
     //Проверка распадника
     //double P[4];
     //double PQ;
