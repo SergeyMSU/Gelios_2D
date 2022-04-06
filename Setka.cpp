@@ -1923,7 +1923,7 @@ void Setka::Print_Tecplot_MK(void)
 	double ro_o_H = 0.18;    //0.18;   // Размер плотности
 	double p_o = 1.0;    //1.0;   // Размер давления
 	double u_o = 10.3799; // 10.38;   // Размер скорости
-	double T_o = 13054.0;
+	double T_o = 6527.0;
 
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
@@ -11374,9 +11374,9 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
 	this->Number1 = 411 * 250; //250  6000;  25
-	this->Number2 = 411 * 50; // 50; // 50;
-	this->Number3 = 411 * 5; // 5;
-	this->Number4 = 411 * 300; // 300; //  300  411 * 1650; // 135 * 40; // 400;
+	this->Number2 = 411 * 1; // 50; // 50;
+	this->Number3 = 411 * 1; // 5;
+	this->Number4 = 411 * 1; // 300; //  300  411 * 1650; // 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11414,8 +11414,8 @@ void Setka::M_K_prepare(void)
 
 	double kas = 1.0; // 1.0    0.3 * 0.4  было 0.01 // 0.00025; //0.001;
 	cout << "Setka.cpp    " << "kas = " << kas << endl;
-	double ss1 = 1.0; // * 0.5;
-	double ss2 = 0.007; // 0.007; // * 0.5;  
+	double ss1 = 1.0 * 2; // 1.0 * 0.5;
+	double ss2 = 0.007 * 3; // 0.007; // * 0.5;  
 	double ss3 = 0.4; // 0.4; // 0.4;
 
 	//double kas = 0.25 * mu1 * 100.0 * 10.0 * 0.25; // 0.00025; //0.001;

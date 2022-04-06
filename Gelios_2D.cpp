@@ -117,7 +117,7 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // 17       IEX
+    SS->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // 17       IEX    vers_test1.txt
     SS->Init_conditions();
 
     SS->TVD_prepare();
