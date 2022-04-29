@@ -410,20 +410,23 @@ double MKmethod::h_mho(const double& x, const double& c)
 double MKmethod::play_mho(Sensor* sens, const double& c)
 {
 	//cout << c << endl;
+
 	double x;
 	do
 	{
-		x = sens->MakeRandom() * pi_;
+		x = 2.0 * sens->MakeRandom() * pi_;
 	} while (exp(2.0 * c * cos(x)) < sens->MakeRandom() * exp(2.0 * fabs(c)) );
 
-	if (sens->MakeRandom() < 0.5)
+	return x;
+
+	/*if (sens->MakeRandom() < 0.5)
 	{
 		return x;
 	}
 	else
 	{
 		return (2.0 * pi_ - x);
-	}
+	}*/
 }
 
 double MKmethod::play_mho2(Sensor* sens, const double& c, const double& p, const double& p1)
@@ -1296,11 +1299,12 @@ bool MKmethod::Change_Velosity(Sensor* sens, const double& Ur, const double& Uth
 		if (X > 7)
 		{
 			double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+			//mu_[i] = (u * sigma(u) / (uu * sigma(uu))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 			mu_[i] = (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 		}
 		else
 		{
-			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp)/cp)) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 		}
 		//mu_[i] = (u * sigma2(u, cp) / (IS)) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (this->norm_mho(c)) / (1.0 + kv(c));
 		//cout << IS << " " << uu * sigma2(uu, cp) << endl;
@@ -1877,6 +1881,7 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 	// Как первая часть, но розыгрышь идёт по-частям
 {
 	double X = sqrt(kvv(Vr - Ur, Vthe - Uthe, Vphi - Uphi));
+	double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
 	//double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
 
 	//double IS = this->Int_cp_1(X);
@@ -1986,6 +1991,8 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 		Wa_[i] = Wa;
 	}
 
+
+
 	// Считаем веса и Mho
 	for (int i = 0; i < I; i++)
 	{
@@ -2018,12 +2025,17 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 
 		if (X > 7)
 		{
-			double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+			//double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+			//mu_[i] = (u * sigma(u) / (uu * sigma(uu))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 			mu_[i] = (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+			/*if (X < 7)
+			{
+				cout << (uu * sigma2(uu, cp)) << " " << this->int_1(X * cp, cp)/cp << " " << X << " " << cp << endl;
+			}*/
 		}
 		else
 		{
-			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp) / cp)) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
 		}
 	}
 
@@ -2089,12 +2101,24 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 		uuu = sqrt(kvv(u1, u2, u3));
 		yy = sqrt(kvv(y1, y2, y3));
 		h = ((uuu * sigma2(uuu, cp)) / (sigma2(X, cp) * (X + yy)));
-	} while (h < ksi6); // || (v1 < 0.0 && kv(v2) + kv(v3) < gg * kv(v1)));
+		/*if (h > 1.0)
+		{
+			cout << "ERROR h  2096 nhsbfsbfuffr" << endl;
+			exit(-22);
+		}*/
+	} while (h < ksi6); //|| (v1 < 0.0 && kv(v2) + kv(v3) < gg * kv(v1)));
 
 
 	Wr_[I] = v1;
 	Wthe_[I] = v2;
 	Wphi_[I] = v3;
+
+	/*mu_[I] = 1.0;
+	for (int i = 0; i < I; i++)
+	{
+		mu_[I] = mu_[I] - mu_[i];
+	}
+	return true;*/
 
 	if (Wr_[I] >= 0.0 || kv(Wthe_[I]) + kv(Wphi_[I]) > gg * kv(Wr_[I]))
 	{

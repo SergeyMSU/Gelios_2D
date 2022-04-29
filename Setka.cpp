@@ -2034,7 +2034,7 @@ void Setka::Print_Tecplot_MK(void)
 			" " << i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_T[3] * T_o << " " //
 			<< i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " <<//
 			(i->par[0].H_n[0] + i->par[0].H_n[1] + i->par[0].H_n[2] + i->par[0].H_n[3]) * ro_o_H << //
-			" " << i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T <<  endl;
+			" " << i->par[0].I_u * 0.00001107 << " " << i->par[0].I_v * 0.00001107 << " " << i->par[0].I_T * 11.4767 <<  endl;
 
 	}
 	fout.close();
@@ -5148,7 +5148,7 @@ void Setka::Init_conditions(void)
 		}
 		else if (i->type == C_3 || i->type == C_2)
 		{
-			i->par[0] = { ro_inf / 20.0, p_inf * 10.0, v_inf * x / dist, v_inf * y / dist, 100.0,//
+			i->par[0] = { ro_inf / 20.0, p_inf * 10.0, 0.1 * Ve * x / dist, 0.1 * Ve * y / dist, 100.0,//
 			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
 			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 			i->par[1] = i->par[0];
@@ -11374,9 +11374,9 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
 	this->Number1 = 411 * 250; //250  6000;  25
-	this->Number2 = 411 * 1; // 50; // 50;
-	this->Number3 = 411 * 1; // 5;
-	this->Number4 = 411 * 1; // 300; //  300  411 * 1650; // 135 * 40; // 400;
+	this->Number2 = 411 * 30; // 30; // 50;
+	this->Number3 = 411 * 5; // 5;
+	this->Number4 = 411 * 200; // 200; //  300  411 * 1650; // 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11414,9 +11414,9 @@ void Setka::M_K_prepare(void)
 
 	double kas = 1.0; // 1.0    0.3 * 0.4  было 0.01 // 0.00025; //0.001;
 	cout << "Setka.cpp    " << "kas = " << kas << endl;
-	double ss1 = 1.0 * 2; // 1.0 * 0.5;
-	double ss2 = 0.007 * 3; // 0.007; // * 0.5;  
-	double ss3 = 0.4; // 0.4; // 0.4;
+	double ss1 = 3.0; // 1.0 * 0.5;
+	double ss2 = 0.02; // 0.007; // * 0.5;    0.03
+	double ss3 = 0.3; // 0.4; // 0.4;
 
 	//double kas = 0.25 * mu1 * 100.0 * 10.0 * 0.25; // 0.00025; //0.001;
 	//double ss1 = 1.0;
@@ -11482,9 +11482,9 @@ void Setka::M_K_prepare(void)
 	Mu[1][3] = Mu[3][3] * ss2;
 	Mu[1][4] = Mu[3][4] * ss2;
 	Mu[1][5] = Mu[3][5] * ss2;
-	Mu[1][6] = Mu[3][6] * ss2;
-	Mu[1][7] = Mu[3][7] * ss2;
-	Mu[1][8] = Mu[3][8] * ss2;
+	Mu[1][6] = Mu[3][6] * ss2 * 2.0;
+	Mu[1][7] = Mu[3][7] * ss2 * 2.0;
+	Mu[1][8] = Mu[3][8] * ss2 * 2.0;
 
 	Mu[2][0] = Mu[3][0] * ss3;
 	Mu[2][1] = Mu[3][1] * ss3;
@@ -11495,6 +11495,15 @@ void Setka::M_K_prepare(void)
 	Mu[2][6] = Mu[3][6] * ss3;
 	Mu[2][7] = Mu[3][7] * ss3;
 	Mu[2][8] = Mu[3][8] * ss3;
+
+	this->V_r_stat = new double[100000];
+	this->V_t_stat = new double[100000];
+	this->V_p_stat = new double[100000];
+	this->mu_stat = new double[100000];
+	this->phi_stat = new double[100000];
+	this->num_stat = new int[100000];
+	this->number_stat = 0;
+	this->number_stat_2 = 0;
 }
 
 int Setka::geo_zones(const double& r, const double& k)
@@ -11879,6 +11888,11 @@ void Setka::MK_start_new(void)
 	double Y = fabs(Velosity_inf);
 	int st = 1;
 
+	ofstream fout;
+	fout.open("stat.txt");
+
+
+
 	//omp_set_num_threads(12);
 
 #pragma omp parallel for // num_threads(12)
@@ -11898,11 +11912,30 @@ void Setka::MK_start_new(void)
 			cout << "Setka.cpp    " << "Mk_start_new   " << "Wright weyght   " << mu1 << " " << mu2 << " " << mu3 << " " << mu4 << endl;
 			mut_1.unlock();
 		}
+
+		// ѕечать статистики в файл
+		if (omp_get_thread_num() == 0)
+		{
+			this->mut_stat.lock();
+			for (int i = this->number_stat_2; i < this->number_stat; i++)
+			{
+				fout << V_r_stat[i] << " " << V_t_stat[i] << " " << V_p_stat[i] << " " << mu_stat[i] << " " << phi_stat[i] << " " << //
+					num_stat[i] << endl;
+			}
+
+			if (this->number_stat > 90000)
+			{
+				this->number_stat = 0;
+			}
+			this->number_stat_2 = this->number_stat;
+			this->mut_stat.unlock();
+		}
+
 		Sensor* sens1 = Sensors[2 * index];
 		Sensor* sens2 = Sensors[2 * index + 1];
 		MKmethod MK = MKmethod();
 		mut_1.lock();
-		cout << "Setka.cpp    " << "Mk_start_new   " << st << " potok  is  411;  index = " << index << "   k1 = " << this->k_1 << endl;
+		cout << "Setka.cpp    " << "Mk_start_new   " << st << " potok  is  411;  index = " << index << "  nomer = " << omp_get_thread_num() << "   k1 = " << this->number_stat << endl;
 		st++;
 		mut_1.unlock();
 		double x, y, z;
@@ -11926,7 +11959,7 @@ void Setka::MK_start_new(void)
 				bool bb = MK.Init_Parametrs(sens1, mu, Wt, Wp, Wr, X);
 				//cout << "Setka.cpp    " << "Mk_start_new   " << "B " << endl;
 
-				for (int i = 0; i <= I_; i++) // I_
+				for (int i = 0; i <= I_; i++) // I_  от 0 было
 				{
 					sin_ = sqrt(1.0 - kv(X[i]));
 					x = (Rmax_ - 3.0 / RR_) * X[i];
@@ -11957,6 +11990,10 @@ void Setka::MK_start_new(void)
 						}
 
 						Fly_exchenge_Imit_Korol(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1, ii_z, ii_alp, true);
+
+						//Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
+						//	Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
+						
 						//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
 					}
 				}
@@ -11990,7 +12027,7 @@ void Setka::MK_start_new(void)
 			//	Point, mu2, 3, false, mu2, I_ - 1, J_ - 1, false);
 
 			Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
-				Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, mu2);
+				Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2);
 
 			//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
 			//	Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2, I_ - 1, ii);
@@ -12032,12 +12069,14 @@ void Setka::MK_start_new(void)
 			//Fly_exchenge_Imit_Korol(MK, sens2, -0.1/RR_, y, z, a, b, c, Point, mu4, 3, false, mu4, I_ - 1, J_ - 1, true);
 			
 			Fly_exchenge_Imit_Korol_2(MK, sens2, -0.5 / RR_, y, z, a, b, c, Point, mu4, -log(1.0 - sens1->MakeRandom()), //
-				0.0, mu4);
+				0.0, 3, mu4);
 			//Fly_exchenge_Imit(MK, sens2, -0.01 / RR_, y, z, a, b, c, Point, mu4, -log(1.0 - sens1->MakeRandom()), 0.0, //
 			//	3, mu4, I_ - 1, ii);
 		}
 	}
 
+
+	fout.close();
 
 	for (auto& k : this->All_Cells)
 	{
@@ -12605,11 +12644,12 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 // Vx ... -   скорость лет€щего нейтрального атома
 // now -      текуща€ €чейка
 // mu -       вес нейтрального атома
-// area -     в какой области летит атом
+// area -     какой атом летит
 // mu_start - начальный вес атома при инициализации (чтобы понимать, сколько от исходного осталось)
 // to_I - в какую область предназначалс€ атом
 {
 	Cell* next_mb = nullptr;
+
 	// јлгоритм вырубани€ лишних траектори (траектории вырубаютс€ при пересечении новой зоны, далее 
 	// вес лмбо увеличиваетс€, либо частица уничтожаетс€)
 	// Ќе уверен, что to_I бывает больше, чем now->zona, кажетс€ не должно такого быть
@@ -12933,6 +12973,7 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 	double vy = now->par[0].v;
 	double ro = now->par[0].ro;
 
+
 	double t_ex = 0.0;									// врем€ до перезар€дки
 	// time - врем€ нахождени€ атома в €чейке
 	t2 = time;									// врем€ после перезар€дки (будет ниже)
@@ -12957,39 +12998,34 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		double kappa = 0.0;
 		//drob = min(fabs(polar_angle(y_0, z_0) - polar_angle(y_0 + time * Vy, z_0 + time * Vz)) / 0.017 + 5.0, 80.0);
 
-		if (y_start < 40.0/RR_)
-		{
-			drob = 30.0;  // 30.0
-		}
-		else if (y_start < 60.0 / RR_)
-		{
-			drob = 20.0;  // 20.0
-		}
-		else if (y_start < 80.0 / RR_)
-		{
-			drob = 15.0;
-		}
-		else if (y_start < 120.0 / RR_)
-		{
-			drob = 10.0;
-		}
+		//if (y_start < 40.0/RR_)
+		//{
+		//	drob = 30.0;  // 30.0
+		//}
+		//else if (y_start < 60.0 / RR_)
+		//{
+		//	drob = 20.0;  // 20.0
+		//}
+		//else if (y_start < 80.0 / RR_)
+		//{
+		//	drob = 15.0;
+		//}
+		//else if (y_start < 120.0 / RR_)
+		//{
+		//	drob = 10.0;
+		//}
 
-		double vy_ = vy;
 
 		if (true)
 		{
 
-			for (double tt = 0.0; tt < time * 0.99; tt += time / drob)
+			for (double tt = 0.0; tt < time * 0.98; tt += time / drob)
 			{
-				vy_ = vy;
 				double yy = sqrt(kv(y_0 + (tt + time / (2.0 * drob)) * Vy) + kv(z_0 + (tt + time / (2.0 * drob)) * Vz));
 
-				if (now->axis_ == true && yy < now->y_ax)
-				{
-					vy_ = vy * yy / now->y_ax;
-				}
 				alpha = polar_angle(y_0 + (tt + time / (2.0 * drob)) * Vy, z_0 + (tt + time / (2.0 * drob)) * Vz);
-				u = sqrt(kvv(Vx - vx, Vy - vy_ * cos(alpha), Vz - vy_ * sin(alpha)));
+				u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+
 
 				if (u / cp > 7.0)
 				{
@@ -13000,6 +13036,9 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 				else
 				{
 					nu_ex = (ro * MK.int_1(u, cp)) / Kn_;        // ѕробуем вычисл€ть интеграллы численно
+
+					//uz = Velosity_1(u, cp);
+					//cout << (uz * sigma(uz)) << " " << MK.int_1(u, cp) << " " << u << " " << cp << endl;
 				}
 				kappa += (nu_ex * time / drob);
 			}
@@ -13008,11 +13047,15 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		{
 			alpha = polar_angle(y_0, z_0);
 			u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
-			uz = Velosity_1(u, cp);
-			//double IS = MK.Int_cp_1(u / cp);
-			nu_ex = (ro * uz * sigma(uz)) / Kn_;
-			//nu_ex = (ro * IS) / Kn_;
-			//kappa = (nu_ex * time) / Kn_;
+			if (u / cp > 7.0)
+			{
+				uz = Velosity_1(u, cp);
+				nu_ex = (ro * uz * sigma(uz)) / Kn_;
+			}
+			else
+			{
+				nu_ex = (ro * MK.int_1(u, cp)) / Kn_;        // ѕробуем вычисл€ть интеграллы численно
+			}
 			kappa = (nu_ex * time);
 		}
 		
@@ -13040,28 +13083,109 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		}
 
 		double r = sqrt(kvv(x_ex, y_ex, z_ex));
-
-		double rr = sqrt(kvv(0.0, y_ex, z_ex));
 		double all = polar_angle(x_ex, sqrt(kv(y_ex) + kv(z_ex)));
 
-		vy_ = vy;
-		if (now->axis_ == true && rr < now->y_ax)
-		{
-			vy_ = vy * rr / now->y_ax;
-		}
+		// дл€ сбора статистики
+		//if (r < 100.0/RR_ && r > 60.0 / RR_)// && fabs(mu) > Mu[area][now->zona] * mu_start * 0.3 * sin(all))
+		//{
+		//	bool sec = false;
+		//	bool sec2 = false;
+		//	double tt;
+		//	double a1 = Vx * x_0 + Vy * y_0 + Vz * z_0;
+		//	double a2 = kvv(Vx, Vy, Vz);
+		//	double a3 = kvv(x_0, y_0, z_0) - kv(80.0 / RR_);
+		//	double t1 = (-2.0 * a1 + sqrt(4.0 * a1 * a1 - 4.0 * a2 * a3)) / (2.0 * a2);
+		//	double t2 = (-2.0 * a1 - sqrt(4.0 * a1 * a1 - 4.0 * a2 * a3)) / (2.0 * a2);
+		//	if (t1 > 0.000000001 && t1 < time)
+		//	{
+		//		sec = true;
+		//		tt = t1;
+		//		if (t1 < t_ex)
+		//		{
+		//			sec2 = true; // пролетел до перез€р€дки
+		//		}
+		//		else
+		//		{
+		//			sec2 = false;
+		//		}
+		//	}
+		//	if (t2 > 0.000000001 && t2 < time)
+		//	{
+		//		sec = true;
+		//		tt = t2;
+		//		if (t2 < t_ex)
+		//		{
+		//			sec2 = true; // пролетел до перез€р€дки
+		//		}
+		//		else
+		//		{
+		//			sec2 = false;
+		//		}
+		//	}
+		//	
+		//	if (sec == true)
+		//	{
+		//		double xx, yy, zz;
+		//		xx = x_0 + tt * Vx;
+		//		yy = y_0 + tt * Vy;
+		//		zz = z_0 + tt * Vz;
+		//		double Vr, Vphi, Vthe;
+		//		double phi_ = polar_angle(xx, sqrt(kv(yy) + kv(zz)));
+		//		spherical_skorost(yy, zz, xx, Vy, Vz, Vx, Vr, Vphi, Vthe);
+		//
+		//		mut_stat.lock();
+		//		this->V_r_stat[this->number_stat] = Vr;
+		//		this->V_t_stat[this->number_stat] = Vthe;
+		//		this->V_p_stat[this->number_stat] = Vphi;
+		//		this->phi_stat[this->number_stat] = phi_;
+		//		this->num_stat[this->number_stat] = area;
+		//		if (sec2)
+		//		{
+		//			this->mu_stat[this->number_stat] = mu;
+		//		}
+		//		else
+		//		{
+		//			this->mu_stat[this->number_stat] = mu2;
+		//		}
+		//		this->number_stat++;
+		//		mut_stat.unlock();
+		//	}
+		//}
+
+		double rr = sqrt(kvv(0.0, y_ex, z_ex));
+		
 
 		// —читаем источники дл€ частицы до перезар€дки
 
-		u = sqrt(kvv(Vx - vx, Vy - vy_ * cos(alpha), Vz - vy_ * sin(alpha)));
+		u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
 		u1 = vx - Vx;
-		u2 = vy_ * cos(alpha) - Vy;
-		u3 = vy_ * sin(alpha) - Vz;
+		u2 = vy * cos(alpha) - Vy;
+		u3 = vy * sin(alpha) - Vz;
 		double skalar = Vx * u1 + Vy * u2 + Vz * u3;
 
 		// определим область перезар€дки (по геометрическим зонам)
 		int i_z = 0, i_alp = 0;
 		i_z = geo_zones(r);
 		i_alp = alpha_zones(x_ex, rr);
+
+		int area2 = 0;
+		// определим область в которой находитс€ атом сейчас (это параметр самой €чейки)
+		if (now->type == C_5)
+		{
+			area2 = 3;
+		}
+		else if (now->type == C_4)
+		{
+			area2 = 2;
+		}
+		else if (now->type == C_1 || now->type == C_centr)
+		{
+			area2 = 0;
+		}
+		else
+		{
+			area2 = 1;
+		}
 
 
 		now->mut.lock();
@@ -13124,32 +13248,9 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 
 		now->mut.unlock();
 
-		int area2 = 0;
-		// определим область в которой находитс€ атом сейчас (это параметр самой €чейки)
-		if (now->type == C_5)
-		{
-			area2 = 3;
-		}
-		else if (now->type == C_4)
-		{
-			area2 = 2;
-		}
-		else if (now->type == C_1 || now->type == C_centr)
-		{
-			area2 = 0;
-		}
-		else
-		{
-			area2 = 1;
-		}
      
 		double Ur, Uthe, Uphi, Vr, Vthe, Vphi;
-		vy_ = vy;
-		if (now->axis_ == true && rr < now->y_ax)
-		{
-			vy_ = vy * rr / now->y_ax;
-		}
-		spherical_skorost(y_ex, z_ex, x_ex, vy_ * cos(alpha), vy_ * sin(alpha), vx, Ur, Uphi, Uthe);
+		spherical_skorost(y_ex, z_ex, x_ex, vy * cos(alpha), vy * sin(alpha), vx, Ur, Uphi, Uthe);
 		spherical_skorost(y_ex, z_ex, x_ex, Vy, Vz, Vx, Vr, Vphi, Vthe);
 		double mu3;
 
@@ -13164,7 +13265,7 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 			vector <double> Wthe(1);
 			vector <double> Wphi(1);
 			vector <double> mu_(1);
-			MK.Change_Velosity(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
+			MK.Change_Velosity4(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
 			Wr[0] = Wr[0] * cp;
 			Wthe[0] = Wthe[0] * cp;
 			Wphi[0] = Wphi[0] * cp;
@@ -13602,10 +13703,10 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 }
 
 void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
-	double I_do, const double& mu_start)
+	double I_do, int area, const double& mu_start)
 {
 	// Ќова€ верси€ полЄта нейтрального атома. ‘ункци€ без лишнего кода и насыщена комментари€ми
-	// Ѕез геоиетрического и физического расщеплени€, полностью имитационный метод
+	// Ѕез геометрического и физического расщеплени€, полностью имитационный метод
 
 	Cell* next_mb = nullptr;
 	
@@ -13875,11 +13976,65 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 	double mu3 = 0.0;
 
 	double I = I_do;
+	//double drob = 5;
+	//if (y_start < 40.0 / RR_)
+	//{
+	//	drob = 30.0;  // 30.0
+	//}
+	//else if (y_start < 60.0 / RR_)
+	//{
+	//	drob = 20.0;  // 20.0
+	//}
+	//else if (y_start < 80.0 / RR_)
+	//{
+	//	drob = 15.0;
+	//}
+
+	//double vy_ = vy;
+	//double kappa = 0.0;
+	//for (double tt = 0.0; tt < time * 0.99; tt += time / drob)
+	//{
+	//	vy_ = vy;
+	//	double yy = sqrt(kv(y_0 + (tt + time / (2.0 * drob)) * Vy) + kv(z_0 + (tt + time / (2.0 * drob)) * Vz));
+
+	//	if (now->axis_ == true && yy < now->y_ax)
+	//	{
+	//		vy_ = vy * yy / now->y_ax;
+	//	}
+	//	alpha = polar_angle(y_0 + (tt + time / (2.0 * drob)) * Vy, z_0 + (tt + time / (2.0 * drob)) * Vz);
+	//	u = sqrt(kvv(Vx - vx, Vy - vy_ * cos(alpha), Vz - vy_ * sin(alpha)));
+
+	//	if (true)//(u / cp > 7.0)
+	//	{
+	//		uz = Velosity_1(u, cp);
+	//		nu_ex = (ro * uz * sigma(uz)) / Kn_;
+	//		//cout << x_0 << " " << y_start << " " << u / cp << " " << u << " " << cp <<  endl;
+	//	}
+	//	else
+	//	{
+	//		nu_ex = (ro * MK.int_1(u, cp)) / Kn_;        // ѕробуем вычисл€ть интеграллы численно
+	//	}
+	//	kappa += (nu_ex * time / drob);
+	//}
+	
 
 	alpha = polar_angle(y_0 + time / 2.0 * Vy, z_0 + time / 2.0 * Vz);
 	u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
-	uz = Velosity_1(u, cp);
-	double sig = sqrt(kvv(Vx, Vy, Vz)) / ((1.0 / Kn_) * ro * uz * sigma(uz));
+	if (u / cp > 7.0)
+	{
+		uz = Velosity_1(u, cp);
+		nu_ex = (ro * uz * sigma(uz)) / Kn_;
+		//cout << x_0 << " " << y_start << " " << u / cp << " " << u << " " << cp <<  endl;
+	}
+	else
+	{
+		//uz = Velosity_1(u, cp);
+		nu_ex = (ro * MK.int_1(u, cp)) / Kn_;
+		//double sig = sqrt(kvv(Vx, Vy, Vz)) / ((1.0 / Kn_) * ro * uz * sigma(uz));
+	}
+
+	double sig = sqrt(kvv(Vx, Vy, Vz)) / (nu_ex);
+	//double sig = sqrt(kvv(Vx, Vy, Vz)) / (kappa);
 	I += l / sig;
 
 	if (I < KSI)  // Ќе произошла перезар€дка
@@ -13919,9 +14074,29 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 		now->par[0].F_n += t_ex * mu;
 		now->par[0].F_u += t_ex * Vx * mu;
 		now->par[0].F_T += t_ex * kvv(Vx, Vy, Vz) * mu;
-		now->par[0].H_n[3] += t_ex * mu;
-		now->par[0].H_u[3] += t_ex * Vx * mu;
-		now->par[0].H_T[3] += t_ex * kvv(Vx, Vy, Vz) * mu;
+		now->par[0].H_n[area] += t_ex * mu;
+		now->par[0].H_u[area] += t_ex * Vx * mu;
+		now->par[0].H_T[area] += t_ex * kvv(Vx, Vy, Vz) * mu;
+
+		int area2 = 0;
+		// определим область в которой находитс€ атом сейчас (это параметр самой €чейки)
+		if (now->type == C_5)
+		{
+			area2 = 3;
+		}
+		else if (now->type == C_4)
+		{
+			area2 = 2;
+		}
+		else if (now->type == C_1 || now->type == C_centr)
+		{
+			area2 = 0;
+		}
+		else
+		{
+			area2 = 1;
+		}
+
 
 		if (u / cp > 7.0)
 		{
@@ -13945,7 +14120,7 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 		}
 
 		now->par[0].F_v += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
-		now->par[0].H_v[3] += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+		now->par[0].H_v[area] += t_ex * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
 
 		now->mut.unlock();
 
@@ -13977,21 +14152,21 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 			vector <double> Wphi(1);
 			vector <double> mu_(1);
 
-			MK.Change_Velosity(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
+			MK.Change_Velosity4(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
 			Wr[0] = Wr[0] * cp;
 			Wthe[0] = Wthe[0] * cp;
 			Wphi[0] = Wphi[0] * cp;
 
 			dekard_skorost(y_ex, z_ex, x_ex, Wr[0], Wphi[0], Wthe[0], bb, cc, aa);
 
-			if (Wr[0] > 0.0)
+			if (Wr[0] > -1.0)
 			{
 				KSI = -log(1.0 - sens->MakeRandom());
-				Fly_exchenge_Imit_Korol_2(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, KSI, I_do, mu_start);
+				Fly_exchenge_Imit_Korol_2(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, KSI, I_do, area2, mu_start);
 			}
 			else
 			{
-				Fly_exchenge_Imit_Korol(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, 3, false, mu_start, I_ - 1, J_ - 1, true);
+				Fly_exchenge_Imit_Korol(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, false, mu_start, I_ - 1, J_ - 1, true);
 			}
 			return;
 		}
@@ -14007,10 +14182,10 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 	now->par[0].F_u += t2 * Vx * mu2;
 	now->par[0].F_v += t2 * (Vy * cos(alpha) + Vz * sin(alpha)) * mu2;
 	now->par[0].F_T += t2 * kvv(Vx, Vy, Vz) * mu2;
-	now->par[0].H_n[3] += t2 * mu2;
-	now->par[0].H_u[3] += t2 * Vx * mu2;
-	now->par[0].H_v[3] += t2 * (Vy * cos(alpha) + Vz * sin(alpha)) * mu2;
-	now->par[0].H_T[3] += t2 * kvv(Vx, Vy, Vz) * mu2;
+	now->par[0].H_n[area] += t2 * mu2;
+	now->par[0].H_u[area] += t2 * Vx * mu2;
+	now->par[0].H_v[area] += t2 * (Vy * cos(alpha) + Vz * sin(alpha)) * mu2;
+	now->par[0].H_T[area] += t2 * kvv(Vx, Vy, Vz) * mu2;
 	now->mut.unlock();
 
 	double X = x_ex + t2 * Vx;
@@ -14086,7 +14261,7 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 
 	if (next != nullptr)
 	{
-		Fly_exchenge_Imit_Korol_2(MK, sens, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, mu_start);
+		Fly_exchenge_Imit_Korol_2(MK, sens, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, area, mu_start);
 	}
 	else
 	{

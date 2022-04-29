@@ -100,6 +100,16 @@ public:
 
 	mutex Smut;
 
+	double* V_r_stat;
+	double* V_t_stat;
+	double* V_p_stat;
+	double* mu_stat;
+	double* phi_stat;
+	int* num_stat;
+	int number_stat;
+	int number_stat_2;
+	mutex mut_stat;
+
 
 	Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4);
 	Setka();
@@ -198,7 +208,7 @@ public:
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep); // Смотри описание функции в коде функции
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
-		double I_do, const double& mu_start);
+		double I_do, int area, const double& mu_start);
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
 

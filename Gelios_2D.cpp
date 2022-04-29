@@ -6,51 +6,55 @@ int main()
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
-    Setka* CC;
 
-    CC = new Setka();
-    CC->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");
+    // ТЕСТОВАЯ ЗАДАЧА
+    //Setka* CC;
+
+    //CC = new Setka();
+    //CC->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // vers_test1.txt
 
    
-    CC->Move_Setka_Calculate_3(0.0);
-    for (auto& i : CC->All_Points)
-    {
-        i->x = i->x2;
-        i->y = i->y2;
-        i->Vx = 0.0;
-        i->Vy = 0.0;
-        i->count = 0;
-    }
+    //CC->Move_Setka_Calculate_3(0.0);
+    //for (auto& i : CC->All_Points)
+    //{
+    //    i->x = i->x2;
+    //    i->y = i->y2;
+    //    i->Vx = 0.0;
+    //    i->Vy = 0.0;
+    //    i->count = 0;
+    //}
 
 
-    CC->TVD_prepare();
-    CC->Proverka();
+    //CC->TVD_prepare();
+    //CC->Proverka();
 
-    CC->Init_conditions();
+    //CC->Init_conditions();
 
-    CC->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
-    CC->MK_start_new();
+    //CC->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    //CC->MK_start_new();
   
-    //CC->Print_Gran("surface6_test.txt");
-    CC->Print_Tecplot_MK();
-    //CC->Print_cell2();
-    CC->Save_Setka_ALL_ALPHA("vers_test1.txt");
+    ////CC->Print_Gran("surface6_test.txt");
+    //CC->Print_Tecplot_MK();
+    ////CC->Print_cell2();
+    //CC->Save_Setka_ALL_ALPHA("vers_test1.txt");
 
-    exit(-1);
+    //exit(-1);
 
-    //Проверка распадника
+    // КОНЕЦ ТЕСТОВОЙ ЗАДАЧИ ---------------------------------------------------------------
+
+    // Проверка распадника
     //double P[4];
     //double PQ;
     //auto RR = new Setka();
     //double a, b, c;
-    //double ro1 = 1.0;
-    //double p1 = 1.0;
-    //double u1 = 1.0;
-    //double ro2 = 2.0;
+    //double ro1 = 2.0;
+    //double p1 = 2.0;
+    //double u1 = 0.0;
+    //double ro2 = 1.0;
     //double p2 = 1.0;
-    //double u2 = 1.0;
-    //double n1 = 1.0;
-    //double w = 3.1;
+    //double u2 = 0.0;
+    //double n1 = -1.0;
+    //double w = 0.1;
 
 
     //RR->HLLC_2d_Korolkov_b_s(ro1, 1.0, p1, u1, 0.0,// 
@@ -69,11 +73,14 @@ int main()
     //Setka* CC;
     //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
 
-   /* MKmethod* MK;
+    /*MKmethod* MK;
+    Setka* CC;
+    CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
     MK = new MKmethod();
-    double c = 1.2;
-    double x = 0.7;
-    cout << MK->for_Wr_2(0.0, 0.4, 1.1, 4.0) - MK->for_Wr_2(0.0, 0.1, 1.1, 4.0) << endl;*/
+    double c = 18.0 * fabs(Velosity_inf);
+    double x = 70.0 * fabs(Velosity_inf);
+    double uz = CC->Velosity_1(x, c);
+    cout << MK->int_1(x, c) << " " << uz * sigma(uz) << endl;*/
 
     //double u = 0.0, cp = 12.0;
     //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
@@ -117,8 +124,8 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // 17       IEX    vers_test1.txt
-    SS->Init_conditions();
+    SS->Download_Setka_ALL_ALPHA_2_0("vers6_136.txt");  // 17       IEX    vers_test1.txt
+    //SS->Init_conditions();
 
     SS->TVD_prepare();
     SS->Proverka();
@@ -289,7 +296,7 @@ int main()
     //delete SS3;
 
 
-    for (int k = 0; k < 0; k++)  // 10
+    for (int k = 0; k < 10; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
@@ -299,11 +306,11 @@ int main()
     }
 
     //SS->Print_cell2();
-    SS->Print_Gran("surface6_131.txt");
+    SS->Print_Gran("surface6_137.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers6_131.txt");
+    SS->Save_Setka_ALL_ALPHA("vers6_137.txt");
 
     exit(-1);
     delete SS;
@@ -387,7 +394,7 @@ int main()
     }
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
-    for (int k = 0; k < 50; k++)  // 10
+    for (int k = 0; k < 5; k++)  // 10
     {
         cout << "Global step 2 = " << k + 1 << endl;
         SS->Go_stationary_5_komponent_inner_MK2(30000);
