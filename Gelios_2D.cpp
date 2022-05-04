@@ -7,11 +7,12 @@ int main()
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
 
-    // ТЕСТОВАЯ ЗАДАЧА
+     //ТЕСТОВАЯ ЗАДАЧА
     //Setka* CC;
 
     //CC = new Setka();
-    //CC->Download_Setka_ALL_ALPHA_2_0("vers6_130.txt");  // vers_test1.txt
+    //CC->Download_Setka_ALL_ALPHA_2_0("vers_test1.txt");  // vers_test1.txt   vers6_130.txt
+    //exit(-1);
 
    
     //CC->Move_Setka_Calculate_3(0.0);
@@ -124,7 +125,7 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers6_136.txt");  // 17       IEX    vers_test1.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers11_1.txt");  // 17       IEX    vers_test1.txt
     //SS->Init_conditions();
 
     SS->TVD_prepare();
@@ -296,7 +297,7 @@ int main()
     //delete SS3;
 
 
-    for (int k = 0; k < 10; k++)  // 10
+    for (int k = 0; k < 40; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
@@ -306,16 +307,17 @@ int main()
     }
 
     //SS->Print_cell2();
-    SS->Print_Gran("surface6_137.txt");
+    SS->Print_Gran("surface11_2.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers6_137.txt");
+    SS->Save_Setka_ALL_ALPHA("vers11_2.txt");
 
     exit(-1);
+    // ----------------------------------------------------------------------------------------------------
     delete SS;
     SS = new Setka();
-    SS->Download_Setka_ALL_ALPHA_2_0("vers6_124.txt");
+    SS->Download_Setka_ALL_ALPHA_2_0("vers11_2.txt");
     SS->TVD_prepare();
     SS->Proverka();
     for (auto i : SS->All_Cells)
@@ -394,16 +396,75 @@ int main()
     }
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
-    for (int k = 0; k < 5; k++)  // 10
+    for (int k = 0; k < 40; k++)  // 10
     {
         cout << "Global step 2 = " << k + 1 << endl;
-        SS->Go_stationary_5_komponent_inner_MK2(30000);
+        SS->Go_stationary_5_komponent_inner_MK2(40000);
         SS->Go_5_komponent__MK2(50000);
     }
 
-    SS->Print_Gran("surface6_125.txt");
+    SS->Print_Gran("surface11_3.txt");
     SS->Print_Tecplot_MK();
-    SS->Save_Setka_ALL_ALPHA("vers6_125.txt");
+    SS->Save_Setka_ALL_ALPHA("vers11_3.txt");
+
+    // ----------------------------------------------------------------------------------------------------
+    delete SS;
+    SS = new Setka();
+    SS->Download_Setka_ALL_ALPHA_2_0("vers11_3.txt");
+    SS->TVD_prepare();
+    SS->Proverka();
+    for (auto i : SS->All_Cells)
+    {
+
+        if (i->type == C_centr)
+        {
+            i->par[0].ro_H1 = i->par[1].ro_H1 = 0.00000001;
+            i->par[0].p_H1 = i->par[1].p_H1 = 0.00000001;
+            i->par[0].u_H1 = i->par[1].u_H1 = 0.0;
+            i->par[0].v_H1 = i->par[1].v_H1 = 0.0;
+
+            i->par[0].ro_H2 = i->par[1].ro_H2 = 0.00000001;
+            i->par[0].p_H2 = i->par[1].p_H2 = 0.00000001;
+            i->par[0].u_H2 = i->par[1].u_H2 = 0.0;
+            i->par[0].v_H2 = i->par[1].v_H2 = 0.0;
+
+            i->par[0].ro_H3 = i->par[1].ro_H3 = 0.00000001;
+            i->par[0].p_H3 = i->par[1].p_H3 = 0.00000001;
+            i->par[0].u_H3 = i->par[1].u_H3 = 0.0;
+            i->par[0].v_H3 = i->par[1].v_H3 = 0.0;
+
+            i->par[0].ro_H4 = i->par[1].ro_H4 = 0.00000001;
+            i->par[0].p_H4 = i->par[1].p_H4 = 0.00000001;
+            i->par[0].u_H4 = i->par[1].u_H4 = 0.0;
+            i->par[0].v_H4 = i->par[1].v_H4 = 0.0;
+        }
+
+
+        double x, y;
+        i->Get_Center(x, y);
+        if (sqrt(x * x + y * y) <= R111_)
+        {
+            SS->All_Cells_Inner.push_back(i);
+        }
+
+
+        if (i->type == C_centr)
+        {
+            SS->All_Cells_zero.push_back(i);
+        }
+    }
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    SS->MK_start_new();
+    for (int k = 0; k < 40; k++)  // 10
+    {
+        cout << "Global step 2 = " << k + 1 << endl;
+        SS->Go_stationary_5_komponent_inner_MK2(40000);
+        SS->Go_5_komponent__MK2(50000);
+    }
+
+    SS->Print_Gran("surface11_4.txt");
+    SS->Print_Tecplot_MK();
+    SS->Save_Setka_ALL_ALPHA("vers11_4.txt");
 
     exit(-1);
 

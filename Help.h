@@ -55,8 +55,10 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define chi_ 1.0 //36.1059 // 36.1059
 #define chi_real 36.1275
 #define kurant  0.1
-#define Kn_  0.622171 // 0.5  // 242.785									// Число Кнудсена
-#define a_2 0.102578  // 0.10263
+//#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
+#define Kn_  1.5			
+//#define Kn_  0.2	                                            // Число Кнудсена
+#define a_2 0.1307345665  // 0.102578  // 0.10263
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Дифференциальное сечение перезарядки

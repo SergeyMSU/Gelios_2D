@@ -53,7 +53,7 @@ public:
 	vector<sensor2*> Sensors2;
 	vector <double> Ri;            // Геометрические зоны для расщепления Монте-Карло
 	double Mu[4][9];
-	double Mu_stat[4][9][12];      // Считаем статистику для весов
+	double Mu_stat[4][I_ + 1][12];      // Считаем статистику для весов
 	int Num_stat[4][9][12];      // Считаем статистику для весов
 	double Sinus[12];
 	mutex m_m;

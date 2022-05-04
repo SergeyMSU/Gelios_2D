@@ -332,6 +332,88 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 			}
 			return;
 		}
+		if ((this->A->type == P_Contact && this->B->type == P_Contact) ||//
+			(this->A->type == P_Inner_shock && this->B->type == P_Inner_shock) ||//
+			(this->A->type == P_Outer_shock && this->B->type == P_Outer_shock))
+		{
+			double x, y, x2, y2, dist1, dist2;
+			this->Get_Center(x, y);
+			auto par2 = this->Master->par[i];
+			auto par1 = this->Sosed_down->par[i];
+			this->Master->Get_Center(x2, y2);
+			dist2 = sqrt(kv(x - x2) + kv(y - y2));
+			this->Sosed_down->Get_Center(x2, y2);
+			dist1 = sqrt(kv(x - x2) + kv(y - y2));
+
+			par.ro = linear(-dist1, par1.ro, -dist2, par2.ro, 0.0);
+			par.p = linear(-dist1, par1.p, -dist2, par2.p, 0.0);
+			par.u = linear(-dist1, par1.u, -dist2, par2.u, 0.0);
+			par.v = linear(-dist1, par1.v, -dist2, par2.v, 0.0);
+			par.Q = linear(-dist1, par1.Q, -dist2, par2.Q, 0.0);
+			if (par.ro <= 0.0)
+			{
+				par.ro = par2.ro;
+			}
+			if (par.p <= 0.0)
+			{
+				par.p = par2.p;
+			}
+
+			par.ro_H1 = linear(-dist1, par1.ro_H1, -dist2, par2.ro_H1, 0.0);
+			par.p_H1 = linear(-dist1, par1.p_H1, -dist2, par2.p_H1, 0.0);
+			par.u_H1 = linear(-dist1, par1.u_H1, -dist2, par2.u_H1, 0.0);
+			par.v_H1 = linear(-dist1, par1.v_H1, -dist2, par2.v_H1, 0.0);
+			par.ro_H2 = linear(-dist1, par1.ro_H2, -dist2, par2.ro_H2, 0.0);
+			par.p_H2 = linear(-dist1, par1.p_H2, -dist2, par2.p_H2, 0.0);
+			par.u_H2 = linear(-dist1, par1.u_H2, -dist2, par2.u_H2, 0.0);
+			par.v_H2 = linear(-dist1, par1.v_H2, -dist2, par2.v_H2, 0.0);
+			par.ro_H3 = linear(-dist1, par1.ro_H3, -dist2, par2.ro_H3, 0.0);
+			par.p_H3 = linear(-dist1, par1.p_H3, -dist2, par2.p_H3, 0.0);
+			par.u_H3 = linear(-dist1, par1.u_H3, -dist2, par2.u_H3, 0.0);
+			par.v_H3 = linear(-dist1, par1.v_H3, -dist2, par2.v_H3, 0.0);
+			par.ro_H4 = linear(-dist1, par1.ro_H4, -dist2, par2.ro_H4, 0.0);
+			par.p_H4 = linear(-dist1, par1.p_H4, -dist2, par2.p_H4, 0.0);
+			par.u_H4 = linear(-dist1, par1.u_H4, -dist2, par2.u_H4, 0.0);
+			par.v_H4 = linear(-dist1, par1.v_H4, -dist2, par2.v_H4, 0.0);
+
+			if (par.ro_H1 <= 0.0)
+			{
+				par.ro_H1 = par2.ro_H1;
+			}
+			if (par.p_H1 <= 0.0)
+			{
+				par.p_H1 = par2.p_H1;
+			}
+
+			if (par.ro_H2 <= 0.0)
+			{
+				par.ro_H2 = par2.ro_H2;
+			}
+			if (par.p_H2 <= 0.0)
+			{
+				par.p_H2 = par2.p_H2;
+			}
+
+			if (par.ro_H3 <= 0.0)
+			{
+				par.ro_H3 = par2.ro_H3;
+			}
+			if (par.p_H3 <= 0.0)
+			{
+				par.p_H3 = par2.p_H3;
+			}
+
+			if (par.ro_H4 <= 0.0)
+			{
+				par.ro_H4 = par2.ro_H4;
+			}
+			if (par.p_H4 <= 0.0)
+			{
+				par.p_H4 = par2.p_H4;
+			}
+
+			return;
+		}
 		double x, y, x2, y2, dist1, dist2, dist3;
 		this->Get_Center(x, y);
 		auto par2 = this->Master->par[i];
@@ -355,13 +437,13 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 			cout << "Gran.cpp    " << x << " " << y << " " << x2 << " " << y2 << " " << par1.ro << " " << par2.ro << " " << par3.ro << endl;
 			exit(-1);
 		}
-
 		if (par.p <= 0.0)
 		{
 			cout << "Gran.cpp    " << "Get par  361" << endl;
 			cout << "Gran.cpp    " << x << " " << y << " " << x2 << " " << y2 << " " << par1.p << " " << par2.p << " " << par3.p << endl;
 			exit(-1);
 		}
+
 		par.ro_H1 = linear(-dist1, par1.ro_H1, -dist2, par2.ro_H1, dist3, par3.ro_H1, 0.0);
 		par.p_H1 = linear(-dist1, par1.p_H1, -dist2, par2.p_H1, dist3, par3.p_H1, 0.0);
 		par.u_H1 = linear(-dist1, par1.u_H1, -dist2, par2.u_H1, dist3, par3.u_H1, 0.0);

@@ -1966,9 +1966,9 @@ void Setka::Print_Tecplot_MK(void)
 			<< i->par[0].u_H4 * u_o << " " << i->par[0].v_H4 * u_o << " " <<//
 			(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << //
 			" " << i->par[0].F_n << " " << i->par[0].F_u << " " << i->par[0].F_v << " " << i->par[0].F_T << " " //
-			<< i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T << " " << //
-			i->par[0].II_u << " " << i->par[0].II_v << " " << i->par[0].II_T << " " << //
-			i->par[0].M_u << " " << i->par[0].M_v << " " << i->par[0].M_T << " " << //
+			<< i->par[0].I_u * 0.00001107 << " " << i->par[0].I_v * 0.00001107 << " " << i->par[0].I_T * 11.4767 << " " << //
+			i->par[0].II_u * 0.00001107 << " " << i->par[0].II_v * 0.00001107 << " " << i->par[0].II_T * 11.4767 << " " << //
+			i->par[0].M_u * 0.00001107 << " " << i->par[0].M_v * 0.00001107 << " " << i->par[0].M_T * 11.4767 << " " << //
 			i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_u[0] * u_o << " " << i->par[0].H_v[0] * u_o << " " << i->par[0].H_T[0] * T_o << " " //
 			<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_u[1] * u_o << " " << i->par[0].H_v[1] * u_o << " " << i->par[0].H_T[1] * T_o << " " //
 			<< i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_u[2] * u_o << " " << i->par[0].H_v[2] * u_o << " " << i->par[0].H_T[2] * T_o << " " //
@@ -2096,50 +2096,56 @@ void Setka::Proverka(void)
 
 	cout << "Setka.cpp    " << "Proverka TVD" << endl;
 
-	for (auto& i : this->All_Gran)
+	if (false)
 	{
-		if (i->type == Usualy)
+		for (auto& i : this->All_Gran)
 		{
-			Parametr par;
-			i->Get_par_TVD(par, 0);
-			if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+			if (i->type == Usualy)
 			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				Parametr par;
+				i->Get_par_TVD(par, 0);
+				if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
+				if ((par.p < i->Master->par[0].p && par.p < i->Sosed->par[0].p) || (par.p > i->Master->par[0].p && par.p > i->Sosed->par[0].p))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
+				if ((par.u < i->Master->par[0].u && par.u < i->Sosed->par[0].u) || (par.u > i->Master->par[0].u && par.u > i->Sosed->par[0].u))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
+				if ((par.v < i->Master->par[0].v && par.v < i->Sosed->par[0].v) || (par.v > i->Master->par[0].v && par.v > i->Sosed->par[0].v))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
+				if ((par.Q < i->Master->par[0].Q && par.Q < i->Sosed->par[0].Q) || (par.Q > i->Master->par[0].Q && par.Q > i->Sosed->par[0].Q))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
 			}
-			if ((par.p < i->Master->par[0].p && par.p < i->Sosed->par[0].p) || (par.p > i->Master->par[0].p && par.p > i->Sosed->par[0].p))
-			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
-			}
-			if ((par.u < i->Master->par[0].u && par.u < i->Sosed->par[0].u) || (par.u > i->Master->par[0].u && par.u > i->Sosed->par[0].u))
-			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
-			}
-			if ((par.v < i->Master->par[0].v && par.v < i->Sosed->par[0].v) || (par.v > i->Master->par[0].v && par.v > i->Sosed->par[0].v))
-			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
-			}
-			if ((par.Q < i->Master->par[0].Q && par.Q < i->Sosed->par[0].Q) || (par.Q > i->Master->par[0].Q && par.Q > i->Sosed->par[0].Q))
-			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
-			}
-		}
 
+		}
 	}
 
 	cout << "Setka.cpp    " << "Proverka TVD 2" << endl;
 
-	for (auto& i : this->All_Gran_copy)
+	if (false)
 	{
-		if (i->type == Usualy)
+		for (auto& i : this->All_Gran_copy)
 		{
-			Parametr par;
-			i->Get_par_TVD(par, 0);
-			if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+			if (i->type == Usualy)
 			{
-				cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				Parametr par;
+				i->Get_par_TVD(par, 0);
+				if ((par.ro < i->Master->par[0].ro && par.ro < i->Sosed->par[0].ro) || (par.ro > i->Master->par[0].ro && par.ro > i->Sosed->par[0].ro))
+				{
+					cout << "Setka.cpp    " << "PROBLEM BIG" << endl;
+				}
 			}
-		}
 
+		}
 	}
 	
 	cout << "Setka.cpp    " << "Proverka TVD  3" << endl;
@@ -3415,7 +3421,8 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
 
 			double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV * koef * 0.3;// *0.05;
+			VV = VV * koef * 0.3;// * 0.3;
+
 			//VV = 0.2;
 
 			/*if (i->A->x < -400)
@@ -3576,7 +3583,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vl = Vl * koef;
+			Vl = Vl * koef;  // 0
 			double t1 = -n2;
 			double t2 = n1;
 
@@ -3763,7 +3770,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vp = Vp * koef * 0.1;
+			Vp = Vp * koef * 0.1;  // 0.1
 			//cout << "Setka.cpp    " << Vp << endl;
 
 			double t1 = -n2;
@@ -10148,7 +10155,7 @@ void Setka::Go_5_komponent__MK2(int step)
 				i->Get_normal(n1, n2);
 				double Vc, Vl, Vp;
 				W = ((x4 - x2) * n1 + (y4 - y2) * n2) / T[now1];
-				int met = 1;  // 1
+				int met = 1;  // 1                                                                 метод распадника
 				double dis = sqrt(kv(x2) + kv(y2));
 
 				if (i->type == Usualy)
@@ -10264,12 +10271,14 @@ void Setka::Go_5_komponent__MK2(int step)
 					np = true;
 				}
 
-				//np = false;
+				//np = true;
 
 				/*if (y < 30 && x > 120 && x < 160)
 				{
 					np = true;
 				}*/
+
+				//god = false;
 
 				if (god == true)
 				{
@@ -11443,6 +11452,9 @@ void Setka::M_K_prepare(void)
 	Mu[3][6] = kv(Ri[6] / Rmax_) * kas * 0.13;
 	Mu[3][7] = kv(Ri[7] / Rmax_) * kas * 0.1;
 	Mu[3][8] = kv(Ri[8] / Rmax_) * kas * 0.1;
+
+	cout << "All Weyghts = " << Mu[3][0] << " " << Mu[3][1] << " " << Mu[3][2] << " " << Mu[3][3] << //
+		" " << Mu[3][4] << " " << Mu[3][5] << " " << Mu[3][6] << " " << Mu[3][7] << " " << Mu[3][8] << endl;
 
 	/*for (int i = 0; i < 4; i++)
 	{
@@ -13277,13 +13289,13 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 			if (Wr[0] < 0.0)
 			{
 				//wwt = sqrt(kv(Wphi[0]) + kv(Wthe[0]));
-				cout << "Setka.cpp    " << "Fly_ex_Korol   "<< "Letit vniz  " << x_ex << " " << rr << " " << mu3 << " " << area << " " << area2 << endl;
-				goto aa;
+				//cout << "Setka.cpp    " << "Fly_ex_Korol   "<< "Letit vniz  " << x_ex * RR_ << " " << rr * RR_ << " " << mu3 << " " << area << " " << area2 << endl;
+				//goto aa;
 				time_do_peregel = (-aa * x_ex - bb * y_ex - cc * z_ex)/kvv(aa,bb,cc);
 				peregel = sqrt(kvv(x_ex + aa * time_do_peregel, y_ex + bb * time_do_peregel, z_ex + cc * time_do_peregel));
 				ii_z = this->geo_zones(peregel);                     // Номер зоны перегелия атома
 				ii_alp = alpha_zones(x_ex + aa * time_do_peregel, sqrt(kvv(y_ex + bb * time_do_peregel, z_ex + cc * time_do_peregel, 0.0)));
-				kj = false;   // Убиваем траекторию, иначе может испортить статистику
+				//kj = false;   // Убиваем траекторию, иначе может испортить статистику
 			}
 			else
 			{

@@ -497,6 +497,12 @@ void Cell::Calc_Sourse(void)
 
 void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
 {
+	/*q1 = 0.0;
+	q2 = 0.0;
+	q3 = 0.0;
+	return;*/
+
+
 	double xx, yy;
 	this->Get_Center(xx, yy);
 	double rr = sqrt(kv(xx) + kv(yy));
@@ -514,6 +520,10 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 	double u_H3, v_H3, ro_H3, p_H3;
 	double u_H4, v_H4, ro_H4, p_H4;
 	double T_H1, T_H2, T_H3, T_H4;
+
+	double ku = this->par[0].k_u;
+	double kv = this->par[0].k_v;
+	double kT = this->par[0].k_T;
 
 	if (rr > 10.0 / RR_ && rr < 1500.0 / RR_ && xx >= 0.0)
 	{
@@ -566,6 +576,10 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 		T_H2 = linear(r1, K_do->par[0].H_T[1], r2, K_posle->par[0].H_T[1], rr);
 		T_H3 = linear(r1, K_do->par[0].H_T[2], r2, K_posle->par[0].H_T[2], rr);
 		T_H4 = linear(r1, K_do->par[0].H_T[3], r2, K_posle->par[0].H_T[3], rr);
+
+		ku = linear(r1, K_do->par[0].k_u, r2, K_posle->par[0].k_u, rr);
+		kv = linear(r1, K_do->par[0].k_v, r2, K_posle->par[0].k_v, rr);
+		kT = linear(r1, K_do->par[0].k_T, r2, K_posle->par[0].k_T, rr);
 
 		p_H1 = 0.5 * T_H1 * ro_H1;
 		p_H2 = 0.5 * T_H2 * ro_H2;
@@ -636,18 +650,18 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 	this->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
 		+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
 	this->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
-		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
-		nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+		    (U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+		                                    nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
 			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
-		nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+		                                    nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
 			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
-		nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+		                                    nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
 			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
 
 
-	q1 = this->par[0].M_u * this->par[0].k_u;
-	q2 = this->par[0].M_v * this->par[0].k_v;
-	q3 = this->par[0].M_T * this->par[0].k_T;
+	q1 = this->par[0].M_u * ku;
+	q2 = this->par[0].M_v * kv;
+	q3 = this->par[0].M_T * kT;
 }
 
 void Cell::Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
