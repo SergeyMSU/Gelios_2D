@@ -55,9 +55,11 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define chi_ 1.0 //36.1059 // 36.1059
 #define chi_real 36.1275
 #define kurant  0.1
+//#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
-#define Kn_  1.5			
+#define Kn_  6.0			
 //#define Kn_  0.2	                                            // Число Кнудсена
+//#define a_2 0.102578  // 0.10263
 #define a_2 0.1307345665  // 0.102578  // 0.10263
 #define n_p_LISM_ (3.0) 
 #define n_H_LISM_ (1.0)
@@ -82,7 +84,8 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define R3_ (150.0/RR_)  // 150.0
 #define R4_ (600.0/RR_)  // 600.0
 #define R5_ (2200.0/RR_)  // 2200.0
-#define Rmax_ (1300.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
+//#define Rmax_ (1300.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
+#define Rmax_ (1800.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ (-1500.0/RR_)  // -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
 #define I_ 8 //5 // Количество зон по радиусу
@@ -98,3 +101,14 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define betta_ 1.0  // сжатие
 
 #define polusum false  // Берём лт полусумму источников или только один
+#define mu_statistic true  // считаем ли статистику весов по зонам
+#define func_stat false     // считаем ли функцию распределения и моменты на сфере радиуса?
+#define R_stat 80.0        // Сфера на которой считаем статистику
+#define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
+
+
+// Предикат проверки прерывания веса атома
+
+#define pred(i, j, al) (Mu[i][j] * mu_start * 0.3 * sin(al))
+
+//#define pred(i, j, al) (Mu[i][j] * sin(al))

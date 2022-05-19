@@ -4,8 +4,10 @@ void polar_perenos(const double& x1, const double& y1, const double& x2, const d
 {
 	double phi1 = polar_angle(x1, y1);
 	double phi2 = polar_angle(x2, y2);
+	//cout << "phi = " << phi1 << " " << phi2 << endl;
 	double fr = u * cos(phi1) + v * sin(phi1);
 	double ff = -u * sin(phi1) + v * cos(phi1);
+	//cout << fr << " " << ff << endl;
 	u = fr * cos(phi2) - ff * sin(phi2);
 	v = fr * sin(phi2) + ff * cos(phi2);
 	return;

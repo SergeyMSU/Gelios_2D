@@ -44,29 +44,27 @@ int main()
     // КОНЕЦ ТЕСТОВОЙ ЗАДАЧИ ---------------------------------------------------------------
 
     // Проверка распадника
-    //double P[4];
-    //double PQ;
-    //auto RR = new Setka();
-    //double a, b, c;
-    //double ro1 = 2.0;
-    //double p1 = 2.0;
-    //double u1 = 0.0;
-    //double ro2 = 1.0;
-    //double p2 = 1.0;
-    //double u2 = 0.0;
-    //double n1 = -1.0;
-    //double w = 0.1;
+    /*double P[4];
+    double PQ;
+    auto RR = new Setka();
+    double a, b, c;
+    double ro1 = 2.0;
+    double p1 = 2.0;
+    double u1 = 1.0;
+    double ro2 = 1.0;
+    double p2 = 1.0;
+    double u2 = 0.5;
+    double n1 = 1.0;
+    double w = 0.0;
 
 
-    //RR->HLLC_2d_Korolkov_b_s(ro1, 1.0, p1, u1, 0.0,// 
-    //    ro2, 1.0, p2, u2, 0.0,//
-    //    w, P, PQ, n1, 0.0, 10.0, 1, a, b, c);
-    //for (int i = 0; i < 4; i++)
-    //{
-    //    cout << P[i] << endl;
-    //}
+    RR->HLLC_2d_Korolkov_b_s(ro1, 1.0, p1, u1, 0.0, ro2, 1.0, p2, u2, 0.0, w, P, PQ, n1, 0.0, 10.0, 1, a, b, c);
+    for (int i = 0; i < 4; i++)
+    {
+        cout << P[i] << endl;
+    }
 
-    //exit(-1);
+    exit(-1);*/
 
     //ofstream fout;
     //fout.open("Source_3_cp12.txt");
@@ -125,15 +123,13 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers11_1.txt");  // 17       IEX    vers_test1.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers16_4.txt");  //  9 4   11 4       IEX    vers_test1.txt
     //SS->Init_conditions();
-
     SS->TVD_prepare();
     SS->Proverka();
     //SS->Print_cell2();
     //SS->Print_Gran();
     //SS->Print_Gran("sur7_101.txt");
-    //exit(-2);
 
     /*double xx, yy;
     SS->All_Cells[34]->Get_Center(xx, yy);
@@ -141,9 +137,10 @@ int main()
     cout << SS->All_Cells[34]->number << endl;
     exit(-1);*/
 
-    /*SS->Line_Outer[2]->B->Vx = -0.0028;
+    //SS->Line_Outer[2]->B->Vx = -0.0028;
 
-    SS->Move_Setka_Calculate_2(1.0);
+    /*SS->Move_Setka_Calculate_2(0.0);
+    
     for (auto& i : SS->All_Points)
     {
         i->x = i->x2;
@@ -172,7 +169,7 @@ int main()
 
            // для счёта плазмы
            //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
-           //i->par[1].v = i->par[0].v / (chi_real / chi_);
+           //i->par[1].v = i->par[0].v = i->par[0].v / (chi_real / chi_);
            //i->par[1].ro = i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
            //i->par[1].Q = i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
         }
@@ -209,6 +206,12 @@ int main()
             SS->All_Cells_Inner.push_back(i);
         }
 
+        /*if (x > 600.0 / RR_)
+        {
+            i->par[1].ro = i->par[0].ro = 4.0;
+            i->par[1].p = i->par[0].p = 2.5;
+        }*/
+
         //if (x < -700 && y < 200)
         //{
         //    i->par[1].u = i->par[0].u = Velosity_inf;       // Перенормировка
@@ -228,6 +231,7 @@ int main()
             SS->All_Cells_zero.push_back(i);
         }
     }
+
 
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
@@ -297,7 +301,8 @@ int main()
     //delete SS3;
 
 
-    for (int k = 0; k < 40; k++)  // 10
+    SS->Save_Setka_ALL_ALPHA("vers16_5.txt");
+    for (int k = 0; k < 0; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
@@ -307,11 +312,11 @@ int main()
     }
 
     //SS->Print_cell2();
-    SS->Print_Gran("surface11_2.txt");
+    //SS->Print_Gran("surface15_6.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers11_2.txt");
+    //SS->Save_Setka_ALL_ALPHA("vers15_6.txt");
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------

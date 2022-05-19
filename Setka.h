@@ -51,11 +51,10 @@ public:
 
 	vector<Sensor*> Sensors;
 	vector<sensor2*> Sensors2;
-	vector <double> Ri;            // Геометрические зоны для расщепления Монте-Карло
-	double Mu[4][9];
-	double Mu_stat[4][I_ + 1][12];      // Считаем статистику для весов
-	int Num_stat[4][9][12];      // Считаем статистику для весов
-	double Sinus[12];
+	vector <double> Ri;               // Геометрические зоны для расщепления Монте-Карло
+	double Mu[4][9];                  // Это и есть веса для каждой зоны (по радиусу) и каждого сорта атома (из четырёх)
+	double Mu_stat[4][9];      // Считаем статистику для весов
+	int I_stat[4][9];      // Считаем статистику для весов
 	mutex m_m;
 	ofstream f_way;
 	int f_num;
@@ -109,6 +108,17 @@ public:
 	int number_stat;
 	int number_stat_2;
 	mutex mut_stat;
+
+
+	// Моменты функции распределения для Насти
+	double mu_mom[4][54];
+	double Vx_mom[4][54];
+	double Vy_mom[4][54];
+	double Vxx_mom[4][54];
+	double Vyy_mom[4][54];
+	double Vxy_mom[4][54];
+	double Vxxx_mom[4][54];
+	mutex mut_mom;
 
 
 	Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4);
@@ -206,7 +216,7 @@ public:
 	void Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
-		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep); // Смотри описание функции в коде функции
+		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1); // Смотри описание функции в коде функции
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 	int geo_zones(const double& r, const double& k = 1.0);

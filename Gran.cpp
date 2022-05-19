@@ -264,6 +264,12 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 
+		//par = { ro * kv(chi_real / chi_), P_E, chi_real * x / dist / (chi_real / chi_), chi_real * y / dist / (chi_real / chi_), ro * (chi_real / chi_),//
+		//0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
+		//	par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
+		//	par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
+		//	par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
+
 
 		//cout << "Gran.cpp    " << par.ro << " " << dist << endl;
 	}
@@ -273,6 +279,10 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 		par = {1.0, 1.0, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
 		par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 		1.0, 0.5, Velosity_inf, 0.0};
+
+		//par = { 4.0, 2.5, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
+		//par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
+		//1.0, 0.5, Velosity_inf, 0.0 };
 	}
 
 	return;
@@ -515,13 +525,19 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		double dist = sqrt(x * x + y * y);
 		double ro = 1.0 / (kv(chi_real) * dist * dist);
 		double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
-		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));
+		double T_p = (P_E * pow(1.0 / dist, 2.0 * ggg)) / (2.0 * ro / (dist * dist));  
 
 		par = { ro, P_E, chi_real * x / dist, chi_real * y / dist, ro,//
 		0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
 			par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
 			par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 			par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
+
+		//par = { ro * kv(chi_real / chi_), P_E, chi_real * x / dist / (chi_real / chi_), chi_real * y / dist / (chi_real / chi_), ro * (chi_real / chi_),//
+		//0.0000001, (0.0000001 * chi_real * chi_real / (ggg * 14.1344 * 14.1344)), chi_real * x / dist, chi_real * y / dist,//
+		//	par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , //
+		//	par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
+		//	par2.ro_H4, par2.p_H4, par2.u_H4, par2.v_H4 };
 
 
 		//cout << "Gran.cpp    " << par.ro << " " << dist << endl;
@@ -532,6 +548,11 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 		par = { 1.0, 1.0, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
 		par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
 		1.0, 0.5, Velosity_inf, 0.0 };
+
+		//par = { 4.0, 2.5, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
+		//par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
+		//1.0, 0.5, Velosity_inf, 0.0 };
+
 	}
 
 	return;
