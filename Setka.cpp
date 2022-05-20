@@ -11432,10 +11432,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 250; //250  6000;  25
-	this->Number2 = 411 * 30; // 30; // 50;
+	this->Number1 = 411 * 250 * 8; //250  6000;  25
+	this->Number2 = 411 * 3; // 30; // 50;
 	this->Number3 = 411 * 5; // 5;
-	this->Number4 = 411 * 200; // 200; //  300  411 * 1650; // 135 * 40; // 400;
+	this->Number4 = 411 * 20; // 200; //  300  411 * 1650; // 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11471,11 +11471,11 @@ void Setka::M_K_prepare(void)
 	mu1 = ((this->sqv_1) / this->sum_s) * (1.0 * this->AllNumber / this->Number1);  // Учёт, что для большого количества траекторий исходный вес меньше
 
 
-	double kas = 1.0; // 1.0    0.5 для Kn = 3
+	double kas = 3.0; // 1.0    0.5 для Kn = 3
 	cout << "Setka.cpp    " << "kas = " << kas << endl;
 	double ss1 = 3.0; // 1.0 * 0.5;
 	double ss2 = 0.02; // 0.02; // * 0.5;    0.03
-	double ss3 = 0.3; // 0.4; // 0.4;
+	double ss3 = 0.4; // 0.3; // 0.4;
 
 	double ss4 = 1.0; // 0.1   0.02
 
@@ -12760,6 +12760,7 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 // to_I - в какую область предназначался атом
 {
 	Cell* next_mb = nullptr;
+	bool ch_now = false;          // true в случае, если основной атом нужно перезаряжать более одного раза в этой ячейке
 
 	// Алгоритм вырубания лишних траектори (траектории вырубаются при пересечении новой зоны, далее 
 	// вес лмбо увеличивается, либо частица уничтожается)
@@ -13110,6 +13111,11 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		double kappa = 0.0;
 		//drob = min(fabs(polar_angle(y_0, z_0) - polar_angle(y_0 + time * Vy, z_0 + time * Vz)) / 0.017 + 5.0, 80.0);
 
+		if (y_start < 30.0 / RR_)
+		{
+			drob = 10.0;  // 30.0
+		}
+
 		//if (y_start < 40.0/RR_)
 		//{
 		//	drob = 30.0;  // 30.0
@@ -13127,6 +13133,18 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 		//	drob = 10.0;
 		//}
 
+		// Дополнение: перезаряжаем насколько раз в ячейке, если надо
+		if (true)
+		{
+			uz = Velosity_1(u, cp);
+			nu_ex = (ro * uz * sigma(uz)) / Kn_;
+			if (time > 1.0 / nu_ex)
+			{
+				time = time / ((int)(time / (1.0 / nu_ex)) + 1);
+				ch_now = true;
+				t2 = time;
+			}
+		}
 
 		if (true)
 		{
@@ -13170,6 +13188,8 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 			}
 			kappa = (nu_ex * time);
 		}
+
+		
 		
 
 		t_ex = -(time / kappa) * log(1.0 - sens->MakeRandom() * (1.0 - exp(-kappa))); // Время до перезарядки
@@ -13644,16 +13664,34 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, doub
 	/*double X = x_ex + t2 * Vx;
 	double Y = y_ex + t2 * Vy;
 	double Z = z_ex + t2 * Vz;*/
-	double X = x_0 + b * Vx;
-	double Y = y_0 + b * Vy;
-	double Z = z_0 + b * Vz;
+	double X, Y, Z;
+	double xk, yk;
+	if (ch_now == false)
+	{
+		X = x_0 + b * Vx;
+		Y = y_0 + b * Vy;
+		Z = z_0 + b * Vz;
+		xk = x_0 + b * Vx;
+		yk = sqrt(kv(y_0 + b * Vy) + kv(z_0 + b * Vz));
+	}
+	else
+	{
+		X = x_0 + time * Vx;
+		Y = y_0 + time * Vy;
+		Z = z_0 + time * Vz;
+		xk = x_0 + time * Vx;
+		yk = sqrt(kv(y_0 + time * Vy) + kv(z_0 + time * Vz));
+	}
 
 	Cell* next = nullptr;             // В какую ячейку попадаем следующую
-	double xk, yk;
-	xk = x_0 + b * Vx;
-	yk = sqrt(kv(y_0 + b * Vy) + kv(z_0 + b * Vz));
 	double r_k = sqrt(kv(xk) + kv(yk));
 	double r_0 = sqrt(kv(x_0) + kv(y_0) + kv(z_0));
+
+	if (ch_now == true)
+	{
+		next = now;
+		next_mb = nullptr;
+	}
 
 	/*if (yk < 5.0)
 	{

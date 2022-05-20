@@ -123,7 +123,7 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers16_4.txt");  //  9 4   11 4       IEX    vers_test1.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers7_3.txt");  //  9 4   11 4       IEX    vers_test1.txt
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();
@@ -231,7 +231,7 @@ int main()
             SS->All_Cells_zero.push_back(i);
         }
     }
-
+    SS->Print_cell2();
 
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
@@ -301,7 +301,7 @@ int main()
     //delete SS3;
 
 
-    SS->Save_Setka_ALL_ALPHA("vers16_5.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_4.txt");
     for (int k = 0; k < 0; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
@@ -311,12 +311,12 @@ int main()
         SS->Go_5_komponent__MK2(50000);
     }
 
-    //SS->Print_cell2();
-    //SS->Print_Gran("surface15_6.txt");
+    SS->Print_cell2();
+    SS->Print_Gran("surface7_5.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    //SS->Save_Setka_ALL_ALPHA("vers15_6.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_5.txt");
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------
