@@ -862,6 +862,394 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 	return true;
 }
 
+bool MKmethod::Init_Parametrs_2s(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_)
+// Розыгрышь на части сферы (от 0 до 0.9 например)
+{
+	double Y = fabs(Velosity_inf);
+	double ksi, ksi1, ksi2;
+	double X1;
+	double X2;
+	double X0 = 1.0;                // для метода хорд
+	double split, gam1, gam2;
+	vector <double> Wa_(this->num_area);
+	vector <double> Mho_(this->num_area);
+
+	// Разыгрываем  X
+	for (int i = 0; i < this->num_area; i++)
+	{
+		ksi = sens->MakeRandom();
+		//cout << "ksi  " << ksi << endl;
+		X1 = 0.0;
+		X2 = k_sphere;
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		while (fabs(X2 - X1) > 0.0000001)     // Деление пополам, иначе разваливается
+		{
+			X0 = (X1 + X2) / 2.0;
+			if (this->Hx2(gam1, gam2, X0, Y, ksi) < 0.0)
+			{
+				X1 = X0;
+			}
+			else
+			{
+				X2 = X0;
+			}
+			//k++;
+		}
+		/*if (std::fpclassify(X0) != FP_NORMAL && std::fpclassify(X0) != FP_ZERO)
+		{
+			cout << X0 << "    ERROR  229" << endl;
+			exit(-1);
+		}*/
+		X_[i] = X2;
+		//cout << X0 << " " << ksi << " " << gam1 << " " << gam2 << endl;
+		//cout << "X2 = " << X2 << "    " << k << endl;
+	}
+
+	double Wr1, Wr2, Wr0;
+	// Разыгрываем  Wr
+	for (int i = 0; i < this->num_area; i++)
+	{
+		ksi = sens->MakeRandom();
+		//cout << "ksi  " << ksi << endl;
+		Wr1 = -5.0;
+		Wr2 = 0.0;
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+		while (this->Hwr(gam1, gam2, Wr1, X_[i], Y, ksi) >= 0.0)
+		{
+			Wr1 = Wr1 - 1.0;
+		}
+		//int k = 0;
+		while (fabs(Wr2 - Wr1) > 0.000001)     // Деление пополам, иначе разваливается
+		{
+			Wr0 = (Wr1 + Wr2) / 2.0;
+			if (this->Hwr(gam1, gam2, Wr0, X_[i], Y, ksi) < 0)
+			{
+				Wr1 = Wr0;
+			}
+			else
+			{
+				Wr2 = Wr0;
+			}
+			//k++;
+		}
+
+		/*if (std::fpclassify(Wr2) != FP_NORMAL && std::fpclassify(Wr2) != FP_ZERO)
+		{
+			cout << Wr2 << "    ERROR  Wr2  276" << endl;
+			exit(-1);
+		}*/
+
+		Wr_[i] = Wr0;
+		//cout << Wr0 << " " << ksi << " " << X_[i] << endl;
+		//cout << "Wr2 = " << Wr2 << "    " << k << endl;
+	}
+
+	double W1, W2, Wa, Yt;
+	// Разыгрываем  Wa
+	for (int i = 0; i < this->num_area; i++)
+	{
+		Yt = Y * sqrt(1.0 - kv(X_[i]));
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		do
+		{
+			ksi1 = sens->MakeRandom();
+			ksi2 = sens->MakeRandom();
+			W1 = sqrt(gam1 * kv(Wr_[i]));
+			W2 = sqrt(gam2 * kv(Wr_[i]));
+			Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+		} while ((1.0 + kv(Yt * Wa)) / (1.0 + kv(Yt * W2)) < ksi2);
+
+		if (std::fpclassify(Wa) != FP_NORMAL && std::fpclassify(Wa) != FP_ZERO)
+		{
+			cout << Wa << "    ERROR  Wa  311" << endl;
+			cout << ksi1 << endl;
+			exit(-1);
+		}
+
+		Wa_[i] = Wa;
+		//cout << Wa << " " << ksi1 << " " << Wr_[i] << " " << X_[i] << endl;
+	}
+
+	//exit(-1);
+
+	// Разыгрываем  Mho
+	//for (int i = 0; i < this->num_area; i++)
+	//{
+	//	Mho_[i] = play_mho(sens, Y * sqrt(1.0 - kv(X_[i])) * Wa_[i]);
+	//	/*if (std::fpclassify(Mho_[i]) != FP_NORMAL && std::fpclassify(Mho_[i]) != FP_ZERO)
+	//	{
+	//		cout << Mho_[i] << "    ERROR  Mho_[i]  324   " << Y * sqrt(1.0 - kv(X_[i])) * Wa_[i] << endl;
+	//		exit(-1);
+	//	}*/
+	//}
+
+	// Считаем веса
+	for (int i = 0; i < this->num_area; i++)
+	{
+		double c = Y * sqrt(1.0 - kv(X_[i])) * Wa_[i];
+		double p = this->norm_mho(c);
+		if (false)//(fabs(c) > 0.1)
+		{
+			double p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
+			Mho_[i] = play_mho2(sens, c, p * pi_, p1);
+		}
+		else
+		{
+			Mho_[i] = play_mho(sens, c);
+		}
+
+		Wt_[i] = Wa_[i] * cos(Mho_[i]);
+		Wp_[i] = Wa_[i] * sin(Mho_[i]);
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		double AA0 = k_sphere * (exp(-kv(k_sphere) * kv(Y)) / sqrtpi_ + k_sphere * Y) + (0.5 / Y + kv(k_sphere) * Y) * erf(k_sphere * Y);
+		mu_[i] = (this->F(k_sphere, gam2, Y) - this->F(k_sphere, gam1, Y)) * (p) / (AA0 * (1.0 + kv(c)));
+		//cout << mu_[i] << "     -  " << i <<  endl;
+		//cout << (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) << "  " << this->A0_ << endl;
+		/*if (std::fpclassify(mu_[i]) != FP_NORMAL && std::fpclassify(mu_[i]) != FP_ZERO)
+		{
+			cout << mu_[i] << "    ERROR  mu_[i]  348" << endl;
+			cout << gam1 << " " << gam2 << endl;
+			cout << this->F(1.0, gam2, Y) << endl;
+			cout << this->F(1.0, gam1, Y) << endl;
+			cout << c << endl;
+			cout << this->A0_ << endl;
+			cout << Wa_[i] << endl;
+			exit(-1);
+		}*/
+	}
+	//exit(-1);
+
+	// Разыгрываем основной атом
+
+
+	// Розыгрыш X 
+	double ksi3, ksi4;
+	double z, h;
+	double hhn = ((2.0 * exp(-kv(k_sphere) * Y * Y)) / sqrtpi_ + 2.0 * k_sphere * Y * (1.0 + erf(k_sphere * Y)));
+	do
+	{
+		ksi1 = sens->MakeRandom();
+		X2 = ksi1 * k_sphere;
+		h = ((2.0 * exp(-X2 * X2 * Y * Y)) / sqrtpi_ + 2.0 * X2 * Y * (1.0 + erf(X2 * Y))) / hhn;
+		ksi2 = sens->MakeRandom();
+	} while (ksi2 > h);
+
+	X_[this->num_area] = X2;
+
+	double gg = 0.0;
+	if (this->num_area > 0)
+	{
+		gg = this->gam_[this->num_area - 1];
+	}
+
+	double p4_ = sqrtpi_ * (Y * X2) / (1.0 + sqrtpi_ * (Y * X2));                  // Для розыгрыша основного атома на границе по препринту Маламы
+	//do
+	//{
+	do
+	{
+		ksi1 = sens->MakeRandom();
+		ksi2 = sens->MakeRandom();
+		ksi3 = sens->MakeRandom();
+		if (p4_ > ksi1)
+		{
+			z = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+		}
+		else
+		{
+			if (ksi2 <= 0.5)
+			{
+				z = -sqrt(-log(2.0 * ksi2));
+			}
+			else
+			{
+				z = sqrt(-log(2.0 * (1.0 - ksi2)));
+			}
+		}
+
+		Wr_[this->num_area] = z - (Y * X2);
+		h = fabs(-(Y * X2) + z) / ((Y * X2) + fabs(z));
+		ksi4 = sens->MakeRandom();
+	} while (h <= ksi4 || z >= (Y * X2));
+
+	double ksi5, ksi6;
+	ksi5 = sens->MakeRandom();
+	ksi6 = sens->MakeRandom();
+	//ksi7 = sens->MakeRandom();
+
+	Wt_[this->num_area] = Y * sqrt(1.0 - kv(X_[this->num_area])) + sqrt(-log(ksi5)) * cos(2.0 * pi_ * ksi6);
+	Wp_[this->num_area] = sqrt(-log(ksi5)) * sin(2.0 * pi_ * ksi6);
+	//} while(Wr_[this->num_area] < 0.0 && kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) < gg * kv(Wr_[this->num_area]));
+
+	/*mu_[this->num_area] = 1.0;
+	for (int i = 0; i < this->num_area; i++)
+	{
+		mu_[this->num_area] = mu_[this->num_area] - mu_[i];
+	}*/
+
+	/*for (int i = 0; i <= this->num_area; i++)
+	{
+		cout << mu_[i] << endl;
+	}
+	cout << "----------------------------------" << endl;*/
+
+	if (this->num_area == 0)
+	{
+		mu_[this->num_area] = 1.0;
+		//cout << "A " << endl;
+		return true;
+	}
+	else
+	{
+		if (Wr_[this->num_area] >= 0.0 || kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) > this->gam_[this->num_area - 1] * kv(Wr_[this->num_area]))
+		{
+			mu_[this->num_area] = 1.0;
+			//cout << "B" << endl;
+		}
+		else
+		{
+			mu_[this->num_area] = 0.0;  // Чтобы не запускать этот атом
+			//cout << "C" << endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool MKmethod::Init_Parametrs_mini(Sensor* sens, double& Wt_, double& Wp_, double& Wr_, double& X_)
+{
+	// розыгрышь на сфере при косинусе больше 0.9
+	double B0 = this->B0(k_sphere);
+	double Y = fabs(Velosity_inf);
+	double X1 = k_sphere;
+	double X2 = 1.0;
+	double X0 = 0.0;
+	double ksi = sens->MakeRandom();
+
+	double ksi1, ksi2;
+	double z, h;
+	double hhn = ((2.0 * exp(-kv(1.0) * Y * Y)) / sqrtpi_ + 2.0 * 1.0 * Y * (1.0 + erf(1.0 * Y)));
+	do
+	{
+		ksi1 = sens->MakeRandom();
+		X2 = k_sphere + ksi1 * (1 - k_sphere);
+		h = ((2.0 * exp(-X2 * X2 * Y * Y)) / sqrtpi_ + 2.0 * X2 * Y * (1.0 + erf(X2 * Y))) / hhn;
+		ksi2 = sens->MakeRandom();
+	} while (ksi2 > h);
+
+	//while (fabs(X2 - X1) > 0.0000001)     // Деление пополам, иначе разваливается
+	//{
+	//	X0 = (X1 + X2) / 2.0;
+	//	if (this->H_sphere(k_sphere, X0, B0, ksi) < 0.0)
+	//	{
+	//		X1 = X0;
+	//	}
+	//	else
+	//	{
+	//		X2 = X0;
+	//	}
+	//}
+
+	X_ = X2;
+
+	double p4_ = sqrtpi_ * (Y * X2) / (1.0 + sqrtpi_ * (Y * X2));                  // Для розыгрыша основного атома на границе по препринту Маламы
+
+	double ksi3, ksi4;
+
+	do
+	{
+		ksi1 = sens->MakeRandom();
+		ksi2 = sens->MakeRandom();
+		ksi3 = sens->MakeRandom();
+		if (p4_ > ksi1)
+		{
+			z = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+		}
+		else
+		{
+			if (ksi2 <= 0.5)
+			{
+				z = -sqrt(-log(2.0 * ksi2));
+			}
+			else
+			{
+				z = sqrt(-log(2.0 * (1.0 - ksi2)));
+			}
+		}
+
+		Wr_ = z - (Y * X2);
+		h = fabs(-(Y * X2) + z) / ((Y * X2) + fabs(z));
+		ksi4 = sens->MakeRandom();
+	} while (h <= ksi4 || z >= (Y * X2));
+
+	double ksi5, ksi6;
+	ksi5 = sens->MakeRandom();
+	ksi6 = sens->MakeRandom();
+	//ksi7 = sens->MakeRandom();
+
+	Wt_ = Y * sqrt(1.0 - kv(X2)) + sqrt(-log(ksi5)) * cos(2.0 * pi_ * ksi6);
+	Wp_ = sqrt(-log(ksi5)) * sin(2.0 * pi_ * ksi6);
+
+	return true;
+}
+
+double MKmethod::B0(const double& k)
+{
+	return (k * k * Velosity_inf + 1.0 / (2.0 * Velosity_inf)) * erf(-k * Velosity_inf) - (Velosity_inf + 1.0 / (2.0 * Velosity_inf)) * erf(-Velosity_inf) - //
+		k * exp(-kv(k) * kv(Velosity_inf)) / sqrtpi_ + k * k * Velosity_inf + exp(-kv(Velosity_inf)) / sqrtpi_ - Velosity_inf;
+}
+
+double MKmethod::R_sphere(const double& k, const double& Z)
+{
+	return (k* k* Velosity_inf + 1.0 / (2.0 * Velosity_inf)) * erf(-k* Velosity_inf) - (Velosity_inf*Z*Z + 1.0/(2.0 * Velosity_inf)) * //
+		erf(-Velosity_inf*Z) - k * exp(-kv(k) * kv(Velosity_inf))/sqrtpi_ + k * k * Velosity_inf + //
+		Z * exp(-kv(Velosity_inf) * kv(Z))/sqrtpi_ - Velosity_inf * Z * Z;
+}
+
+double MKmethod::H_sphere(const double& k, const double& Z, const double& B, const double& ksi)
+{
+	return this->R_sphere(k, Z)/B - ksi;
+}
+
 bool MKmethod::Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_)
 // Алгоритм Маламы из препринта
 {
@@ -1134,6 +1522,11 @@ int MKmethod::Init(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vec
 double MKmethod::Hx(const double& gam1, const double& gam2, const double& X, const double& Y, const double& ksi)
 {
 	return F(X, gam2, Y) - F(X, gam1, Y) - ksi * (F(1.0, gam2, Y) - F(1.0, gam1, Y));
+}
+
+double MKmethod::Hx2(const double& gam1, const double& gam2, const double& X, const double& Y, const double& ksi)
+{
+	return F(X, gam2, Y) - F(X, gam1, Y) - ksi * (F(k_sphere, gam2, Y) - F(k_sphere, gam1, Y));
 }
 
 double MKmethod::Hwr(const double& gam1, const double& gam2, const double& Z, const double& X, const double& Y, const double& ksi)

@@ -72,14 +72,12 @@ int main()
     //Setka* CC;
     //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
 
-    /*MKmethod* MK;
-    Setka* CC;
-    CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
-    MK = new MKmethod();
-    double c = 18.0 * fabs(Velosity_inf);
-    double x = 70.0 * fabs(Velosity_inf);
-    double uz = CC->Velosity_1(x, c);
-    cout << MK->int_1(x, c) << " " << uz * sigma(uz) << endl;*/
+    //MKmethod* MK;
+    //Setka* CC;
+    //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
+    //MK = new MKmethod();
+    
+    //cout << MK->R_sphere(0.92, 0.95) << endl;
 
     //double u = 0.0, cp = 12.0;
     //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
@@ -123,7 +121,7 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers7_3.txt");  //  9 4   11 4       IEX    vers_test1.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers16_5.txt");  //  9 4   11 4       IEX    vers_test1.txt
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();
@@ -301,7 +299,7 @@ int main()
     //delete SS3;
 
 
-    SS->Save_Setka_ALL_ALPHA("vers7_4.txt");
+    SS->Save_Setka_ALL_ALPHA("vers16_6.txt");
     for (int k = 0; k < 0; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
@@ -312,11 +310,11 @@ int main()
     }
 
     SS->Print_cell2();
-    SS->Print_Gran("surface7_5.txt");
+    SS->Print_Gran("surface16_7.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers7_5.txt");
+    SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------

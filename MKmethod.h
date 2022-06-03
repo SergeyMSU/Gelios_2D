@@ -25,7 +25,9 @@ public:
 
 	// розыгрыш начальных параметров запуска
 	bool Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
+	bool Init_Parametrs_2s(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
 	// Возвращает false, если не нужно запускать основной атом
+	bool Init_Parametrs_mini(Sensor* sens, double& Wt_, double& Wp_, double& Wr_, double& X_);
 	bool Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
 	int Init(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, double& X_);
 	double FF(const double& gam, const double& Yr);
@@ -103,12 +105,18 @@ public:
 	double FI(const double& Z, const double& X, const double& gam, const double& Y);   // ПРОВЕРЕНО!
 	double R(const double& X, const double& Y);              // ПРОВЕРЕНО!
 
+	//для верхушки сферы
+	double B0(const double& k);
+	double R_sphere(const double& k, const double& Z);
+	double H_sphere(const double& k, const double& Z, const double& B, const double& ksi);
+
 	// Для розыгрыша перезарядки внутри области
 	double f2(const double& V, const double& gam, const double& ur, const double& ut);
 	double f2k(const double& V, const double& gam, const double& ur, const double& ut);  // учтено два члена ряда
 
 	// Вспомогательные функции
 	double Hx(const double& gam1, const double& gam2, const double& X, const double& Y, const double& ksi);
+	double Hx2(const double& gam1, const double& gam2, const double& X, const double& Y, const double& ksi);
 	double Hwr(const double& gam1, const double& gam2, const double& Z, const double& X, const double& Y, const double& ksi);
 
 	double Hvr(const double& gam1, const double& gam2, const double& V, const double& ur, const double& ut, const double& ksi);

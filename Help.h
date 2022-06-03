@@ -57,7 +57,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define kurant  0.1
 //#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
-#define Kn_  0.4326569			
+#define Kn_  6.0			
 //#define Kn_  0.2	                                            // Число Кнудсена
 //#define a_2 0.102578  // 0.10263
 #define a_2 0.1307345665  // 0.102578  // 0.10263
@@ -85,7 +85,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define R4_ (600.0/RR_)  // 600.0
 #define R5_ (2200.0/RR_)  // 2200.0
 //#define Rmax_ (1300.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
-#define Rmax_ (1800.0/RR_)  // 1800.0  // (1300.0)   // Максимальный радиус для Монте-Карло
+#define Rmax_ (1800.0/RR_)  // 1390.0  // (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ (-1500.0/RR_)  // -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
 #define I_ 8 //5 // Количество зон по радиусу
@@ -99,6 +99,8 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define Weyght 1000000.0  // Для весов чтобы не было потери точности
 #define eta_ 0.5    // параметр точности
 #define betta_ 1.0  // сжатие
+
+#define k_sphere 1.0  // 0.9  с какого косинуса разыгрываем дополнительные траектории
 
 #define polusum false  // Берём лт полусумму источников или только один
 #define mu_statistic true  // считаем ли статистику весов по зонам

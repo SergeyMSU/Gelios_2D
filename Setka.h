@@ -90,11 +90,13 @@ public:
 	int Number2;
 	int Number3;
 	int Number4;
+	int Number5;
 	int AllNumber;
 	double sqv_1;
 	double sqv_2;
 	double sqv_3;
 	double sqv_4;
+	double sqv_5;
 	double sum_s;
 
 	mutex Smut;
