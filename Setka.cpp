@@ -10198,7 +10198,7 @@ void Setka::Go_5_komponent__MK2(int step)
 				i->Get_normal(n1, n2);
 				double Vc, Vl, Vp;
 				W = ((x4 - x2) * n1 + (y4 - y2) * n2) / T[now1];
-				int met = 1;  // 1                                                                 метод распадника
+				int met = 0;  // 1                                                                 метод распадника
 				double dis = sqrt(kv(x2) + kv(y2));
 
 				if (i->type == Usualy)
@@ -11432,10 +11432,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 250; //250  6000;  25
-	this->Number2 = 411 * 30; // 30; // 50;
-	this->Number3 = 411 * 5; // 5;
-	this->Number4 = 411 * 200; // 200; //  300  411 * 1650; // 135 * 40; // 400;
+	this->Number1 = 411 * 250 * 9; //250  6000;  25
+	this->Number2 = 411 * 30 * 9; // 30; // 50;
+	this->Number3 = 411 * 5 * 9; // 5;
+	this->Number4 = 411 * 200 * 9; // 200; //  300  411 * 1650; // 135 * 40; // 400;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11477,7 +11477,7 @@ void Setka::M_K_prepare(void)
 	double ss2 = 0.02; // 0.02; // * 0.5;    0.03
 	double ss3 = 0.3; // 0.4; // 0.4;
 
-	double ss4 = 1.0; // 0.1   0.02
+	double ss4 = 0.1; // 0.1   0.02
 
 	//double kas = 0.25 * mu1 * 100.0 * 10.0 * 0.25; // 0.00025; //0.001;
 	//double ss1 = 1.0;

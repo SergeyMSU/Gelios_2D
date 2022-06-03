@@ -101,7 +101,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define betta_ 1.0  // сжатие
 
 #define polusum false  // Берём лт полусумму источников или только один
-#define mu_statistic true  // считаем ли статистику весов по зонам
+#define mu_statistic false  // считаем ли статистику весов по зонам
 #define func_stat false     // считаем ли функцию распределения и моменты на сфере радиуса?
 #define R_stat 80.0        // Сфера на которой считаем статистику
 #define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
