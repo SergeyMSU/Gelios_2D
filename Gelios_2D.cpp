@@ -122,8 +122,17 @@ int main()
 
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
-    //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers16_5.txt");  //  9 4   11 4       IEX    vers_test1.txt
+
+    SS->Download_Setka_ALL_ALPHA_2_0("vers7_5.txt");  //  9 4   11 4       IEX    vers_test1.txt
+    //SS->Download_all_parametrs("all_parametrs7_5.txt");
+
+    //SS->Download_Setka_ALL_ALPHA_2_0("vers18_1.txt");  //  9 4   11 4       IEX    vers_test1.txt
+    //SS->Download_all_parametrs("all_parametrs18_1.txt");
+
+    //SS->culc_PUI();
+
+    //SS->Print_for_Igor();
+    //exit(-2);
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();
@@ -233,8 +242,8 @@ int main()
     }
 
 
-    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
-    SS->MK_start_new();
+    //SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    //SS->MK_start_new();
 
     //SS2 = new Setka();
     //SS3 = new Setka();
@@ -301,22 +310,24 @@ int main()
     //delete SS3;
 
 
-    SS->Save_Setka_ALL_ALPHA("vers16_6.txt");
-    for (int k = 0; k < 50; k++)  // 10
+    //SS->Save_Setka_ALL_ALPHA("vers11_7.txt");
+    //SS->Print_Tecplot_MK();
+    //SS->GD_prepare();
+    for (int k = 0; k < 1; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
         //SS->Go_5_komponent_2(50000);
-        SS->Go_stationary_5_komponent_inner_MK2(40000);
+        SS->Go_stationary_5_komponent_inner_MK2(1000);
         SS->Go_5_komponent__MK2(50000);
     }
 
     //SS->Print_cell2();
-    SS->Print_Gran("surface16_7.txt");
+    //SS->Print_Gran("Gran_vers18_2.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
-    //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
+    //SS->Save_Setka_ALL_ALPHA("vers18_2.txt");
+    //SS->Save_Setka_ALL_ALPHA("vers11_6.txt");
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------

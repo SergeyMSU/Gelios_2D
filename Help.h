@@ -34,6 +34,9 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, const double& r2,//
 	const double& x3, const double& r3, const double& x4, const double& r4);
 void polar_provorot(const double& phi, double& u, double& v);
+void Vector_product(const double& a1, const double& a2, const double& a3,//
+	const double& b1, const double& b2, const double& b3,//
+	double& x, double& y, double& z);
 //double max(const double& x, const double& y);
 
 #define ga (5.0/3.0)          // Показатель адиабаты
@@ -57,7 +60,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define kurant  0.1
 //#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
-#define Kn_  6.0			
+#define Kn_  0.4326569808			
 //#define Kn_  0.2	                                            // Число Кнудсена
 //#define a_2 0.102578  // 0.10263
 #define a_2 0.1307345665  // 0.102578  // 0.10263
@@ -85,7 +88,7 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define R4_ (600.0/RR_)  // 600.0
 #define R5_ (2200.0/RR_)  // 2200.0
 //#define Rmax_ (1300.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
-#define Rmax_ (1800.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
+#define Rmax_ (1450.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ (-1500.0/RR_)  // -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
 #define I_ 8 //5 // Количество зон по радиусу
@@ -106,6 +109,9 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define R_stat 80.0        // Сфера на которой считаем статистику
 #define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
 
+
+#define L_Igor 200.0         // В распределении Игоря до какого модуля скорости считаем интегралы
+#define k_Igor 1000         // В распределении Игоря до какого модуля скорости считаем интегралы
 
 // Предикат проверки прерывания веса атома
 

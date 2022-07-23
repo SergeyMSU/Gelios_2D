@@ -109,6 +109,10 @@ public:
 	int number_stat_2;
 	mutex mut_stat;
 
+	// для ПУИ
+	double wmin = 0.0;
+	double wmax = 0.0;
+	int Nw = 0;
 
 	// Моменты функции распределения для Насти
 	double mu_mom[4][54];
@@ -131,7 +135,8 @@ public:
 	void Copy(Setka* S); // Копирует сетку S (положения разрывов), при этом сетки разного разрешения
 	// Для того, чтобы копировать сетки, они должны находиться в одном масштабе (левая и правая граница должна быть такая-же)
 	// потому что это параметр не сетки, а параметр самой программы. #define
-
+	void Download_all_parametrs(string name);
+	void Print_for_Igor(void);
 
 	void Print_point();      // Печатает точки в сетке (не ячейки, а узлы)
 	void Print_Gran();
@@ -164,6 +169,7 @@ public:
 
 	// Газовая динамика
 
+	void culc_PUI(void);
 	void Save_G_D(void);
 	void Download_G_D(void);
 	void Save_G_D_5_komponent(void);
@@ -191,6 +197,8 @@ public:
 		// Функция возвращает не потоки, а сами большие величины в ячейке. 
 	void Init_conditions(void);
 
+	void GD_prepare(void);
+
 
 	// Монте-Карло
 
@@ -217,6 +225,8 @@ public:
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1); // Смотри описание функции в коде функции
+	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1);
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 	int geo_zones(const double& r, const double& k = 1.0);

@@ -16,13 +16,21 @@ enum Cell_type  // Тип грани нужен для граничных условий
 	C_no,
 };
 
+
+class Sensor;
+
 struct Parametr
 {
 	double ro = 0.0;
+	double npui = 0.0;
+	double Tpui = 0.0;
+	double pp = 0.0;
 	double p = 0.0;
 	double u = 0.0;
 	double v = 0.0;
+	double ppui = 0.0;
 	double Q = 0.0;
+	double divV = 0.0;
 	double ro_H1 = 0.0;
 	double p_H1 = 0.0;
 	double u_H1 = 0.0;
@@ -64,6 +72,10 @@ struct Parametr
 	double H_u3[4];
 	double H_v3[4];
 	double H_T3[4];
+	double H_uu[4];
+	double H_vv[4];
+	double H_uv[4];
+	double H_uuu[4];
 	double k_u = 0.0;
 	double k_v = 0.0;
 	double k_T = 0.0;
@@ -98,6 +110,14 @@ public:
 	Parametr par[2];
 	vector <Point*> contour;    // Гарантируется расположение точек по кругу
 	vector <Gran*> Grans;
+	vector <double> fpui;
+	double fpui_max = 1.0;      // Максимальное значение fpui  
+	double Wmin = 0.0;
+	double Wmax = 10.0;         // Максимальная скорость при которой fpui не нулевая
+	vector <double> nu_pui;     // Частоты перезарядки от L, где L от 0 до 20 с шагом 100
+	vector <double> nu2_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
+	vector <double> nu3_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
+	bool pui_ = false;                  // Нужно ли вообще считать эти PUI?
 	int number;
 	int zona;
 	int zona_alpha;
@@ -120,6 +140,18 @@ public:
 	Cell(void);
 
 	void Initial(void);
+
+	double get_nu_pui(double L);
+	double get_nu_pui2(double L);
+	double get_nu_pui3(double L);
+	double get_fpui(const double& W, const double& Wmin, const double& Wmax);
+
+	bool Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
+		const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
+		const double& wmin, const double& wmax);
+	bool Change_Velosity_PUI2(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
+		const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
+		const double& wmin, const double& wmax);
 
 	void Get_Center(double& x, double& y);
 	void Get_Center_posle(double& x, double& y);
