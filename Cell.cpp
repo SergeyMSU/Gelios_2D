@@ -827,4 +827,365 @@ void Cell::Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, c
 }
 
 
+double Cell::get_nu_pui(double L)
+{
+	if (L > L_Igor)
+	{
+		cout << "PROBLEM  Cell  833  nu_pui > 20   " << L << endl;
+		exit(-1);
+	}
+
+	double dl = L_Igor / (k_Igor - 1);
+	int k1 = (int)(L / dl);
+	if (k1 == (k_Igor - 1))
+	{
+		return this->nu_pui[k1];
+	}
+	else
+	{
+		int k2 = k1 + 1;
+		double al = (L - k1 * dl) / dl;
+		return this->nu_pui[k1] * (1.0 - al) + this->nu_pui[k2] * al;
+	}
+
+}
+
+double Cell::get_nu_pui2(double L)
+{
+	if (L > L_Igor)
+	{
+		cout << "PROBLEM  Cell  833  nu_pui > 20" << endl;
+		exit(-1);
+	}
+
+	double dl = L_Igor / (k_Igor - 1);
+	int k1 = (int)(L / dl);
+	if (k1 == (k_Igor - 1))
+	{
+		return this->nu2_pui[k1];
+	}
+	else
+	{
+		int k2 = k1 + 1;
+		double al = (L - k1 * dl) / dl;
+		return this->nu2_pui[k1] * (1.0 - al) + this->nu2_pui[k2] * al;
+	}
+
+}
+
+double Cell::get_nu_pui3(double L)
+{
+	if (L > L_Igor)
+	{
+		cout << "PROBLEM  Cell  833  nu_pui > 20" << endl;
+		exit(-1);
+	}
+
+	double dl = L_Igor / (k_Igor - 1);
+	int k1 = (int)(L / dl);
+	if (k1 == (k_Igor - 1))
+	{
+		return this->nu3_pui[k1];
+	}
+	else
+	{
+		int k2 = k1 + 1;
+		double al = (L - k1 * dl) / dl;
+		return this->nu3_pui[k1] * (1.0 - al) + this->nu3_pui[k2] * al;
+	}
+
+}
+
+double Cell::get_fpui(const double& W, const double& Wmin, const double& Wmax)
+{
+	int N = this->fpui.size();
+	int i = (int)((N - 1) * log(W / Wmin) / log(Wmax / Wmin));
+	//cout << "I = " << i << endl;
+	if (i >= N - 1)
+	{
+		return this->fpui[i];
+	}
+	else
+	{
+		double WL = Wmin * pow(Wmax / Wmin, 1.0 * i / (N - 1));
+		double WR = Wmin * pow(Wmax / Wmin, 1.0 * (i + 1) / (N - 1));
+		//cout << "WL WR  " << WL << " " << WR << endl;
+		return (this->fpui[i + 1] - this->fpui[i]) / (WR - WL) * (W - WL) + this->fpui[i];
+	}
+}
+
+bool Cell::Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
+	const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
+	const double& wmin, const double& wmax)
+{
+	// Число делений в распределениях ИГОРЯ   NW = 100 было
+
+	double u = sqrt(kv(Vh1 - Vp1) + kv(Vh2 - Vp2) + kv(Vh3 - Vp3));
+	double Wr;
+
+	double Wmax3 = this->Wmax * this->Wmax * this->Wmax;
+	double Wmin3 = this->Wmin * this->Wmin * this->Wmin;
+
+	double Thetta = 0.0;
+	double phi = 0.0;
+	double h;
+	double M = (this->Wmax + u) * sigma(fabs(this->Wmax - u)) * this->fpui_max;
+	double uu = 0.0;
+	double coss = 0.0;
+
+	// Находим Wr и Thetta
+
+	do
+	{
+		//cout << "DO " << endl;
+		Wr = pow(sens->MakeRandom() * (Wmax3 - Wmin3) + Wmin3, 1.0 / 3.0);
+		coss = 1.0 - 2.0 * sens->MakeRandom();
+		uu = sqrt(Wr * Wr + u * u - 2.0 * Wr * u * coss);
+		h = uu * sigma(uu) * this->get_fpui(Wr, wmin, wmax) / M;
+		//cout << h << "    " << Wr << "  " << uu << "    " << this->get_fpui(Wr, wmin, wmax) << endl;
+		//cout << "   " << M << "   " << this->fpui_max << "  " << uu * sigma(uu) * this->get_fpui(Wr, wmin, wmax) << endl;
+		//cout << this->number << endl;
+		if (h > 1.0)
+		{
+			cout << " h > 1  iffiuehrkf    " << h << endl;
+			exit(-1);
+		}
+	} while (h < sens->MakeRandom());
+	//cout << "ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
+	Thetta = acos(coss);
+
+	phi = 2.0 * pi_ * sens->MakeRandom();
+
+	double ez1, ez2, ez3;
+	double ex1, ex2, ex3, ex;
+	double ey1, ey2, ey3;
+
+	ez1 = Vh1 - Vp1;
+	ez2 = Vh2 - Vp2;
+	ez3 = Vh3 - Vp3;
+	ez1 = ez1 / u;
+	ez2 = ez2 / u;
+	ez3 = ez3 / u;
+
+	ex = sqrt(kv(Vp1) + kv(Vp2) + kv(Vp3));
+
+	// Находим какой-то базис
+	if (fabs(ez1 * Vp1 + ez2 * Vp2 + ez3 * Vp3) / ex < 0.9)
+	{
+		Vector_product(ez1, ez2, ez3, Vp1, Vp2, Vp3, ex1, ex2, ex3);
+		ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+		ex1 = ex1 / ex;
+		ex2 = ex2 / ex;
+		ex3 = ex3 / ex;
+		Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+	}
+	else
+	{
+		if (fabs(ez1 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 1.0, 0.0, 0.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else if (fabs(ez2 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 0.0, 1.0, 0.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else if (fabs(ez3 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 0.0, 0.0, 1.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else
+		{
+			cout << "ERORORORORO  995 wijrihfberfr" << endl;
+			cout << ez1 << " " << ez2 << " " << ez3 << endl;
+			cout << Vp1 << " " << Vp2 << " " << Vp3 << endl;
+			cout << Vh1 << " " << Vh2 << " " << Vh3 << endl;
+			exit(-2);
+		}
+	}
+
+	double V1, V2, V3;
+	V1 = Wr * sin(Thetta) * cos(phi);
+	V2 = Wr * sin(Thetta) * sin(phi);
+	V3 = Wr * cos(Thetta);
+
+	W1 = Vp1 + V1 * ex1 + V2 * ey1 + V3 * ez1;
+	W2 = Vp2 + V1 * ex2 + V2 * ey2 + V3 * ez2;
+	W3 = Vp3 + V1 * ex3 + V2 * ey3 + V3 * ez3;
+
+	if (fpclassify(W1) == FP_NAN || fpclassify(W1) == FP_SUBNORMAL || fpclassify(W1) == FP_INFINITE)
+	{
+		cout << "NUNUNUNUN  1012" << endl;
+		cout << Wr << " " << Thetta << " " << phi << endl;
+		exit(-1);
+	}
+
+	return true;
+}
+
+
+bool Cell::Change_Velosity_PUI2(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
+	const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
+	const double& wmin, const double& wmax)
+{
+	// Число делений в распределениях ИГОРЯ   NW = 100 было
+
+	double u = sqrt(kv(Vh1 - Vp1) + kv(Vh2 - Vp2) + kv(Vh3 - Vp3));
+	double nu = this->get_nu_pui(u);
+	int n1 = 45;                            // Понижает точность но увеличивает скорость счёта
+	// Лучше чтобы n1 = тому n1, когда считали частоту в начале
+	double dthe = pi_ / (n1 - 1);
+	double L, R, d, f1, f2;
+	double LL = u;
+	double Int1 = 0.0;
+	double Int_do = 0.0;
+	double ksi = sens->MakeRandom();
+	double Wr, Wt, Wp;
+
+	// Находим Wr
+	for (int ik = 0; ik < Nw - 1; ik++)
+	{
+		L = wmin * pow(wmax / wmin, 1.0 * ik / (Nw - 1));
+		R = wmin * pow(wmax / wmin, 1.0 * (ik + 1) / (Nw - 1));
+		for (int ij = 0; ij < n1; ij++)
+		{
+			double the = dthe * ij;
+			d = sqrt(L * L + LL * LL - 2.0 * L * LL * cos(the));
+			f1 = this->fpui[ik] * d * sigma(d) * L * L * sin(the);
+
+			d = sqrt(R * R + LL * LL - 2.0 * R * LL * cos(the));
+			f2 = this->fpui[ik + 1] * d * sigma(d) * R * R * sin(the);
+			Int1 = Int1 + 0.5 * (R - L) * (f2 + f1) * dthe / nu;
+		}
+
+		if (Int1 >= ksi)
+		{
+			double k = (Int1 - Int_do) / (R - L);
+			Wr = L + (ksi - Int_do) / k;
+			break;
+		}
+
+		if (ik == Nw - 2)
+		{
+			Wr = R;
+		}
+
+		Int_do = Int1;
+	}
+
+	// Находим  Tetta                 ПРОВЕРИТЬ
+	double Thetta = 0.0;
+	double phi = 0.0;
+	double ksi2;
+	do
+	{
+		ksi2 = 1.0 - 2.0 * sens->MakeRandom();
+		Thetta = acos(ksi2);
+		d = sqrt(kv(Wr) + kv(u) - 2.0 * Wr * u * ksi2);
+	} while (d * sigma(d) / (fabs(Wr + u) * sigma(fabs(Wr - u))) < sens->MakeRandom());
+
+	phi = 2.0 * pi_ * sens->MakeRandom();
+
+	double ez1, ez2, ez3;
+	double ex1, ex2, ex3, ex;
+	double ey1, ey2, ey3;
+
+	ez1 = Vh1 - Vp1;
+	ez2 = Vh2 - Vp2;
+	ez3 = Vh3 - Vp3;
+	ez1 = ez1 / u;
+	ez2 = ez2 / u;
+	ez3 = ez3 / u;
+
+	ex = sqrt(kv(Vp1) + kv(Vp2) + kv(Vp3));
+
+	// Находим какой-то базис
+	if (fabs(ez1 * Vp1 + ez2 * Vp2 + ez3 * Vp3) / ex < 0.9)
+	{
+		Vector_product(ez1, ez2, ez3, Vp1, Vp2, Vp3, ex1, ex2, ex3);
+		ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+		ex1 = ex1 / ex;
+		ex2 = ex2 / ex;
+		ex3 = ex3 / ex;
+		Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+	}
+	else
+	{
+		if (fabs(ez1 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 1.0, 0.0, 0.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else if (fabs(ez2 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 0.0, 1.0, 0.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else if (fabs(ez3 - 1.0) > 0.001)
+		{
+			Vector_product(ez1, ez2, ez3, 0.0, 0.0, 1.0, ex1, ex2, ex3);
+			ex = sqrt(kv(ex1) + kv(ex2) + kv(ex3));
+			ex1 = ex1 / ex;
+			ex2 = ex2 / ex;
+			ex3 = ex3 / ex;
+			Vector_product(ez1, ez2, ez3, ex1, ex2, ex3, ey1, ey2, ey3);
+		}
+		else
+		{
+			cout << "ERORORORORO  995 wijrihfberfr" << endl;
+			cout << ez1 << " " << ez2 << " " << ez3 << endl;
+			cout << Vp1 << " " << Vp2 << " " << Vp3 << endl;
+			cout << Vh1 << " " << Vh2 << " " << Vh3 << endl;
+			exit(-2);
+		}
+	}
+
+	double V1, V2, V3;
+	V1 = Wr * sin(Thetta) * cos(phi);
+	V2 = Wr * sin(Thetta) * sin(phi);
+	V3 = Wr * cos(Thetta);
+
+	W1 = Vp1 + V1 * ex1 + V2 * ey1 + V3 * ez1;
+	W2 = Vp2 + V1 * ex2 + V2 * ey2 + V3 * ez2;
+	W3 = Vp3 + V1 * ex3 + V2 * ey3 + V3 * ez3;
+
+	if (fpclassify(W1) == FP_NAN || fpclassify(W1) == FP_SUBNORMAL || fpclassify(W1) == FP_INFINITE)
+	{
+		cout << "NUNUNUNUN  1012" << endl;
+		cout << Wr << " " << Thetta << " " << phi << endl;
+		cout << nu << endl;
+		cout << Int1 << " " << Int_do << " " << ksi << endl;
+		cout << L << " " << R << endl;
+		for (int ijk = 0; ijk < 100; ijk++)
+		{
+			cout << this->fpui[ijk] << "  ";
+		}
+		exit(-1);
+	}
+
+	return true;
+}
+
 

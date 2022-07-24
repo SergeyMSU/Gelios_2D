@@ -156,3 +156,12 @@ double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, 
 	return (pi_ / 3.0) * ((r4 - r2) * (x3 * (r2 + r4 + r3) - x1 * (r2 + r4 + r1)) - //
 		(r3 - r1) * (x4 * (r1 + r3 + r4) - x2 * (r1 + r3 + r2)));
 }
+
+void Vector_product(const double& a1, const double& a2, const double& a3,//
+	const double& b1, const double& b2, const double& b3,//
+	double& x, double& y, double& z)
+{
+	x = a2 * b3 - a3 * b2;
+	y = a3 * b1 - a1 * b3;
+	z = a1 * b2 - a2 * b1;
+}

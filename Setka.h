@@ -109,6 +109,11 @@ public:
 	int number_stat_2;
 	mutex mut_stat;
 
+	// для ПУИ
+	double wmin = 0.0;
+	double wmax = 0.0;
+	int Nw = 0;
+
 
 	// Моменты функции распределения для Насти
 	double mu_mom[4][54];
@@ -145,6 +150,8 @@ public:
 	void Print_Tecplot(void);
 	void Print_Tecplot_MK(void);
 	void Print_Sourse(void);
+
+	void Print_for_Igor(void);
 
 
 
@@ -219,8 +226,13 @@ public:
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1); // Смотри описание функции в коде функции
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
+	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1);
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
+
+	void culc_PUI(void);
+	void GD_prepare(void);
 
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);

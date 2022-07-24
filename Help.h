@@ -34,6 +34,9 @@ void spherical_skorost(const double& x, const double& y, const double& z, const 
 double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, const double& r2,//
 	const double& x3, const double& r3, const double& x4, const double& r4);
 void polar_provorot(const double& phi, double& u, double& v);
+void Vector_product(const double& a1, const double& a2, const double& a3,//
+	const double& b1, const double& b2, const double& b3,//
+	double& x, double& y, double& z);
 //double max(const double& x, const double& y);
 
 #define ga (5.0/3.0)          // Показатель адиабаты
@@ -105,6 +108,10 @@ void polar_provorot(const double& phi, double& u, double& v);
 #define func_stat false     // считаем ли функцию распределения и моменты на сфере радиуса?
 #define R_stat 80.0        // Сфера на которой считаем статистику
 #define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
+
+
+#define L_Igor 200.0         // В распределении Игоря до какого модуля скорости считаем интегралы
+#define k_Igor 1000         // В распределении Игоря до какого модуля скорости считаем интегралы
 
 
 // Предикат проверки прерывания веса атома
