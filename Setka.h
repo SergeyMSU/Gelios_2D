@@ -131,6 +131,8 @@ public:
 	void Inizialization(void);
 
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
+	void Save_Source_MK(string name);
+	void Download_Source_MK(string name);
 	void Download_Setka_ALL_ALPHA(string name);       // Старая версия для фалов до 122 включительно
 	void Download_Setka_ALL_ALPHA_2_0(string name);   // Новая функция с какого-то момента.... 
 	void Copy(Setka* S); // Копирует сетку S (положения разрывов), при этом сетки разного разрешения
@@ -233,6 +235,7 @@ public:
 
 	void culc_PUI(void);
 	void GD_prepare(void);
+	double get_w_init(const int& k);
 
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);

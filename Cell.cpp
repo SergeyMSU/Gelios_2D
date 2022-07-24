@@ -826,7 +826,6 @@ void Cell::Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, c
 	q3 = this->par[0].M_T * this->par[0].k_T3;
 }
 
-
 double Cell::get_nu_pui(double L)
 {
 	if (L > L_Igor)
@@ -899,7 +898,8 @@ double Cell::get_nu_pui3(double L)
 double Cell::get_fpui(const double& W, const double& Wmin, const double& Wmax)
 {
 	int N = this->fpui.size();
-	int i = (int)((N - 1) * log(W / Wmin) / log(Wmax / Wmin));
+	//int i = (int)((N - 1) * log(W / Wmin) / log(Wmax / Wmin));
+	int i = (int)((W - Wmin) / (Wmax - Wmin) * (N - 1));
 	//cout << "I = " << i << endl;
 	if (i >= N - 1)
 	{
@@ -907,8 +907,10 @@ double Cell::get_fpui(const double& W, const double& Wmin, const double& Wmax)
 	}
 	else
 	{
-		double WL = Wmin * pow(Wmax / Wmin, 1.0 * i / (N - 1));
-		double WR = Wmin * pow(Wmax / Wmin, 1.0 * (i + 1) / (N - 1));
+		//double WL = Wmin * pow(Wmax / Wmin, 1.0 * i / (N - 1));
+		double WL = Wmin + (Wmax - Wmin) * i / (N - 1);
+		//double WR = Wmin * pow(Wmax / Wmin, 1.0 * (i + 1) / (N - 1));
+		double WR = Wmin + (Wmax - Wmin) * (i + 1) / (N - 1);
 		//cout << "WL WR  " << WL << " " << WR << endl;
 		return (this->fpui[i + 1] - this->fpui[i]) / (WR - WL) * (W - WL) + this->fpui[i];
 	}
@@ -1059,8 +1061,10 @@ bool Cell::Change_Velosity_PUI2(Sensor* sens, const double& Vh1, const double& V
 	// Находим Wr
 	for (int ik = 0; ik < Nw - 1; ik++)
 	{
-		L = wmin * pow(wmax / wmin, 1.0 * ik / (Nw - 1));
-		R = wmin * pow(wmax / wmin, 1.0 * (ik + 1) / (Nw - 1));
+		//L = wmin * pow(wmax / wmin, 1.0 * ik / (Nw - 1));
+		//R = wmin * pow(wmax / wmin, 1.0 * (ik + 1) / (Nw - 1));
+		L = wmin + (wmax - wmin) * ik / (Nw - 1);
+		R = wmin + (wmax - wmin) * (ik + 1) / (Nw - 1);
 		for (int ij = 0; ij < n1; ij++)
 		{
 			double the = dthe * ij;
