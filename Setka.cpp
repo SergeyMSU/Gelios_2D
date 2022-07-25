@@ -1527,11 +1527,10 @@ void Setka::Print_TVD(void)
 	fout.close();
 }
 
-
 void Setka::Print_for_Igor(void)
 {
 	ofstream fout;
-	string name_fff = "print_for_Igor.txt";
+	string name_fff = "print_for_Igor_2.txt";
 	fout.open(name_fff);
 
 	// Считаем дивергенцию
@@ -1663,7 +1662,6 @@ void Setka::Print_for_Igor(void)
 	}
 	fout.close();
 }
-
 
 void Setka::Print_point()
 {
@@ -3768,7 +3766,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vl = Vl * koef * 0.1;  // 0
+			Vl = Vl * koef * 0.01;  // 0.1
 			double t1 = -n2;
 			double t2 = n1;
 
@@ -4872,9 +4870,10 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
 		//i->Key_point[2]->y2 = i->Key_point[2]->y/1.3;
 
-		if (jj >= n_outer_shock)
+		if (jj >= n_outer_shock)                                                        // ТУТ ИЗМЕНИЛ
 		{
 			i->Key_point[2]->y2 = this->D_Rails[jj - 1]->Key_point[2]->y2;
+			//cout << i->Key_point[2]->x << " " << i->Key_point[2]->y << endl;
 			//cout << "Setka.cpp    " << this->D_Rails[jj - 1]->Key_point[2]->y2 << endl;
 			//cout << "Setka.cpp    " << this->D_Rails[jj - 2]->Key_point[2]->y2 << endl;
 			//exit(-1);
@@ -7399,7 +7398,7 @@ void Setka::Go_stationary_5_komponent_inner_MK(int step)
 
 	for (int st = 0; st < step; st++)
 	{
-		if (st % 1000 == 0 && st > 0)
+		if (st % 10000 == 0 && st > 0)
 		{
 			cout << "Setka.cpp    " << st << " " << T[now2] << " " << x_min << " " << y_min << endl;
 		}
@@ -7536,10 +7535,20 @@ void Setka::Go_stationary_5_komponent_inner_MK(int step)
 			Q = par1.Q / kv(chi_real / chi_);*/
 			u = par1.u;
 			v = par1.v;
-			ro = par1.ro - K->par[0].npui;
-			//p = par1.p;
-			p = K->par[0].pp;
+			ro = par1.ro;
+			p = par1.p;
 			Q = par1.Q;
+
+			/*if (K->pui_ == true)
+			{
+				ro = par1.ro - K->par[0].npui;
+				p = K->par[0].pp;
+			}
+			else
+			{
+				ro = par1.ro;
+				p = par1.p;
+			}*/
 
 
 			if (ro <= 0.0000001)
@@ -7619,9 +7628,9 @@ void Setka::Go_stationary_5_komponent_inner_MK(int step)
 				nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
 					(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
 
-			q2_1 = K->par[0].M_u * K->par[0].k_u + K->par[0].II_u;
-			q2_2 = K->par[0].M_v * K->par[0].k_v + K->par[0].II_v;
-			q3 = K->par[0].M_T * K->par[0].k_T + K->par[0].II_T;
+			q2_1 = K->par[0].M_u * K->par[0].k_u;
+			q2_2 = K->par[0].M_v * K->par[0].k_v;
+			q3 = K->par[0].M_T * K->par[0].k_T;
 
 			u = par1.u;
 			v = par1.v;
@@ -9980,7 +9989,7 @@ void Setka::Go_5_komponent_MK(int step)
 		T[now2] = 100000000;
 
 		this->Move_surface(now1, T[now1]);
-		this->Move_Setka_Calculate(T[now1]);
+		this->Move_Setka_Calculate_2(T[now1]);
 
 		//omp_set_num_threads(4);
 #pragma omp parallel for
@@ -10125,131 +10134,174 @@ void Setka::Go_5_komponent_MK(int step)
 			}
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
-			double U_H1, U_H2, U_H3, U_H4;
-			double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
-			double nu_H1, nu_H2, nu_H3, nu_H4;
-			double q2_1, q2_2, q3;
-			double u, v, ro, p, Q;
-
-			double u_H1 = K->par[0].H_u[0], v_H1 = K->par[0].H_v[0], ro_H1 = K->par[0].H_n[0], p_H1 = 0.5 * K->par[0].H_T[0] * K->par[0].H_n[0];
-			double u_H2 = K->par[0].H_u[1], v_H2 = K->par[0].H_v[1], ro_H2 = K->par[0].H_n[1], p_H2 = 0.5 * K->par[0].H_T[1] * K->par[0].H_n[1];
-			double u_H3 = K->par[0].H_u[2], v_H3 = K->par[0].H_v[2], ro_H3 = K->par[0].H_n[2], p_H3 = 0.5 * K->par[0].H_T[2] * K->par[0].H_n[2];
-			double u_H4 = K->par[0].H_u[3], v_H4 = K->par[0].H_v[3], ro_H4 = K->par[0].H_n[3], p_H4 = 0.5 * K->par[0].H_T[3] * K->par[0].H_n[3];
-
-
-			if (false)//(par1.Q / par1.ro < 90)// (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)
+			if (false)
 			{
-				u = par1.u * (chi_real / chi_);
-				v = par1.v * (chi_real / chi_);
-				ro = par1.ro / kv(chi_real / chi_);
-				p = par1.p;
-				Q = par1.Q / kv(chi_real / chi_);
-			}
-			else
-			{
+				double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+				double U_H1, U_H2, U_H3, U_H4;
+				double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+				double nu_H1, nu_H2, nu_H3, nu_H4;
+				double q2_1, q2_2, q3;
+				double u, v, ro, p, Q;
+
+				double u_H1 = K->par[0].H_u[0], v_H1 = K->par[0].H_v[0], ro_H1 = K->par[0].H_n[0], p_H1 = 0.5 * K->par[0].H_T[0] * K->par[0].H_n[0];
+				double u_H2 = K->par[0].H_u[1], v_H2 = K->par[0].H_v[1], ro_H2 = K->par[0].H_n[1], p_H2 = 0.5 * K->par[0].H_T[1] * K->par[0].H_n[1];
+				double u_H3 = K->par[0].H_u[2], v_H3 = K->par[0].H_v[2], ro_H3 = K->par[0].H_n[2], p_H3 = 0.5 * K->par[0].H_T[2] * K->par[0].H_n[2];
+				double u_H4 = K->par[0].H_u[3], v_H4 = K->par[0].H_v[3], ro_H4 = K->par[0].H_n[3], p_H4 = 0.5 * K->par[0].H_T[3] * K->par[0].H_n[3];
+
+
+				if (false)//(par1.Q / par1.ro < 90)// (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)
+				{
+					u = par1.u * (chi_real / chi_);
+					v = par1.v * (chi_real / chi_);
+					ro = par1.ro / kv(chi_real / chi_);
+					p = par1.p;
+					Q = par1.Q / kv(chi_real / chi_);
+				}
+				else
+				{
+					u = par1.u;
+					v = par1.v;
+					ro = par1.ro;
+					p = par1.p;
+					Q = par1.Q;
+
+					/*if (K->pui_ == true)
+					{
+						ro = par1.ro - K->par[0].npui;
+						p = K->par[0].pp;
+					}
+					else
+					{
+						ro = par1.ro;
+						p = par1.p;
+					}*/
+				}
+
+				if (ro <= 0.0)
+				{
+					ro = 0.0000001;
+					p = 0.0;
+				}
+				if (ro_H1 <= 0.0)
+				{
+					ro_H1 = 0.0000001;
+					p_H1 = 0.0;
+				}
+				if (ro_H2 <= 0.0)
+				{
+					ro_H2 = 0.0000001;
+					p_H2 = 0.0;
+				}
+				if (ro_H3 <= 0.0)
+				{
+					ro_H3 = 0.0000001;
+					p_H3 = 0.0;
+				}
+				if (ro_H4 <= 0.0)
+				{
+					ro_H4 = 0.0000001;
+					p_H4 = 0.0;
+				}
+
+				U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
+					* (p / ro + 2.0 * p_H1 / ro_H1));
+				U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
+					* (p / ro + 2.0 * p_H2 / ro_H2));
+				U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
+					* (p / ro + 2.0 * p_H3 / ro_H3));
+				U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
+					* (p / ro + 2.0 * p_H4 / ro_H4));
+
+				U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
+					* (p / ro + 2.0 * p_H1 / ro_H1));
+				U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
+					* (p / ro + 2.0 * p_H2 / ro_H2));
+				U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
+					* (p / ro + 2.0 * p_H3 / ro_H3));
+				U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
+					* (p / ro + 2.0 * p_H4 / ro_H4));
+
+				sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+				sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+				sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+				sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+				nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+				nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+				nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+				nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+				K->par[0].M_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+					+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+				K->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+					+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+
+				if (false)//(par1.Q / par1.ro < 90)//(K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//
+				{
+					// Нужно изменить источник, так как он подставляется в уравнения, где параметры плазмы перенормированы 
+					K->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+						(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+						nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+							(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+						nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+							(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+						nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+							(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro))) / (chi_real / chi_);
+				}
+				else
+				{
+					K->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+						(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+						nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+							(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+						nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+							(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+						nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+							(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+				}
+
+				q2_1 = K->par[0].M_u * K->par[0].k_u;
+				q2_2 = K->par[0].M_v * K->par[0].k_v;
+				q3 = K->par[0].M_T * K->par[0].k_T;
+
+				//cout << "Setka.cpp    " << q2_1 << " " << q2_2 << " " << q3 << endl;
+
 				u = par1.u;
 				v = par1.v;
 				ro = par1.ro;
 				p = par1.p;
 				Q = par1.Q;
+
+				double ro3, Q33, u3, v3, p3;
 			}
 
-			if (ro <= 0.0)
-			{
-				ro = 0.0000001;
-				p = 0.0;
-			}
-			if (ro_H1 <= 0.0)
-			{
-				ro_H1 = 0.0000001;
-				p_H1 = 0.0;
-			}
-			if (ro_H2 <= 0.0)
-			{
-				ro_H2 = 0.0000001;
-				p_H2 = 0.0;
-			}
-			if (ro_H3 <= 0.0)
-			{
-				ro_H3 = 0.0000001;
-				p_H3 = 0.0;
-			}
-			if (ro_H4 <= 0.0)
-			{
-				ro_H4 = 0.0000001;
-				p_H4 = 0.0;
-			}
+			double u = par1.u;
+			double v = par1.v;
+			double ro = par1.ro;
+			double p = par1.p;
+			double Q = par1.Q;
 
-			U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi_)) //
-				* (p / ro + 2.0 * p_H1 / ro_H1));
-			U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi_)) //
-				* (p / ro + 2.0 * p_H2 / ro_H2));
-			U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi_)) //
-				* (p / ro + 2.0 * p_H3 / ro_H3));
-			U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi_)) //
-				* (p / ro + 2.0 * p_H4 / ro_H4));
+			double a1, a2, a3;
+			double b1, b2, b3;
+			double c1, c2, c3;
+			double q2_1, q2_2, q3;
 
-			U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi_) //
-				* (p / ro + 2.0 * p_H1 / ro_H1));
-			U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi_) //
-				* (p / ro + 2.0 * p_H2 / ro_H2));
-			U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi_) //
-				* (p / ro + 2.0 * p_H3 / ro_H3));
-			U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi_) //
-				* (p / ro + 2.0 * p_H4 / ro_H4));
-
-			sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
-			sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
-			sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
-			sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
-
-			nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
-			nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
-			nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
-			nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
-
-			K->par[0].M_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
-				+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
-			K->par[0].M_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
-				+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
-
-			if (false)//(par1.Q / par1.ro < 90)//(K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)//
+			if (polusum == true)
 			{
-				// Нужно изменить источник, так как он подставляется в уравнения, где параметры плазмы перенормированы 
-				K->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
-					(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
-					nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
-						(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
-					nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
-						(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
-					nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
-						(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro))) / (chi_real / chi_);  
+				K->Get_Sourse_MK1(a1, a2, a3, u, v, ro, p);
+				K->Get_Sourse_MK2(b1, b2, b3, u, v, ro, p);
+				K->Get_Sourse_MK3(c1, c2, c3, u, v, ro, p);
+				q2_1 = (a1 + b1 + c1) / 3.0;
+				q2_2 = (a2 + b2 + c2) / 3.0;
+				q3 = (a3 + b3 + c3) / 3.0;
 			}
 			else
 			{
-				K->par[0].M_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
-					(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
-					nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
-						(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
-					nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
-						(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
-					nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
-						(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+				K->Get_Sourse_MK1(a1, a2, a3, u, v, ro, p);
+				q2_1 = a1;
+				q2_2 = a2;
+				q3 = a3;
 			}
-
-			q2_1 = K->par[0].M_u * K->par[0].k_u;
-			q2_2 = K->par[0].M_v * K->par[0].k_v;
-			q3 = K->par[0].M_T * K->par[0].k_T;
-
-			//cout << "Setka.cpp    " << q2_1 << " " << q2_2 << " " << q3 << endl;
-
-			u = par1.u;
-			v = par1.v;
-			ro = par1.ro;
-			p = par1.p;
-			Q = par1.Q;
 
 			double ro3, Q33, u3, v3, p3;
 
@@ -11633,10 +11685,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 250 * 10; //250  6000;  50
-	this->Number2 = 411 * 30 * 5; // 30; // 30;
-	this->Number3 = 411 * 5 * 2; // 10;
-	this->Number4 = 411 * 200 * 5; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	this->Number1 = 411 * 250 * 20; //250  6000;  50
+	this->Number2 = 411 * 30 * 15; // 30; // 30;
+	this->Number3 = 411 * 5 * 5; // 10;
+	this->Number4 = 411 * 200 * 15; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11933,7 +11985,7 @@ void Setka::culc_PUI(void)
 			}
 		}
 
-		i->par[1] = i->par[0];
+		//i->par[1] = i->par[0];
 
 
 		/*if (i->pui_ == true)
@@ -11962,7 +12014,7 @@ void Setka::culc_PUI(void)
 	//exit(-1);
 
 	// Считаем всякие полезные интеграллы для последующих перезарядок
-	if (false)
+	if (true)
 	{
 #pragma omp parallel for
 		for (auto& i : this->All_Cells)
@@ -12670,6 +12722,20 @@ void Setka::MK_start_new(void)
 		double u_H2 = k->par[0].H_u[1], v_H2 = k->par[0].H_v[1], ro_H2 = k->par[0].H_n[1], p_H2 = 0.5 * k->par[0].H_T[1] * k->par[0].H_n[1];
 		double u_H3 = k->par[0].H_u[2], v_H3 = k->par[0].H_v[2], ro_H3 = k->par[0].H_n[2], p_H3 = 0.5 * k->par[0].H_T[2] * k->par[0].H_n[2];
 		double u_H4 = k->par[0].H_u[3], v_H4 = k->par[0].H_v[3], ro_H4 = k->par[0].H_n[3], p_H4 = 0.5 * k->par[0].H_T[3] * k->par[0].H_n[3];
+		
+		u = k->par[0].u;
+		v = k->par[0].v;
+		ro = k->par[0].ro;
+		p = k->par[0].p;
+
+		if (k->pui_ == true)
+		{
+			k->par[0].ro = k->par[0].ro + k->par[0].npui;
+			double dd = k->par[0].p;
+			k->par[0].p = k->par[0].pp;
+			k->par[0].pp = dd;
+		}
+
 		u = k->par[0].u;
 		v = k->par[0].v;
 		ro = k->par[0].ro;
@@ -12744,10 +12810,10 @@ void Setka::MK_start_new(void)
 			nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
 				(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
 
-		if (fabs(k->par[0].M_u) > 0.0001)
+		if (fabs(k->par[0].M_u) > 0.000001)
 		{
-			k->par[0].k_u = k->par[0].I_u / k->par[0].M_u;
-			if (k->par[0].k_u > 3.0 || k->par[0].k_u < 0.33)
+			k->par[0].k_u = (k->par[0].I_u + k->par[0].II_u) / k->par[0].M_u;
+			if (k->par[0].k_u > 10.0 || k->par[0].k_u < 0.1)
 			{
 				k->par[0].k_u = 1.0;
 			}
@@ -12757,10 +12823,10 @@ void Setka::MK_start_new(void)
 			k->par[0].k_u = 1.0;
 		}
 
-		if (fabs(k->par[0].M_v) > 0.0001)
+		if (fabs(k->par[0].M_v) > 0.000001)
 		{
-			k->par[0].k_v = k->par[0].I_v / k->par[0].M_v;
-			if (k->par[0].k_v > 3.0 || k->par[0].k_v < 0.33)
+			k->par[0].k_v = (k->par[0].I_v + k->par[0].II_v) / k->par[0].M_v;
+			if (k->par[0].k_v > 10.0 || k->par[0].k_v < 0.1)
 			{
 				k->par[0].k_v = 1.0;
 			}
@@ -12770,10 +12836,10 @@ void Setka::MK_start_new(void)
 			k->par[0].k_v = 1.0;
 		}
 
-		if (fabs(k->par[0].M_T) > 0.0001)
+		if (fabs(k->par[0].M_T) > 0.000001)
 		{
-			k->par[0].k_T = k->par[0].I_T / k->par[0].M_T;
-			if (k->par[0].k_T > 3.0 || k->par[0].k_T < 0.33)
+			k->par[0].k_T = (k->par[0].I_T + k->par[0].II_T) / k->par[0].M_T;
+			if (k->par[0].k_T > 10.0 || k->par[0].k_T < 0.1)
 			{
 				k->par[0].k_T = 1.0;
 			}
