@@ -189,7 +189,7 @@ public:
 	void Go_3(int step);
 	void Go_5_komponent(int step);
 	void Go_5_komponent_2(int step);  // Другой способ записи законов сохранения и, соответственно многое поменялось
-	void Go_5_komponent_MK(int step);  // Версия с источниками из Монте-Карло
+	void Go_5_komponent_MK(int step, bool dvig = true);  // Версия с источниками из Монте-Карло
 	void Go_5_komponent__MK2(int step);
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
@@ -229,7 +229,7 @@ public:
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
-		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1);
+		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1, bool pui__ = false);
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
 

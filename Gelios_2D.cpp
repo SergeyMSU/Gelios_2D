@@ -123,10 +123,14 @@ int main()
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers18_2.txt");  //  7 5       IEX    vers_test1.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers18_4.txt");  //  7 5       IEX    vers_test1.txt
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();
+
+    /*SS->Print_Tecplot_MK();
+    exit(-1);*/
+
     //SS->Print_cell2();
     //SS->Print_Gran();
     //SS->Print_Gran("sur7_101.txt");
@@ -237,7 +241,7 @@ int main()
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
     
-    SS->Print_for_Igor();
+    //SS->Print_for_Igor();
 
     //SS->GD_prepare();
 
@@ -307,8 +311,8 @@ int main()
     //delete SS2;
     //delete SS3;
 
-    //SS->Download_Source_MK("source_vers18_2.txt");
-    SS->Save_Source_MK("source_vers18_2.txt");
+    //SS->Download_Source_MK("source_vers18_5.txt");
+    SS->Save_Source_MK("source_vers18_5.txt");
     //SS->Print_Tecplot_MK();
 
     for (int k = 0; k < 0; k++)  // 10
@@ -316,16 +320,26 @@ int main()
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
         //SS->Go_5_komponent_2(50000);
-        SS->Go_stationary_5_komponent_inner_MK(20000);
+        SS->Go_stationary_5_komponent_inner_MK(15000);
         //SS->Go_5_komponent__MK2(5000);
-        SS->Go_5_komponent_MK(10000);
+        SS->Go_5_komponent_MK(30000, false);
     }
 
-    //SS->Save_Setka_ALL_ALPHA("vers18_2.txt");
+    for (int k = 0; k < 0; k++)  // 10
+    {
+        cout << "Global step = " << k + 1 << endl;
+        //SS->Go_stationary_5_komponent_inner_2(50000);
+        //SS->Go_5_komponent_2(50000);
+        SS->Go_stationary_5_komponent_inner_MK(10000);
+        //SS->Go_5_komponent__MK2(5000);
+        SS->Go_5_komponent_MK(50000);
+    }
+
+    //SS->Save_Setka_ALL_ALPHA("vers18_7.txt");
     //SS->Save_Source_MK("source_vers18_2.txt");
     //SS->Print_cell2();
-    //SS->Print_Gran("gran_vers18_2.txt");
-    //SS->Print_Tecplot_MK();
+    //SS->Print_Gran("gran_vers18_7.txt");
+    SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
     //SS->Save_Setka_ALL_ALPHA("vers16_7.txt");

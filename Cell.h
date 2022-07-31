@@ -52,10 +52,10 @@ struct Parametr
 	double M_u = 0.0;   // Мультифлюид источники
 	double M_v = 0.0;
 	double M_T = 0.0;
-	double H_n[4];
-	double H_u[4];
-	double H_v[4];
-	double H_T[4];
+	double H_n[pop_atom];
+	double H_u[pop_atom];
+	double H_v[pop_atom];
+	double H_T[pop_atom];
 	double H_n2[4];
 	double H_u2[4];
 	double H_v2[4];
@@ -64,10 +64,10 @@ struct Parametr
 	double H_u3[4];
 	double H_v3[4];
 	double H_T3[4];
-	double H_uu[4];
-	double H_vv[4];
-	double H_uv[4];
-	double H_uuu[4];
+	double H_uu[pop_atom];
+	double H_vv[pop_atom];
+	double H_uv[pop_atom];
+	double H_uuu[pop_atom];
 	double k_u = 0.0;
 	double k_v = 0.0;
 	double k_T = 0.0;
@@ -111,9 +111,12 @@ public:
 	vector <Gran*> Grans;
 
 	vector <double> fpui;
+	vector <vector <double>> fpui_sort;                              // Много fpui делённые на сорта
+	vector <double> Wmin_sort;
+	vector <double> Wmax_sort;
 	double fpui_max = 1.0;      // Максимальное значение fpui  
 	double Wmin = 0.0;
-	double Wmax = 10.0;         // Максимальная скорость при которой fpui не нулевая
+	double Wmax = 1000.0;         // Максимальная скорость при которой fpui не нулевая
 	vector <double> nu_pui;     // Частоты перезарядки от L, где L от 0 до 20 с шагом 100
 	vector <double> nu2_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
 	vector <double> nu3_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
@@ -163,7 +166,7 @@ public:
 		const double& wmin, const double& wmax);
 
 	// Посчитать источники Монте-Карло
-	void Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
+	void Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p, bool interpol = true);
 	void Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 	void Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 

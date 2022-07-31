@@ -1,5 +1,7 @@
 #pragma once
 
+#define pop_atom 6         // Число популяций атомов
+
 #include "Setka.h"
 #include "Rail.h"
 #include "Point.h"
@@ -112,6 +114,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 #define L_Igor 200.0         // В распределении Игоря до какого модуля скорости считаем интегралы
 #define k_Igor 1200         // В распределении Игоря до какого модуля скорости считаем интегралы
+
 
 
 // Предикат проверки прерывания веса атома
