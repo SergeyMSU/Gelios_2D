@@ -2,6 +2,10 @@
 
 #define pop_atom 6         // Число популяций атомов
 
+// Для S+  и S-
+#define n_S 100
+#define max_S 100.0           //  (i + 1) * (max_S/(n_S + 1))   - до этого значения i-ая ячейка
+
 #include "Setka.h"
 #include "Rail.h"
 #include "Point.h"
@@ -59,7 +63,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define M_inf 1.97009
 #define chi_ 1.0 //36.1059 // 36.1059
 #define chi_real 36.1275
-#define kurant  0.1
+#define kurant  0.1    // 0.1
 //#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
 #define Kn_  0.4326569808			
@@ -114,6 +118,8 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 #define L_Igor 200.0         // В распределении Игоря до какого модуля скорости считаем интегралы
 #define k_Igor 1200         // В распределении Игоря до какого модуля скорости считаем интегралы
+
+
 
 
 

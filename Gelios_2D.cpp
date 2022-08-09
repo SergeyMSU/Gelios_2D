@@ -127,7 +127,7 @@ int main()
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();
-
+    //SS->Print_Gran("gran_vers18_4.txt");
     /*SS->Print_Tecplot_MK();
     exit(-1);*/
 
@@ -238,14 +238,16 @@ int main()
 
 
     SS->culc_PUI();
+
+
+    //exit(-1);
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
     
-    //SS->Print_for_Igor();
+    SS->Print_for_Igor();
 
     //SS->GD_prepare();
 
-    //SS->Download_Source_MK("vers18_1.txt");
 
     //SS2 = new Setka();
     //SS3 = new Setka();
@@ -312,6 +314,8 @@ int main()
     //delete SS3;
 
     //SS->Download_Source_MK("source_vers18_5.txt");
+    //SS->Print_for_Igor();
+    //SS->culc_K_Istok();
     SS->Save_Source_MK("source_vers18_5.txt");
     //SS->Print_Tecplot_MK();
 
@@ -335,10 +339,10 @@ int main()
         SS->Go_5_komponent_MK(50000);
     }
 
-    //SS->Save_Setka_ALL_ALPHA("vers18_7.txt");
+    //SS->Save_Setka_ALL_ALPHA("vers18_5.txt");
     //SS->Save_Source_MK("source_vers18_2.txt");
     //SS->Print_cell2();
-    //SS->Print_Gran("gran_vers18_7.txt");
+    //SS->Print_Gran("gran_vers18_5.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");

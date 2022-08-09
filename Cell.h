@@ -110,17 +110,21 @@ public:
 	vector <Point*> contour;    // Гарантируется расположение точек по кругу
 	vector <Gran*> Grans;
 
+	int i_pui = 0;             // Количество сортов пуи
 	vector <double> fpui;
-	vector <vector <double>> fpui_sort;                              // Много fpui делённые на сорта
 	vector <double> Wmin_sort;
 	vector <double> Wmax_sort;
+	vector <double> fpui_max_sort;
 	double fpui_max = 1.0;      // Максимальное значение fpui  
 	double Wmin = 0.0;
 	double Wmax = 1000.0;         // Максимальная скорость при которой fpui не нулевая
-	vector <double> nu_pui;     // Частоты перезарядки от L, где L от 0 до 20 с шагом 100
-	vector <double> nu2_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
-	vector <double> nu3_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
+	vector <vector <double>> nu_pui;     // Частоты перезарядки от L, где L от 0 до 20 с шагом 100
+	vector <vector <double>> nu2_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
+	vector <vector <double>> nu3_pui;     // Источник импульса перезарядки от L, где L от 0 до 20 с шагом 100
 	bool pui_ = false;                  // Нужно ли вообще считать эти PUI?
+
+	double S_p[n_S];              // Для  S+  и  S-
+	double S_m[n_S];
 
 	int number;
 	int zona;
@@ -154,16 +158,16 @@ public:
 	double Get_Volume_posle(void);
 	double Get_Volume_posle_rotate(const double& angle);
 
-	double get_nu_pui(double L);
-	double get_nu_pui2(double L);
-	double get_nu_pui3(double L);
+	double get_nu_pui(const double& L, int i);
+	double get_nu_pui2(const double& L, int i);
+	double get_nu_pui3(const double& L, int i);
 	double get_fpui(const double& W, const double& Wmin, const double& Wmax);
 	bool Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
 		const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
-		const double& wmin, const double& wmax);
+		const double& wmin, const double& wmax, int ifg);
 	bool Change_Velosity_PUI2(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
 		const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
-		const double& wmin, const double& wmax);
+		const double& wmin, const double& wmax, int ifg);
 
 	// Посчитать источники Монте-Карло
 	void Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p, bool interpol = true);

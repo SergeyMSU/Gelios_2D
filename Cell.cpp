@@ -507,7 +507,7 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 	this->Get_Center(xx, yy);
 	double rr = sqrt(kv(xx) + kv(yy));
 
-	if (true)//(xx < -0.8 && xx > -2.0)
+	if (false)//(xx < -0.8 && xx > -2.0)
 	{
 		q1 = this->par[0].I_u + this->par[0].II_u;
 		q2 = this->par[0].I_v + this->par[0].II_v;
@@ -630,9 +630,9 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 	}
 
 
-	q1 = this->par[0].M_u * ku;
-	q2 = this->par[0].M_v * kv;
-	q3 = this->par[0].M_T * kT;
+	q1 = this->par[0].M_u * ku;// +this->par[0].II_u;
+	q2 = this->par[0].M_v * kv;// +this->par[0].II_v;
+	q3 = this->par[0].M_T * kT;// +this->par[0].II_T;
 }
 
 void Cell::Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p)
@@ -797,7 +797,9 @@ void Cell::Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, c
 	q3 = this->par[0].M_T * this->par[0].k_T3;
 }
 
-double Cell::get_nu_pui(double L)
+
+
+double Cell::get_nu_pui(const double& L, int i)
 {
 	if (L > L_Igor)
 	{
@@ -809,18 +811,18 @@ double Cell::get_nu_pui(double L)
 	int k1 = (int)(L / dl);
 	if (k1 == (k_Igor - 1))
 	{
-		return this->nu_pui[k1];
+		return  this->nu_pui[i][k1];
 	}
 	else
 	{
 		int k2 = k1 + 1;
 		double al = (L - k1 * dl) / dl;
-		return this->nu_pui[k1] * (1.0 - al) + this->nu_pui[k2] * al;
+		return this->nu_pui[i][k1] * (1.0 - al) + this->nu_pui[i][k2] * al;
 	}
 
 }
 
-double Cell::get_nu_pui2(double L)
+double Cell::get_nu_pui2(const double& L, int i)
 {
 	if (L > L_Igor)
 	{
@@ -832,18 +834,18 @@ double Cell::get_nu_pui2(double L)
 	int k1 = (int)(L / dl);
 	if (k1 == (k_Igor - 1))
 	{
-		return this->nu2_pui[k1];
+		return  this->nu2_pui[i][k1];
 	}
 	else
 	{
 		int k2 = k1 + 1;
 		double al = (L - k1 * dl) / dl;
-		return this->nu2_pui[k1] * (1.0 - al) + this->nu2_pui[k2] * al;
+		return  this->nu2_pui[i][k1] * (1.0 - al) + this->nu2_pui[i][k2] * al;
 	}
 
 }
 
-double Cell::get_nu_pui3(double L)
+double Cell::get_nu_pui3(const double& L, int i)
 {
 	if (L > L_Igor)
 	{
@@ -855,23 +857,31 @@ double Cell::get_nu_pui3(double L)
 	int k1 = (int)(L / dl);
 	if (k1 == (k_Igor - 1))
 	{
-		return this->nu3_pui[k1];
+		return  this->nu3_pui[i][k1];
 	}
 	else
 	{
 		int k2 = k1 + 1;
 		double al = (L - k1 * dl) / dl;
-		return this->nu3_pui[k1] * (1.0 - al) + this->nu3_pui[k2] * al;
+		return  this->nu3_pui[i][k1] * (1.0 - al) + this->nu3_pui[i][k2] * al;
 	}
 
 }
+
+
 
 double Cell::get_fpui(const double& W, const double& Wmin, const double& Wmax)
 {
+	if (W < Wmin || W > Wmax)
+	{
+		return 0.0;
+	}
+
 	int N = this->fpui.size();
+
 	//int i = (int)((N - 1) * log(W / Wmin) / log(Wmax / Wmin));
 	int i = (int)((W - Wmin) / (Wmax - Wmin) * (N - 1));
-	//cout << "I = " << i << endl;
+
 	if (i >= N - 1)
 	{
 		return this->fpui[i];
@@ -882,27 +892,27 @@ double Cell::get_fpui(const double& W, const double& Wmin, const double& Wmax)
 		double WL = Wmin + (Wmax - Wmin) * i / (N - 1);
 		//double WR = Wmin * pow(Wmax / Wmin, 1.0 * (i + 1) / (N - 1));
 		double WR = Wmin + (Wmax - Wmin) * (i + 1) / (N - 1);
-		//cout << "WL WR  " << WL << " " << WR << endl;
+
 		return (this->fpui[i + 1] - this->fpui[i]) / (WR - WL) * (W - WL) + this->fpui[i];
 	}
 }
 
 bool Cell::Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
 	const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
-	const double& wmin, const double& wmax)
+	const double& wmin, const double& wmax, int ifg)
 {
 	// Число делений в распределениях ИГОРЯ   NW = 100 было
 
 	double u = sqrt(kv(Vh1 - Vp1) + kv(Vh2 - Vp2) + kv(Vh3 - Vp3));
 	double Wr;
 
-	double Wmax3 = this->Wmax * this->Wmax * this->Wmax;
-	double Wmin3 = this->Wmin * this->Wmin * this->Wmin;
+	double Wmax3 = this->Wmax_sort[ifg] * this->Wmax_sort[ifg] * this->Wmax_sort[ifg];
+	double Wmin3 = this->Wmin_sort[ifg] * this->Wmin_sort[ifg] * this->Wmin_sort[ifg];
 
 	double Thetta = 0.0;
 	double phi = 0.0;
 	double h;
-	double M = (this->Wmax + u) * sigma(fabs(this->Wmax - u)) * this->fpui_max;
+	double M = (this->Wmax_sort[ifg] + u) * sigma(fabs(this->Wmax_sort[ifg] - u)) * this->fpui_max_sort[ifg];
 	double uu = 0.0;
 	double coss = 0.0;
 
@@ -1000,12 +1010,12 @@ bool Cell::Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh
 	W2 = Vp2 + V1 * ex2 + V2 * ey2 + V3 * ez2;
 	W3 = Vp3 + V1 * ex3 + V2 * ey3 + V3 * ez3;
 
-	/*if (fpclassify(W1) == FP_NAN || fpclassify(W1) == FP_SUBNORMAL || fpclassify(W1) == FP_INFINITE)
+	if (fpclassify(W1) == FP_NAN || fpclassify(W1) == FP_SUBNORMAL || fpclassify(W1) == FP_INFINITE)
 	{
 		cout << "NUNUNUNUN  1012" << endl;
 		cout << Wr << " " << Thetta << " " << phi << endl;
 		exit(-1);
-	}*/
+	}
 
 	return true;
 }
@@ -1013,12 +1023,12 @@ bool Cell::Change_Velosity_PUI(Sensor* sens, const double& Vh1, const double& Vh
 
 bool Cell::Change_Velosity_PUI2(Sensor* sens, const double& Vh1, const double& Vh2, const double& Vh3, //
 	const double& Vp1, const double& Vp2, const double& Vp3, double& W1, double& W2, double& W3, int Nw, //
-	const double& wmin, const double& wmax)
+	const double& wmin, const double& wmax, int ifg)
 {
 	// Число делений в распределениях ИГОРЯ   NW = 100 было
 
 	double u = sqrt(kv(Vh1 - Vp1) + kv(Vh2 - Vp2) + kv(Vh3 - Vp3));
-	double nu = this->get_nu_pui(u);
+	double nu = this->get_nu_pui(u, ifg);
 	int n1 = 45;                            // Понижает точность но увеличивает скорость счёта
 	// Лучше чтобы n1 = тому n1, когда считали частоту в начале
 	double dthe = pi_ / (n1 - 1);

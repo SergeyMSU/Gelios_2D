@@ -2232,7 +2232,6 @@ double MKmethod::Int_cp_2(const double& x)
 	}
 }
 
-
 double MKmethod::int_1_f1(const double& x)
 {
 	if (x <= 1.0)

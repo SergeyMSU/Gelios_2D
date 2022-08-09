@@ -233,6 +233,9 @@ public:
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
 
+	void culc_K_Istok(void);
+	void proverka_Istok(int ni);
+
 	void culc_PUI(void);
 	void GD_prepare(void);
 	double get_w_init(const int& k);
