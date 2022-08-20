@@ -2340,7 +2340,7 @@ double MKmethod::int_1_f3(const double& x)
 			0.4148977656870439 * x * x * x + 0.025300923044176957 * x * x * x * x -//
 			0.0010108688120876522 * x * x * x * x * x + 0.00001864423130429156 * x * x * x * x * x * x;
 	}
-	cout << " ERRRROROROROROROO MKMETHOD 2251" << endl;
+	cout << " ERRRROROROROROROO MKMETHOD 2251  -   " << x << endl;
 	return 0.0;
 }
 

@@ -3103,6 +3103,19 @@ void Setka::Download_Setka_ALL_ALPHA_2_0(string name)
 	for (int i = 0; i < n; i++)
 	{
 		fout >> x >> y;
+
+		if (std::fpclassify(x) != FP_NORMAL && std::fpclassify(x) != FP_ZERO)
+		{
+			cout << x << "    ERROR  3109 hsugfugufwe" << endl;
+			exit(-1);
+		}
+
+		if (std::fpclassify(y) != FP_NORMAL && std::fpclassify(y) != FP_ZERO)
+		{
+			cout << y << "    ERROR  3109 hsugfugufwesrfrsf" << endl;
+			exit(-1);
+		}
+
 		auto P = new Point(x * LL, y * LL);
 		fout >> type;
 		P->type = static_cast<Point_type>(type);
@@ -3399,6 +3412,12 @@ void Setka::Download_Setka_ALL_ALPHA_2_0(string name)
 		fout >> i->par[0].k_u >> i->par[0].k_v >> i->par[0].k_T;
 
 		i->par[1] = i->par[0];
+
+		if (std::fpclassify(i->par[0].ro) != FP_NORMAL)
+		{
+			cout << i->par[0].ro << "    ERROR  3109 hsugfugufwesrfrsf i->par[0].ro" << endl;
+			exit(-1);
+		}
 	}
 
 
@@ -3566,7 +3585,7 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
-	double koef = 0.1; // 1.0;
+	double koef = 0.3; // 1.0;
 	// Разбираемся с контактом
 
 	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -3580,7 +3599,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	//}
 	
 	// Контакт
-	if (false)
+	if (true)
 	{
 		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -3927,7 +3946,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	}
 
 	// Двигаем ли внешнюю волну
-	if (false)
+	if (true)
 	{
 		//double Vconst = 0.0;
 		for (int j = 0; j < this->Line_Outer.size(); j++)
@@ -3972,7 +3991,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vp = Vp * koef;  // 0.1
+			Vp = Vp * koef * 0.05;  // 0.1
 			//cout << "Setka.cpp    " << Vp << endl;
 
 			double t1 = -n2;
@@ -11603,7 +11622,7 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 250 * 30; //250  6000;  250 * 50
+	this->Number1 = 411 * 250 * 50; //250  6000;  250 * 50
 	this->Number2 = 411 * 30 * 30; // 30; // 30;
 	this->Number3 = 411 * 5 * 10; // 10;
 	this->Number4 = 411 * 200 * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
@@ -11917,6 +11936,17 @@ void Setka::culc_PUI(void)
 
 		if (i->par[0].npui > 0.001 * i->par[0].ro)
 		{
+			if (i->par[0].npui > i->par[0].ro)
+			{
+				cout << "pui > ro   " << i->contour[0]->x << "  " << i->contour[0]->y << "  " << i->par[0].npui  << "  " << i->par[0].ro << endl;
+				double d = (1.01 * i->par[0].npui) / i->par[0].ro;
+				i->par[0].npui = i->par[0].npui / d;
+				i->par[0].ppui = i->par[0].ppui / d;
+				for (auto& j : i->fpui)
+				{
+					j = j / d;
+				}
+			}
 			i->par[0].ro = i->par[0].ro - i->par[0].npui;
 			i->par[0].p = 2.0 * i->par[0].ro * Tsw;
 			i->pui_ = true;
@@ -11929,6 +11959,7 @@ void Setka::culc_PUI(void)
 				double dist = sqrt(kv(xx) + kv(yy));
 				i->par[0].p = 1109.31 * pow(rr / dist, 2.0 * ggg);
 			}
+
 		}
 
 		//i->par[1] = i->par[0];
@@ -12024,7 +12055,7 @@ void Setka::culc_PUI(void)
 	//exit(-1);
 
 	// Считаем всякие полезные интеграллы для последующих перезарядок
-	if (true)
+	if (false)
 	{
 #pragma omp parallel for
 		for (auto& i : this->All_Cells)
@@ -15431,6 +15462,15 @@ void Setka::Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, 
 	//cout << "Setka.cpp    " << "Fly_ex_Korol   "<< a << " " << b << endl;
 	double uz, uz_M, uz_E;								// средние скорости в интегралах
 	double cp = sqrt(now->par[0].p / now->par[0].ro);
+
+	if (std::fpclassify(cp) != FP_NORMAL)
+	{
+		cout << cp << "    ERROR  cp ihwuyegfyguy234223424" << endl;
+		cout << now->par[0].p << " " << now->par[0].ro << endl;
+		cout << now->contour[0]->x << " " << now->contour[0]->y << endl;
+		exit(-1);
+	}
+
 	double vx = now->par[0].u;							// Скорости плазмы в ячейке
 	double vy = now->par[0].v;
 	double ro = now->par[0].ro;
@@ -15498,6 +15538,13 @@ void Setka::Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, 
 
 				alpha = polar_angle(y_0 + (tt + time / (2.0 * drob)) * Vy, z_0 + (tt + time / (2.0 * drob)) * Vz);
 				u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+
+				if (std::fpclassify(u) != FP_NORMAL && std::fpclassify(u) != FP_ZERO)
+				{
+					cout << u << "    ERROR  uuu weferwfw43423ewefdef" << endl;
+					cout << Vx << " " << Vy << " " << Vz << " " << vx << " " << vy << " " << alpha << endl;
+					exit(-1);
+				}
 
 				if (now->pui_ == true)
 				{
