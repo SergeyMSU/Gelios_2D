@@ -131,7 +131,15 @@ int main()
     //sleep(7800);
     cout << "NOT SLEEP" << endl;
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
-    SS->Download_Setka_ALL_ALPHA_2_0("vers18_21.txt");  //  5  10      IEX    vers_test1.txt
+
+    SS->Download_Setka_ALL_ALPHA_2_0("vers7_5.txt");  //  5  10      IEX    vers18_21.txt
+
+    SS->TVD_prepare();
+    SS->Proverka();
+
+    SS->Print_for_Igor();
+    exit(-1);
+
     //SS->Init_conditions();
     SS->TVD_prepare();
     SS->Proverka();

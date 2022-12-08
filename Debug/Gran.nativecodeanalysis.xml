@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>D:\Gelios_2D\Gelios_2D\</FILEPATH>
+      <FILENAME>Gran.cpp</FILENAME>
+      <LINE>4</LINE>
+      <COLUMN>6</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Переменная "Gran::aa" не инициализирована. Всегда инициализируйте переменную-член (type.6).</DESCRIPTION>
+    <FUNCTION>Gran::{ctor}</FUNCTION>
+    <DECORATED>??0Gran@@QAE@PAVPoint@@0W4Gran_type@@@Z</DECORATED>
+    <FUNCLINE>4</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>Gran::aa</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>D:\Gelios_2D\Gelios_2D\</FILEPATH>
+      <FILENAME>Gran.cpp</FILENAME>
+      <LINE>4</LINE>
+      <COLUMN>6</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Переменная "Gran::bb" не инициализирована. Всегда инициализируйте переменную-член (type.6).</DESCRIPTION>
+    <FUNCTION>Gran::{ctor}</FUNCTION>
+    <DECORATED>??0Gran@@QAE@PAVPoint@@0W4Gran_type@@@Z</DECORATED>
+    <FUNCLINE>4</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>Gran::bb</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>D:\Gelios_2D\Gelios_2D\</FILEPATH>
+      <FILENAME>Gran.cpp</FILENAME>
+      <LINE>4</LINE>
+      <COLUMN>6</COLUMN>
+    </SFA>
+    <DEFECTCODE>26495</DEFECTCODE>
+    <DESCRIPTION>Переменная "Gran::cc" не инициализирована. Всегда инициализируйте переменную-член (type.6).</DESCRIPTION>
+    <FUNCTION>Gran::{ctor}</FUNCTION>
+    <DECORATED>??0Gran@@QAE@PAVPoint@@0W4Gran_type@@@Z</DECORATED>
+    <FUNCLINE>4</FUNCLINE>
+    <ADDITIONALINFO>
+      <targetSymbol>Gran::cc</targetSymbol>
+    </ADDITIONALINFO>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>D:\Gelios_2D\Gelios_2D\</FILEPATH>
+      <FILENAME>Gran.cpp</FILENAME>
+      <LINE>4</LINE>
+      <COLUMN>6</COLUMN>
+    </SFA>
+    <DEFECTCODE>26812</DEFECTCODE>
+    <DESCRIPTION>Тип перечисления "Gran_type" не входит в область. Старайтесь использовать "enum class" вместо "enum" (Enum.3).</DESCRIPTION>
+    <FUNCTION>Gran::{ctor}</FUNCTION>
+    <DECORATED>??0Gran@@QAE@PAVPoint@@0W4Gran_type@@@Z</DECORATED>
+    <FUNCLINE>4</FUNCLINE>
+    <PATH></PATH>
+  </DEFECT>
+</DEFECTS>

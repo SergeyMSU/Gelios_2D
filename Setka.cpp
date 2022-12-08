@@ -1592,6 +1592,13 @@ void Setka::Print_for_Igor(void)
 				if (K->type == C_2 && i->Sosed->type == C_1)
 				{
 					par2 = par1;
+					cout << "2  ->  1  " << x << " " << y << endl;
+					double kx, ky;
+					i->Sosed_down->Get_Center(kx, ky);
+					double dist3 = sqrt(kv(x2 - kx) + kv(y2 - ky));
+					cout << kx << "  " << ky << endl;
+					par2.u = linear(-dist3, i->Sosed_down->par[0].u, -dist, par1.u, dist2);
+					par2.v = linear(-dist3, i->Sosed_down->par[0].v, -dist, par1.v, dist2);
 				}
 				if (K->type == C_1 && i->Sosed->type == C_3)
 				{
@@ -1600,10 +1607,21 @@ void Setka::Print_for_Igor(void)
 				if (K->type == C_3 && i->Sosed->type == C_1)
 				{
 					par2 = par1;
+
+					double kx, ky;
+					i->Sosed_down->Get_Center(kx, ky);
+					double dist3 = sqrt(kv(x2 - kx) + kv(y2 - ky));
+					par2.u = linear(-dist3, i->Sosed_down->par[0].u, -dist, par1.u, dist2);
+					par2.v = linear(-dist3, i->Sosed_down->par[0].v, -dist, par1.v, dist2);
 				}
 				if (K->type == C_3 && i->Sosed->type == C_4)
 				{
 					par2 = par1;
+					double kx, ky;
+					i->Sosed_down->Get_Center(kx, ky);
+					double dist3 = sqrt(kv(x2 - kx) + kv(y2 - ky));
+					par2.u = linear(-dist3, i->Sosed_down->par[0].u, -dist, par1.u, dist2);
+					par2.v = linear(-dist3, i->Sosed_down->par[0].v, -dist, par1.v, dist2);
 				}
 				if (K->type == C_4 && i->Sosed->type == C_3)
 				{
