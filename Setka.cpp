@@ -12961,8 +12961,11 @@ void Setka::MK_start_new(void)
 
 			//Fly_exchenge_Imit_Korol_PUI(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c, Point, mu3, 3, false, mu3, I_ - 1, J_ - 1, false);
 
-			Fly_exchenge_Imit(MK, sens2, Left_ + 2.0, y, z, a, b, c, Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, //
-				3, mu3, I_ - 1, ii);
+			//Fly_exchenge_Imit(MK, sens2, Left_ + 2.0/ RR_, y, z, a, b, c, Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, //
+			//	3, mu3, I_ - 1, ii);
+
+			Fly_exchenge_Imit_Korol_2(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c,//
+				Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu3);
 		}
 		for (int ii = 0; ii < Number4 / 411; ii++)  //Number4 / 411
 		{
@@ -13209,543 +13212,6 @@ void Setka::MK_start_new(void)
 			nu_H[i] = ro * k->par[0].H_n[i] * U_M_H[i] * sigma_H[i];
 		}
 		
-		k->par[0].M_u = 0.0;
-		k->par[0].M_v = 0.0;
-		k->par[0].M_T = 0.0;
-
-		for (int i = 0; i < pop_atom; i++)
-		{
-			k->par[0].M_u = k->par[0].M_u + (n_p_LISM_ / Kn_) * nu_H[i] * (k->par[0].H_u[i] - u);
-			k->par[0].M_v = k->par[0].M_v + (n_p_LISM_ / Kn_) * nu_H[i] * (k->par[0].H_v[i] - v);
-			k->par[0].M_T = k->par[0].M_T + (n_p_LISM_ / Kn_) * nu_H[i] * ((kv(k->par[0].H_u[i]) + kv(k->par[0].H_v[i]) - kv(u) - kv(v)) / 2.0 + //
-				(U_H[i] / U_M_H[i]) * (2.0 * p_H[i] / k->par[0].H_n[i] - p / ro));
-		}
-
-
-		if (fabs(k->par[0].M_u) > 0.000001)
-		{
-			k->par[0].k_u = (k->par[0].I_u + k->par[0].II_u) / k->par[0].M_u;
-			if (k->par[0].k_u > 10.0 || k->par[0].k_u < 0.1)
-			{
-				k->par[0].k_u = 1.0;
-			}
-		}
-		else
-		{
-			k->par[0].k_u = 1.0;
-		}
-
-		if (fabs(k->par[0].M_v) > 0.000001)
-		{
-			k->par[0].k_v = (k->par[0].I_v + k->par[0].II_v) / k->par[0].M_v;
-			if (k->par[0].k_v > 10.0 || k->par[0].k_v < 0.1)
-			{
-				k->par[0].k_v = 1.0;
-			}
-		}
-		else
-		{
-			k->par[0].k_v = 1.0;
-		}
-
-		if (fabs(k->par[0].M_T) > 0.000001)
-		{
-			k->par[0].k_T = (k->par[0].I_T + k->par[0].II_T) / k->par[0].M_T;
-			if (k->par[0].k_T > 30.0 || k->par[0].k_T < 0.1)
-			{
-				k->par[0].k_T = 1.0;
-			}
-		}
-		else
-		{
-			k->par[0].k_T = 1.0;
-		}
-
-		double xx, yy;
-		k->Get_Center(xx, yy);
-		if (false)//(xx > 2.6 && k->axis_ == true)
-		{
-			k->par[0].F_n = 1.0;
-			k->par[0].F_u = Velosity_inf;
-			k->par[0].F_v = 0.0;
-			k->par[0].F_T = 1.0;
-			k->par[0].H_n[0] = 0.0;
-			k->par[0].H_u[0] = 0.0;
-			k->par[0].H_v[0] = 0.0;
-			k->par[0].H_T[0] = 0.0;
-			k->par[0].H_n[1] = 0.0;
-			k->par[0].H_u[1] = 0.0;
-			k->par[0].H_v[1] = 0.0;
-			k->par[0].H_T[1] = 0.0;
-			k->par[0].H_n[2] = 0.0;
-			k->par[0].H_u[2] = 0.0;
-			k->par[0].H_v[2] = 0.0;
-			k->par[0].H_T[2] = 0.0;
-			k->par[0].H_n[3] = 1.0;
-			k->par[0].H_u[3] = Velosity_inf;
-			k->par[0].H_v[3] = 0.0;
-			k->par[0].H_T[3] = 1.0;
-
-			k->par[0].I_u = 0.0;
-			k->par[0].I_v = 0.0;
-			k->par[0].I_T = 0.0;
-
-			k->par[0].k_u = 0.0;
-			k->par[0].k_v = 0.0;
-			k->par[0].k_T = 0.0;
-		}
-
-	}
-
-	for (auto& k : this->Cell_other)
-	{
-		k->par[0].F_n = 1.0;
-		k->par[0].F_u = Velosity_inf;
-		k->par[0].F_v = 0.0;
-		k->par[0].F_T = 1.0;
-		k->par[0].H_n[0] = 0.0;
-		k->par[0].H_u[0] = 0.0;
-		k->par[0].H_v[0] = 0.0;
-		k->par[0].H_T[0] = 0.0;
-		k->par[0].H_n[1] = 0.0;
-		k->par[0].H_u[1] = 0.0;
-		k->par[0].H_v[1] = 0.0;
-		k->par[0].H_T[1] = 0.0;
-		k->par[0].H_n[2] = 0.0;
-		k->par[0].H_u[2] = 0.0;
-		k->par[0].H_v[2] = 0.0;
-		k->par[0].H_T[2] = 0.0;
-		k->par[0].H_n[3] = 1.0;
-		k->par[0].H_u[3] = Velosity_inf;
-		k->par[0].H_v[3] = 0.0;
-		k->par[0].H_T[3] = 1.0;
-
-		k->par[0].I_u = 0.0;
-		k->par[0].I_v = 0.0;
-		k->par[0].I_T = 0.0;
-
-		k->par[0].k_u = 0.0;
-		k->par[0].k_v = 0.0;
-		k->par[0].k_T = 0.0;
-	}
-
-
-	if (func_stat)
-	{
-		double no = (1.0 * AllNumber);
-		fout2 << sum_s / no << endl;
-
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < Al_stat; j++)
-			{
-				fout2 << this->mu_mom[i][j] << " " << this->Vx_mom[i][j] << " " << this->Vy_mom[i][j] //
-					<< " " << this->Vxx_mom[i][j] << " " << this->Vyy_mom[i][j] << " " << this->Vxy_mom[i][j] //
-					<< " " << this->Vxxx_mom[i][j] << endl;
-			}
-		}
-	}
-}
-
-void Setka::MK_start_2_0(void)
-{
-	// Не получилось прироста во времени с новыми датчиками
-	mutex mut_1;
-	double Y = fabs(Velosity_inf);
-	int st = 1;
-
-	ofstream fout;
-	fout.open("stat.txt");
-
-	ofstream fout2;
-	fout2.open("stat_moments.txt");
-
-
-	// Создадим набор датчиков
-	/*std::random_device rd;
-
-	vector <std::mt19937> generators;
-	vector <std::uniform_real_distribution<double>> distributors;
-
-	for (int i = 0; i < 2880; i++)
-	{
-		generators.push_back(std::mt19937(rd()));
-		distributors.push_back(std::uniform_real_distribution<double>(0.000000001, 1.0));
-	}*/
-
-	//omp_set_num_threads(12);
-
-
-#pragma omp parallel for // num_threads(12)
-	for (int index = 0; index < 1440; index++)
-	{
-		double A1 = 1.0 + (1.0 + 1.0 / (2.0 * kv(Y))) * erf(Y) + exp(-kv(Y)) / (Y * sqrtpi_);
-		double A2 = 0.0; // Нужно задать после нахождения угла theta
-		double mu1, mu2, mu3, mu4;
-		double Vx, Vy, Vz;
-		mu1 = ((this->sqv_1) / this->sum_s) * (1.0 * this->AllNumber / this->Number1);
-		mu2 = ((this->sqv_2) / this->sum_s) * (1.0 * this->AllNumber / this->Number2);
-		mu3 = ((this->sqv_3) / this->sum_s) * (1.0 * this->AllNumber / this->Number3);
-		mu4 = ((this->sqv_4) / this->sum_s) * (1.0 * this->AllNumber / this->Number4);
-		if (index == 0)
-		{
-			mut_1.lock();
-			cout << "Setka.cpp    " << "Mk_start_new   " << "Wright weyght   " << mu1 << " " << mu2 << " " << mu3 << " " << mu4 << endl;
-			mut_1.unlock();
-		}
-
-		std::random_device rdd;
-		std::mt19937 gen1(rdd()); // generators[2 * index];
-		std::mt19937 gen2(rdd()); // generators[2 * index + 1];
-		std::uniform_real_distribution<double> dis1(0.000000001, 1.0); // distributors[2 * index];
-		std::uniform_real_distribution<double> dis2(0.000000001, 1.0); // distributors[2 * index + 1];
-
-		MKmethod MK = MKmethod();
-		//mut_1.lock();
-		//cout << "Setka.cpp    " << "Mk_start_new   " << st << " potok  is  1440;  index = " << index << "  nomer = " << omp_get_thread_num() << "   k1 = " << this->number_stat << endl;
-		//st++;
-		//mut_1.unlock();
-		double x, y, z;
-		double ksi1, ksi2, ksi3, ksi4, ksi5, ksi6, ksi7;
-		double phi, Vphi, Vr;
-		double a, b, c;
-		double r;
-
-		for (int ii = 0; ii < Number1 / 1440; ii++)  //  Вылет с полусферы   Number1 / 135
-		{
-			if (true)
-			{
-				vector <double> mu(I_ + 1);
-				vector <double> Wt(I_ + 1);
-				vector <double> Wp(I_ + 1);
-				vector <double> Wr(I_ + 1);
-				vector <double> X(I_ + 1);
-				double phi, sin_;
-
-				bool bb = MK.Init_Parametrs_(gen1, dis1, mu, Wt, Wp, Wr, X);
-
-
-				for (int i = 0; i <= I_; i++) // I_  от 0 было
-				{
-					sin_ = sqrt(1.0 - kv(X[i]));
-					x = (Rmax_ - 3.0 / RR_) * X[i];
-					phi = 2.0 * pi_ * ((dis1)(gen1));
-					y = (Rmax_ - 3.0 / RR_) * sin_ * cos(phi);
-					z = (Rmax_ - 3.0 / RR_) * sin_ * sin(phi);
-					Cell* Point = Belong_point(1, x, sqrt(kv(z) + kv(y)));
-
-					dekard_skorost(y, z, x, Wr[i], Wp[i], Wt[i], Vy, Vz, Vx);
-
-
-					if (i != I_ || bb == true)
-					{
-						double time_do_peregel, peregel;
-						int ii_z, ii_alp;
-						if (Vx * x + Vy * y + Vz * z < 0.0)
-						{
-							time_do_peregel = (-Vx * x - Vy * y - Vz * z) / kvv(Vx, Vy, Vz);
-							peregel = sqrt(kvv(x + Vx * time_do_peregel, y + Vy * time_do_peregel, z + Vz * time_do_peregel));
-							ii_z = this->geo_zones(peregel);                     // Номер зоны перегелия атома
-							ii_alp = alpha_zones(x + Vx * time_do_peregel, sqrt(kvv(y + Vy * time_do_peregel, z + Vz * time_do_peregel, 0.0)));
-						}
-						else
-						{
-							ii_z = I_;
-							ii_alp = alpha_zones(x, sqrt(kvv(y, z, 0.0)));
-						}
-
-						Fly_exchenge_Imit_Korol(MK, gen2, dis2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
-					}
-				}
-			}
-
-		}
-		for (int ii = 0; ii < Number2 / 1440; ii++)  //  Вылет сверху 
-		{
-			//cout << "Setka.cpp    " << "Mk_start_new   " << "A" << endl;
-			ksi1 = (dis1(gen1));
-			ksi2 = (dis1(gen1));
-			ksi3 = (dis1(gen1));
-			ksi4 = (dis1(gen1));
-			ksi5 = (dis1(gen1));
-
-			double ll = (Left_ + 2.0 / RR_);
-			double rr = -0.5 / RR_;
-			x = ll + ksi1 * (rr - ll);
-			phi = ksi2 * 2.0 * pi_;
-			Vphi = cos(2.0 * pi_ * ksi3) * sqrt(-log(1.0 - ksi4));
-			Vx = Velosity_inf + sin(2.0 * pi_ * ksi3) * sqrt(-log(1.0 - ksi4));
-			Vr = -sqrt(-log(ksi5));
-			y = (R5_ - 2.0 / RR_) * cos(phi);
-			z = (R5_ - 2.0 / RR_) * sin(phi);
-
-			Cell* Point = Belong_point(2, x, sqrt(kv(z) + kv(y)));  // Находит ячейку, которой принадлежит точка
-
-			Fly_exchenge_Imit_Korol_2(MK, gen2, dis2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
-				Point, mu2, -log(1.0 - ((dis1)(gen1))), 0.0, 3, mu2);
-		}
-		for (int ii = 0; ii < Number3 / 1440; ii++)  //  Вылет сзади
-		{
-			//cout << "Setka.cpp    " << "Mk_start_new   " << "B" << endl;
-			Velosity_initial2(gen1, dis1, a, b, c);
-			ksi1 = ((dis1)(gen1));
-			ksi2 = ((dis1)(gen1));
-
-			r = sqrt(ksi1 * (R5_ - 2.0 / RR_) * (R5_ - 2.0 / RR_));
-			phi = ksi2 * 2.0 * pi_;
-			y = r * cos(phi);
-			z = r * sin(phi);
-
-			Cell* Point = Belong_point(3, Left_ + 2.0 / RR_, double(sqrt(kv(z) + kv(y))) );  // Находит ячейку, которой принадлежит точка
-
-			//Fly_exchenge_Imit(MK, sens2, Left_ + 2.0, y, z, a, b, c, Point, mu3, -log(1.0 - ((*dis1)(gen1))), 0.0, //
-			//	3, mu3, I_ - 1, ii);
-
-			Fly_exchenge_Imit_Korol_2(MK, gen2, dis2, Left_ + 2.0, y, z, a, b, c,
-				Point, mu3, -log(1.0 - ((dis1)(gen1))), 0.0, 3, mu3);
-		}
-		for (int ii = 0; ii < Number4 / 1440; ii++)  //Number4 / 411
-		{
-			double a, b, c;
-			Velosity_initial(gen1, dis1, a, b, c);
-			ksi1 = ((dis1)(gen1));
-			ksi2 = ((dis1)(gen1));
-
-			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ - 3.0 / RR_)) + kv(Rmax_ - 3.0 / RR_));  // 0.1
-			phi = ksi2 * 2.0 * pi_;
-			y = r * cos(phi);
-			z = r * sin(phi);
-
-			Cell* Point = Belong_point(4, -0.5 / RR_, double(sqrt(kv(z) + kv(y))));
-
-
-			Fly_exchenge_Imit_Korol_2(MK, gen2, dis2, -0.5 / RR_, y, z, a, b, c, Point, mu4, -log(1.0 - ((dis1)(gen1))), //
-				0.0, 3, mu4);
-		}
-	}
-
-
-	fout.close();
-
-	//for (auto& k : this->All_Cells)
-
-#pragma omp parallel for
-	for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
-	{
-		/*for (int il = 0; il < 7; il++)
-		{
-			if (k->par[0].num_atoms > 0)
-			{
-				k->par[0].w_m[il] /= k->par[0].num_atoms;
-			}
-		}*/
-
-		auto k = this->All_Cells[ikld];
-
-		double no = (1.0 * AllNumber * k->Get_Volume_rotate(360.0));
-
-		k->par[0].I_u = sum_s * k->par[0].I_u / no;
-		k->par[0].I_v = sum_s * k->par[0].I_v / no;
-		k->par[0].I_T = sum_s * k->par[0].I_T / no;
-
-		k->par[0].II_u = sum_s * k->par[0].II_u / no;
-		k->par[0].II_v = sum_s * k->par[0].II_v / no;
-		k->par[0].II_T = sum_s * k->par[0].II_T / no;
-
-
-
-		if (k->par[0].F_n > 0)
-		{
-			/*k->par[0].I_u = k->par[0].I_u / k->par[0].F_n;
-			k->par[0].I_v = k->par[0].I_v / k->par[0].F_n;
-			k->par[0].I_T = k->par[0].I_T / k->par[0].F_n;*/
-
-			k->par[0].F_u = k->par[0].F_u / k->par[0].F_n;
-			k->par[0].F_v = k->par[0].F_v / k->par[0].F_n;
-			k->par[0].F_T = (2.0 / 3.0) * (k->par[0].F_T / k->par[0].F_n - kvv(k->par[0].F_u, k->par[0].F_v, 0.0));
-
-			for (int ij = 0; ij < n_S; ij++)
-			{
-				double  w2 = (ij + 1) * (max_S / n_S);
-				double  w1 = (ij) * (max_S / n_S);
-				k->S_p[ij] = sum_s * k->S_p[ij] / (no * 4.0 * pi_ * (1.0 / 3.0) * (pow(w2, 3) - pow(w1, 3)));
-				k->S_m[ij] = sum_s * k->S_m[ij] / (no);
-			}
-		}
-		else
-		{
-			/*k->par[0].I_u = 0.0;
-			k->par[0].I_v = 0.0;
-			k->par[0].I_T = 0.0;*/
-
-			k->par[0].F_n = 0.0;
-			k->par[0].F_u = 0.0;
-			k->par[0].F_v = 0.0;
-			k->par[0].F_T = 0.0;
-
-			for (int ij = 0; ij < n_S; ij++)
-			{
-				k->S_m[ij] = 0.0;
-				k->S_p[ij] = 0.0;
-			}
-
-		}
-
-		// Теперь посчиатем S- для игоря ///////////////////////////////////////////////
-		if (k->type == C_1 || k->type == C_2 || k->type == C_3)
-		{
-			double S_min[n_S];
-			for (int ij = 0; ij < n_S; ij++)
-			{
-				S_min[ij] = 0.0;
-			}
-
-			double dthe = pi_ / 40.0;
-
-			for (int ij = 0; ij < n_S; ij++)
-			{
-				double w = ((ij + 1.0) * max_S / n_S + ij * max_S / n_S) / 2.0;
-				double w2 = ((ij + 1.0) * max_S / n_S);
-				double w1 = ((ij)*max_S / n_S);
-				for (int ik = 0; ik < n_S; ik++)
-				{
-					double Vh = ((ik + 1.0) * max_S / n_S + ik * max_S / n_S) / 2.0;
-					double ff = k->S_m[ik];
-					if (ff > 0.0)
-					{
-						for (double the = 0.0; the <= pi_; the = the + dthe)
-						{
-							double d = sqrt(kv(Vh) + kv(w) - 2.0 * w * Vh * cos(the));
-							if (d > 0.000000001)
-							{
-								S_min[ij] = S_min[ij] + ff * d * sigma(d) * sin(the) * dthe * 2.0 * pi_; //  / Kn_
-							}
-						}
-					}
-
-				}
-				S_min[ij] = S_min[ij] / (4.0 * pi_);
-			}
-
-
-			for (int ij = 0; ij < n_S; ij++)
-			{
-				k->S_m[ij] = S_min[ij];
-			}
-		}
-
-		////////////////////////////////////////////////////////////////////////////////
-
-		if (k->par[0].F_n > 0)
-		{
-			for (int i = 0; i < pop_atom; i++)
-			{
-				if (k->par[0].H_n[i] > 0)
-				{
-					k->par[0].H_u[i] = k->par[0].H_u[i] / k->par[0].H_n[i];
-					k->par[0].H_v[i] = k->par[0].H_v[i] / k->par[0].H_n[i];
-					//k->par[0].H_T[i] = (2.0 / 3.0) * (k->par[0].H_T[i] / k->par[0].H_n[i] - kvv(k->par[0].F_u, k->par[0].F_v, 0.0));
-					k->par[0].H_T[i] = (2.0 / 3.0) * (k->par[0].H_T[i] / k->par[0].H_n[i] - kvv(k->par[0].H_u[i], k->par[0].H_v[i], 0.0));
-					k->par[0].H_uu[i] = k->par[0].H_uu[i] / k->par[0].H_n[i] - k->par[0].H_u[i] * k->par[0].H_u[i];
-					k->par[0].H_vv[i] = k->par[0].H_vv[i] / k->par[0].H_n[i] - k->par[0].H_v[i] * k->par[0].H_v[i];
-					k->par[0].H_uv[i] = k->par[0].H_uv[i] / k->par[0].H_n[i] - k->par[0].H_u[i] * k->par[0].H_v[i];
-					k->par[0].H_uuu[i] = 2.0 * k->par[0].H_v[i] * k->par[0].H_v[i] * k->par[0].H_v[i] + //
-						3.0 * k->par[0].H_v[i] * k->par[0].H_vv[i] - k->par[0].H_uuu[i] / k->par[0].H_n[i];
-				}
-				else
-				{
-					k->par[0].H_u[i] = 0.0;
-					k->par[0].H_v[i] = 0.0;
-					k->par[0].H_T[i] = 0.0;
-					k->par[0].H_uu[i] = 0.0;
-					k->par[0].H_vv[i] = 0.0;
-					k->par[0].H_uv[i] = 0.0;
-					k->par[0].H_uuu[i] = 0.0;
-				}
-			}
-		}
-
-		if (k->df_s4_bool == true)
-		{
-			k->df_s4->normir(sum_s / no);
-		}
-
-		if (k->df_s3_bool == true)
-		{
-			k->df_s3->normir(sum_s / no);
-		}
-
-		k->par[0].F_n = sum_s * k->par[0].F_n / no;
-		for (int i = 0; i < pop_atom; i++)
-		{
-			k->par[0].H_n[i] = sum_s * k->par[0].H_n[i] / no;
-		}
-
-
-		k->par[0].I_u = (n_p_LISM_) * (k->par[0].I_u);
-		k->par[0].I_v = (n_p_LISM_) * (k->par[0].I_v);
-		k->par[0].I_T = (n_p_LISM_) * (k->par[0].I_T);
-		k->par[0].II_u = (n_p_LISM_) * (k->par[0].II_u);
-		k->par[0].II_v = (n_p_LISM_) * (k->par[0].II_v);
-		k->par[0].II_T = (n_p_LISM_) * (k->par[0].II_T);
-
-		// Считаем мультифдюидные источники
-
-		double U_M_H[pop_atom];
-		double U_H[pop_atom];
-		double sigma_H[pop_atom];
-		double nu_H[pop_atom];
-		double q2_1, q2_2, q3;
-		double u, v, ro, p, Q;
-
-		double u_H[pop_atom];
-		double v_H[pop_atom];
-		double ro_H[pop_atom];
-		double p_H[pop_atom];
-
-		for (int i = 0; i < pop_atom; i++)
-		{
-			p_H[i] = 0.5 * k->par[0].H_T[i] * k->par[0].H_n[i];
-			if (k->par[0].H_n[i] <= 0.0)
-			{
-				k->par[0].H_n[i] = 0.0000001;
-				p_H[i] = 0.0;
-			}
-		}
-
-		if (k->pui_ == true)
-		{
-			k->par[0].ro = k->par[0].ro + k->par[0].npui;
-			double dd = k->par[0].p;
-			k->par[0].p = k->par[0].pp;
-			k->par[0].pp = dd;
-		}
-
-		u = k->par[0].u;
-		v = k->par[0].v;
-		ro = k->par[0].ro;
-		p = k->par[0].p;
-
-		if (ro <= 0.0)
-		{
-			ro = 0.0000001;
-			p = 0.0;
-		}
-
-
-		for (int i = 0; i < pop_atom; i++)
-		{
-			U_M_H[i] = sqrt(kv(u - k->par[0].H_u[i]) + kv(v - k->par[0].H_v[i]) + (64.0 / (9.0 * pi_)) //
-				* (p / ro + 2.0 * p_H[i] / k->par[0].H_n[i]));
-
-			U_H[i] = sqrt(kv(u - k->par[0].H_u[i]) + kv(v - k->par[0].H_v[i]) + (4.0 / (pi_)) //
-				* (p / ro + 2.0 * p_H[i] / k->par[0].H_n[i]));
-
-			sigma_H[i] = kv(1.0 - a_2 * log(U_M_H[i]));
-
-			nu_H[i] = ro * k->par[0].H_n[i] * U_M_H[i] * sigma_H[i];
-		}
-
 		k->par[0].M_u = 0.0;
 		k->par[0].M_v = 0.0;
 		k->par[0].M_T = 0.0;
@@ -17060,6 +16526,14 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 				}
 			}
 		}
+		if (next == nullptr)
+		{
+			if (now->belong(xk, yk) == true)
+			{
+				cout << "Ostalsya v svoey " << endl;
+				next = now;
+			}
+		}
 	}
 
 	if (next == nullptr)
@@ -17081,7 +16555,20 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 	{
 		if (xk > -1440.0 / RR_ && xk < 1200.0 / RR_ && yk < 200.0 / RR_) // Проверка, если траектория пропадёт не на границе а в нуле скорее всего
 		{
-			cout << "Setka.cpp  15246  propal  " << xk << " " << yk << endl;
+			cout << "Setka.cpp  15246  propal  " << xk << " " << yk << " " << Vx << " " << Vy << " " << Vz << " " << time << endl;
+			cout << x_0 << " " <<  y_0 << endl;
+			double cv1, cv2;
+			now->Get_Center(cv1, cv2);
+			cout << cv1 << " " << cv2 << endl;
+			for (auto& i : this->All_Cells)
+			{
+				if (i->belong(xk, yk) == true)
+				{
+					cout << "Nashol " << endl;
+					next = i;
+					Fly_exchenge_Imit_Korol_2(MK, sens, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, area, mu_start);
+				}
+			}
 		}
 	}
 
@@ -17089,7 +16576,7 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, do
 	return;
 }
 
-void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::uniform_real_distribution<double>& dis,
+void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, bool AZ[I_][J_],
 	double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 	double I_do, int area, const double& mu_start)
 {
@@ -17550,7 +17037,7 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::unif
 			vector <double> Wphi(1);
 			vector <double> mu_(1);
 
-			MK.Change_Velosity5(gen, dis, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
+			MK.Change_Velosity4(sens, Ur / cp, Uthe / cp, Uphi / cp, Vr / cp, Vthe / cp, Vphi / cp, Wr, Wthe, Wphi, mu_, cp, r, 0);
 			Wr[0] = Wr[0] * cp;
 			Wthe[0] = Wthe[0] * cp;
 			Wphi[0] = Wphi[0] * cp;
@@ -17559,12 +17046,13 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::unif
 
 			if (true)//(Wr[0] > -0.4 && (now->type != C_3 && now->type != C_2 && now->type != C_1))
 			{
-				KSI = -log(1.0 - (dis(gen)));
-				Fly_exchenge_Imit_Korol_2(MK, gen, dis, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, KSI, I_do, area2, mu_start);
+				bool BZ[I_][J_] = { false };
+				KSI = -log(1.0 - sens->MakeRandom());
+				Fly_exchenge_Imit_Korol_2(MK, sens, BZ, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, KSI, I_do, area2, mu_start);
 			}
 			else
 			{
-				//Fly_exchenge_Imit_Korol_PUI(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, false, mu_start, I_ - 1, J_ - 1, true);
+				Fly_exchenge_Imit_Korol_PUI(MK, sens, x_ex, y_ex, z_ex, aa, bb, cc, now, mu3, area2, false, mu_start, I_ - 1, J_ - 1, true);
 			}
 			return;
 		}
@@ -17650,6 +17138,14 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::unif
 				}
 			}
 		}
+		if (next == nullptr)
+		{
+			if (now->belong(xk, yk) == true)
+			{
+				cout << "Ostalsya v svoey " << endl;
+				next = now;
+			}
+		}
 	}
 
 	if (next == nullptr)
@@ -17665,13 +17161,26 @@ void Setka::Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::unif
 
 	if (next != nullptr)
 	{
-		Fly_exchenge_Imit_Korol_2(MK, gen, dis, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, area, mu_start);
+		Fly_exchenge_Imit_Korol_2(MK, sens, AZ, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, area, mu_start);
 	}
 	else
 	{
-		if (xk > -1000.0 / RR_ && xk < 1000.0 / RR_ && yk < 200.0 / RR_) // Проверка, если траектория пропадёт не на границе а в нуле скорее всего
+		if (xk > -1440.0 / RR_ && xk < 1200.0 / RR_ && yk < 200.0 / RR_) // Проверка, если траектория пропадёт не на границе а в нуле скорее всего
 		{
-			cout << "Setka.cpp  15246  propal  " << xk << " " << yk << endl;
+			cout << "Setka.cpp  15246  propal  " << xk << " " << yk << " " << Vx << " " << Vy << " " << Vz << " " << time << endl;
+			cout << x_0 << " " << y_0 << endl;
+			double cv1, cv2;
+			now->Get_Center(cv1, cv2);
+			cout << cv1 << " " << cv2 << endl;
+			for (auto& i : this->All_Cells)
+			{
+				if (i->belong(xk, yk) == true)
+				{
+					cout << "Nashol " << endl;
+					next = i;
+					Fly_exchenge_Imit_Korol_2(MK, sens, AZ, X, Y, Z, Vx, Vy, Vz, next, mu2, KSI, I_do, area, mu_start);
+				}
+			}
 		}
 	}
 
@@ -19474,7 +18983,7 @@ void Setka::Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0
 	{
 		if (xk > -1000.0 / RR_ && xk < 1000.0 / RR_ && yk < 200.0 / RR_) // ,           
 		{
-			cout << "Setka.cpp 17048   " << xk << " " << yk << endl;
+			cout << "Setka.cpp 17048 f  " << xk << " " << yk << endl;
 			cout << Vx << " " << Vy << " " << Vz << endl;
 		}
 	}

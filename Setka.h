@@ -248,7 +248,8 @@ public:
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 
-	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::uniform_real_distribution<double>& dis, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
+	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, bool AZ[I_][J_],
+		double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 
 	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //

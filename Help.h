@@ -9,6 +9,9 @@
 #define n_S 100
 #define max_S 100.0           //  (i + 1) * (max_S/(n_S + 1))   - до этого значения i-ая ячейка
 
+#define I_ 8 //5 // Количество зон по радиусу
+#define J_ 11 //5 // Количество зон по углу
+
 #include <initializer_list>
 #include <random>
 #include <ctime> // подключаем clock
@@ -114,8 +117,6 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define Rmax_ (1450.0/RR_)  // 1800.0  // (1300.0)   // Максимальный радиус для Монте-Карло
 #define Left_ (-1500.0/RR_)  // -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
-#define I_ 8 //5 // Количество зон по радиусу
-#define J_ 11 //5 // Количество зон по углу
 #define weight_ 0.25     // Веса для атомов
 #define gam(i) ( 1.0/(kv(R5_ - 2.0/RR_)/kv(Ri[(i)]) - 1.0) )
 #define R_m 4.0   // Для улучшения статистики на оси происходит запуск с диска этого радиуса

@@ -339,9 +339,10 @@ int main()
     double end;
     start = omp_get_wtime();
 
+
     SS->MK_start_new();
     //SS->MK_start_2_0();
-
+    
     double seconds = difftime(end, start);
     end = omp_get_wtime();
     printf("Work took %f seconds\n", end - start);
