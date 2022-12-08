@@ -26,9 +26,14 @@ public:
 	// розыгрыш начальных параметров запуска
 	bool Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
 	// Возвращает false, если не нужно запускать основной атом
-	bool Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
+
+	bool Init_Parametrs_(std::mt19937& gen, std::uniform_real_distribution<double>& dis, vector <double>& mu_,
+		vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_);
+
+	bool Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_,
+		vector <double>& Wr_, vector <double>& X_);
+
 	int Init(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, double& X_);
-	double FF(const double& gam, const double& Yr);
 
 	// Розыгрыш скорости при перезарядке
 	bool Change_Velosity(Sensor* sens, const double& Ur, const double& Uthe, const double& Uphi, //
@@ -49,6 +54,12 @@ public:
 		const double& y_ex = 0.0, const double& z_ex = 0.0);  // Мой алгоритм (по первому Маламы) с табличным вычислением весов
 	// Возвращает false, если не нужно запускать основной атом
 
+	template<typename Random_type, typename Distribution_type>
+	bool Change_Velosity5(Random_type& gen, Distribution_type& dis, const double& Ur, const double& Uthe, const double& Uphi, //
+		const double& Vr, const double& Vthe, const double& Vphi, vector <double>& Wr_, vector <double>& Wthe_,//
+		vector <double>& Wphi_, vector <double>& mu_, const double& cp, const double& r, int I, const double& x_ex = 0.0,//
+		const double& y_ex = 0.0, const double& z_ex = 0.0);
+
 	double for_Wr_1(const double& Z, const double& gam, const double& ur);
 	double H_Wr_1(const double& gam1, const double& gam2, const double& V, const double& ur, const double& p, const double& ksi);
 	double for_Wr_2(const double& Z, const double& gam, const double& ur, const double& ut);
@@ -64,6 +75,12 @@ public:
 	double mho_H1(const double& c, const double& k, const double& ksi);
 	double mho_H2(const double& c, const double& k, const double& ksi);
 	double h_mho(const double& x, const double& c);
+
+	template<typename Random_type, typename Distribution_type>
+	low_type play_mho(Random_type& gen, Distribution_type& dis, const double& c);
+
+	template<typename Random_type, typename Distribution_type>
+	low_type play_mho2(Random_type& gen, Distribution_type& dis, const double& c, const double& p, const double& p1);
 
 
 	// Интерполяция интеграллов
@@ -102,6 +119,8 @@ public:
 	double F0(const double& X, const double& Y);  // Функция распределения для X   // ПРОВЕРЕНО!
 	double FI(const double& Z, const double& X, const double& gam, const double& Y);   // ПРОВЕРЕНО!
 	double R(const double& X, const double& Y);              // ПРОВЕРЕНО!
+
+	double FF(const double& gam, const double& Yr);
 
 	// Для розыгрыша перезарядки внутри области
 	double f2(const double& V, const double& gam, const double& ur, const double& ut);

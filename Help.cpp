@@ -119,7 +119,10 @@ double linear(const double& x1, const double& t1, const double& x2, const double
 	return  (d * (y - x2) + t2);
 }
 
-void dekard_skorost(double x, double y, double z, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz)
+
+void dekard_skorost(const double& x, const double& y, const double& z,
+	const double& Vr, const double& Vphi, const double& Vtheta, double& Vx,
+	double& Vy, double& Vz)
 {
 	double r_2 = sqrt(x * x + y * y + z * z);
 	double the_2 = acos(z / r_2);
@@ -164,4 +167,11 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 	x = a2 * b3 - a3 * b2;
 	y = a3 * b1 - a1 * b3;
 	z = a1 * b2 - a2 * b1;
+}
+
+// Функция для проверки скорости работы датчиков, если их положить на регистр.
+// для этого необходимо, чтобы функция была в том же файле, откуда её вызывают
+double Change(std::mt19937& gen, std::uniform_real_distribution<double>& dis)
+{
+	return ((dis)(gen));
 }

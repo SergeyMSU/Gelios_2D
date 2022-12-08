@@ -96,6 +96,7 @@ struct Parametr
 class Point;
 class Gran;
 class Sensor;
+class Dist_func;
 
 class Cell
 {
@@ -125,6 +126,12 @@ public:
 
 	double S_p[n_S];              // Для  S+  и  S-
 	double S_m[n_S];
+
+	Dist_func* df_s4;
+	bool df_s4_bool = false;
+
+	Dist_func* df_s3;
+	bool df_s3_bool = false;
 
 	int number;
 	int zona;
@@ -174,7 +181,9 @@ public:
 	void Get_Sourse_MK2(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 	void Get_Sourse_MK3(double& q1, double& q2, double& q3, const double& u, const double& v, const double& ro, const double& p);
 
+
 	bool belong(const double& x, const double& y);
+
 	void renew(void); // Обновить значения L
 
 	void Calc_Sourse(void);  // Функция вычисляющая источники

@@ -16,6 +16,7 @@ class Cell;
 class Gran;
 class Sensor;
 class MKmethod;
+class Dist_func;
 using namespace std;
 
 class Setka
@@ -48,6 +49,8 @@ public:
 	vector <Cell*> Cell_disk;      // Ячейки диска
 	vector <Cell*> Cell_other;      // Ячейки , которые не считаются
 	Cell* Cell_m;                  // Для 4-го типа вылета частиц
+
+	vector <Dist_func*> Dist_func_all;
 
 	vector<Sensor*> Sensors;
 	vector<sensor2*> Sensors2;
@@ -205,12 +208,24 @@ public:
 
 	void Init_Velosity(Sensor* sens, const double& A2, vector <double>& mu, vector <double>& Wt, vector <double>& Wp, vector <double>& Wr, const double& the);
 	void Velosity_initial2(Sensor* s, double& Vx, double& Vy, double& Vz); //   Для вылета сзади
+
+	template<typename Random_type, typename Distribution_type, typename accuracy_type>
+	void Velosity_initial2(Random_type& gen, Distribution_type& dis, accuracy_type& Vx, accuracy_type& Vy, accuracy_type& Vz);
+
 	void Velosity_initial(Sensor* s, double& Vx, double& Vy, double& Vz);  //  Для вылета с плоскости спереди (4 тип)
+
+	template<typename Random_type, typename Distribution_type, typename accuracy_type>
+	void Velosity_initial(Random_type& gen, Distribution_type& dis, accuracy_type& Vx, accuracy_type& Vy, accuracy_type& Vz);
+
 	void Init_Pozision(Sensor* sens, const double& A1, double& phi, double& the);    // Моделирование начальных положений на полусфере
 	double F_mk(const double& gamma, const double& Yr);
 	void MK_start(void);
 	void MK_start_new(void);
-	Cell* Belong_point(int b, const double& x, const double& y);   // Находит граничную ячейку, которой принадлежит точка
+	void MK_start_2_0(void);
+
+
+	Cell* Belong_point(int b, const double& x, const double& y);
+
 	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, //
 		double mu, const double& mu_0, bool ExCh);
 	void Fly_exchenge_Split(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
@@ -225,9 +240,17 @@ public:
 	void Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
-		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1); // Смотри описание функции в коде функции
+		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1); // Смотри описание функции в коде функции
+	
+	void Fly_exchenge_Imit_Korol(MKmethod& MK, std::mt19937& gen, std::uniform_real_distribution<double>& dis, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1);
+
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
+
+	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, std::mt19937& gen, std::uniform_real_distribution<double>& dis, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
+		double I_do, int area, const double& mu_start);
+
 	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1, bool pui__ = false);
 	int geo_zones(const double& r, const double& k = 1.0);

@@ -2,6 +2,13 @@
 
 using namespace std;
 
+template low_type MKmethod::play_mho(std::mt19937& gen, std::uniform_real_distribution<double>& dis, const double& c);
+template low_type MKmethod::play_mho2(std::mt19937& gen, std::uniform_real_distribution<double>& dis, const double& c, const double& p, const double& p1);
+template bool MKmethod::Change_Velosity5(std::mt19937& gen, std::uniform_real_distribution<double>& dis, const double& Ur, const double& Uthe, const double& Uphi, //
+	const double& Vr, const double& Vthe, const double& Vphi, vector <double>& Wr_, vector <double>& Wthe_,//
+	vector <double>& Wphi_, vector <double>& mu_, const double& cp, const double& r, int I, const double& x_ex,//
+	const double& y_ex, const double& z_ex);
+
 MKmethod::MKmethod(void)
 {
 	double Yr = fabs(Velosity_inf);
@@ -289,7 +296,6 @@ double MKmethod::FF(const double& gam, const double& Yr)
 
 double MKmethod::F0(const double& X, const double& Y)
 {
-
 	return -(2.0 * X * Y * exp(-kv(X * Y)) * (5.0 - 2.0 * (-2.0 + kv(X)) * kv(Y)) + //
 		sqrtpi_ * (-4.0 * pow4(X * Y) + 8.0 * kv(X * Y) * (1.0 + kv(Y)) + (3.0 + 4.0 * kv(Y) - 4.0 * pow4(X * Y) //
 			+ 8.0 * kv(X * Y) * (1.0 + kv(Y))) * erf(X * Y)))//
@@ -429,6 +435,27 @@ double MKmethod::play_mho(Sensor* sens, const double& c)
 	}*/
 }
 
+template<typename Random_type, typename Distribution_type>
+low_type MKmethod::play_mho(Random_type& gen, Distribution_type& dis, const double& c)
+{
+	low_type x;
+	do
+	{
+		x = 2.0 * (dis(gen)) * pi_;
+	} while (exp(2.0 * c * cos(x)) < (dis(gen)) * exp(2.0 * fabs(c)));
+
+	return x;
+
+	/*if (sens->MakeRandom() < 0.5)
+	{
+		return x;
+	}
+	else
+	{
+		return (2.0 * pi_ - x);
+	}*/
+}
+
 double MKmethod::play_mho2(Sensor* sens, const double& c, const double& p, const double& p1)
 {
 	//cout << c << endl;
@@ -499,6 +526,86 @@ double MKmethod::play_mho2(Sensor* sens, const double& c, const double& p, const
 	//return x;
 
 	if (sens->MakeRandom() < 0.5)
+	{
+		return x;
+	}
+	else
+	{
+		return (2.0 * pi_ - x);
+	}
+}
+
+template<typename Random_type, typename Distribution_type>
+low_type MKmethod::play_mho2(Random_type& gen, Distribution_type& dis, const double& c, const double& p, const double& p1)
+{
+	//cout << c << endl;
+	low_type cc = c;
+	bool minus = false;
+	if (c < 0.0)
+	{
+		minus = true;
+		cc = -c;
+	}
+
+	low_type x = 0.0;
+	low_type ksi, k1, k2, k0;
+
+	if ((dis(gen)) <= p1 / p)
+	{
+		do
+		{
+			ksi = (dis(gen));
+			k1 = 0.0;
+			k2 = pi_ / 2.0;
+			k0 = (k1 + k2) / 2.0;
+			while (fabs(k2 - k1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				k0 = (k1 + k2) / 2.0;
+				if (this->mho_H1(c, k0, ksi) < 0)
+				{
+					k1 = k0;
+				}
+				else
+				{
+					k2 = k0;
+				}
+			}
+			x = k0;
+		} while ((dis(gen)) > exp(2.0 * c * cos(x)) / exp(-8.0 * c * kv(x / pi_) + 2.0 * c));
+	}
+	else
+	{
+		do
+		{
+			ksi = (dis(gen));
+			k1 = pi_ / 2.0;
+			k2 = pi_;
+			k0 = (k1 + k2) / 2.0;
+			while (fabs(k2 - k1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				k0 = (k1 + k2) / 2.0;
+				if (this->mho_H2(c, k0, ksi) < 0)
+				{
+					k1 = k0;
+				}
+				else
+				{
+					k2 = k0;
+				}
+			}
+			x = k0;
+		} while ((dis(gen)) > exp(2.0 * c * cos(x)) / (exp(-4.0 * c / pi_ * (x - pi_ / 2.0))));
+	}
+
+
+	if (minus)
+	{
+		x = pi_ - x;
+	}
+
+	//return x;
+
+	if ((dis(gen)) < 0.5)
 	{
 		return x;
 	}
@@ -862,7 +969,298 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 	return true;
 }
 
-bool MKmethod::Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_)
+bool MKmethod::Init_Parametrs_(std::mt19937& gen, std::uniform_real_distribution<double>& dis, vector <double>& mu_,
+	vector <double>& Wt_, vector <double>& Wp_, vector <double>& Wr_, vector <double>& X_)
+{
+	low_type Y = fabs(Velosity_inf);
+	low_type ksi, ksi1, ksi2;
+	low_type X1;
+	low_type X2;
+	low_type X0 = 1.0;                // для метода хорд
+	low_type split, gam1, gam2;
+	vector <double> Wa_(this->num_area);
+	vector <double> Mho_(this->num_area);
+
+	// Разыгрываем  X
+	for (int i = 0; i < this->num_area; i++)
+	{
+		ksi = (dis(gen));
+		//cout << "ksi  " << ksi << endl;
+		X1 = 0.0;
+		X2 = 1.0;
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		while (fabs(X2 - X1) > 0.0000001)     // Деление пополам, иначе разваливается
+		{
+			X0 = (X1 + X2) / 2.0;
+			if (this->Hx(gam1, gam2, X0, Y, ksi) < 0.0)
+			{
+				X1 = X0;
+			}
+			else
+			{
+				X2 = X0;
+			}
+			//k++;
+		}
+		/*if (std::fpclassify(X0) != FP_NORMAL && std::fpclassify(X0) != FP_ZERO)
+		{
+			cout << X0 << "    ERROR  229" << endl;
+			exit(-1);
+		}*/
+		X_[i] = X0;
+		//cout << X0 << " " << ksi << " " << gam1 << " " << gam2 << endl;
+		//cout << "X2 = " << X2 << "    " << k << endl;
+	}
+
+	low_type Wr1, Wr2, Wr0;
+	// Разыгрываем  Wr
+	for (int i = 0; i < this->num_area; i++)
+	{
+		ksi = (dis(gen));
+		//cout << "ksi  " << ksi << endl;
+		Wr1 = -5.0;
+		Wr2 = 0.0;
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+		while (this->Hwr(gam1, gam2, Wr1, X_[i], Y, ksi) >= 0.0)
+		{
+			Wr1 = Wr1 - 1.0;
+		}
+		//int k = 0;
+		while (fabs(Wr2 - Wr1) > 0.000001)     // Деление пополам, иначе разваливается
+		{
+			Wr0 = (Wr1 + Wr2) / 2.0;
+			if (this->Hwr(gam1, gam2, Wr0, X_[i], Y, ksi) < 0)
+			{
+				Wr1 = Wr0;
+			}
+			else
+			{
+				Wr2 = Wr0;
+			}
+			//k++;
+		}
+
+		/*if (std::fpclassify(Wr2) != FP_NORMAL && std::fpclassify(Wr2) != FP_ZERO)
+		{
+			cout << Wr2 << "    ERROR  Wr2  276" << endl;
+			exit(-1);
+		}*/
+
+		Wr_[i] = Wr0;
+		//cout << Wr0 << " " << ksi << " " << X_[i] << endl;
+		//cout << "Wr2 = " << Wr2 << "    " << k << endl;
+	}
+
+	low_type W1, W2, Wa, Yt;
+	// Разыгрываем  Wa
+	for (int i = 0; i < this->num_area; i++)
+	{
+		Yt = Y * sqrt(1.0 - kv(X_[i]));
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+
+		do
+		{
+			ksi1 = (dis(gen));
+			ksi2 = (dis(gen));
+			W1 = sqrt(gam1 * kv(Wr_[i]));
+			W2 = sqrt(gam2 * kv(Wr_[i]));
+			Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+		} while ((1.0 + kv(Yt * Wa)) / (1.0 + kv(Yt * W2)) < ksi2);
+
+		if (std::fpclassify(Wa) != FP_NORMAL && std::fpclassify(Wa) != FP_ZERO)
+		{
+			cout << Wa << "    ERROR  Wa  311" << endl;
+			cout << ksi1 << endl;
+			exit(-1);
+		}
+
+		Wa_[i] = Wa;
+		//cout << Wa << " " << ksi1 << " " << Wr_[i] << " " << X_[i] << endl;
+	}
+
+	//exit(-1);
+
+	// Разыгрываем  Mho
+	//for (int i = 0; i < this->num_area; i++)
+	//{
+	//	Mho_[i] = play_mho(sens, Y * sqrt(1.0 - kv(X_[i])) * Wa_[i]);
+	//	/*if (std::fpclassify(Mho_[i]) != FP_NORMAL && std::fpclassify(Mho_[i]) != FP_ZERO)
+	//	{
+	//		cout << Mho_[i] << "    ERROR  Mho_[i]  324   " << Y * sqrt(1.0 - kv(X_[i])) * Wa_[i] << endl;
+	//		exit(-1);
+	//	}*/
+	//}
+
+	// Считаем веса
+	for (int i = 0; i < this->num_area; i++)
+	{
+		low_type c = Y * sqrt(1.0 - kv(X_[i])) * Wa_[i];
+		low_type p = this->norm_mho(c);
+		if (false)//(fabs(c) > 0.1)
+		{
+			low_type p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
+			Mho_[i] = play_mho2(gen, dis, c, p * pi_, p1);
+		}
+		else
+		{
+			Mho_[i] = play_mho(gen, dis, c);
+		}
+
+		Wt_[i] = Wa_[i] * cos(Mho_[i]);
+		Wp_[i] = Wa_[i] * sin(Mho_[i]);
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = this->gam_[i];
+		}
+		else
+		{
+			gam1 = this->gam_[i - 1];
+			gam2 = this->gam_[i];
+		}
+		mu_[i] = (this->F(1.0, gam2, Y) - this->F(1.0, gam1, Y)) * (p) / (this->A0_ * (1.0 + kv(c)));
+	}
+	//exit(-1);
+
+	// Разыгрываем основной атом
+
+	// Розыгрыш X целиком из препринта
+	low_type p1 = erf(Y) / (this->A1_ * kv(Y));
+	low_type ksi3, ksi4;
+	low_type z, h;
+	ksi1 = (dis(gen));
+	if (p1 < ksi1)
+	{
+		do
+		{
+			ksi2 = (dis(gen));
+			ksi3 = (dis(gen));
+			X2 = sqrt(ksi2);
+			h = (1.0 + erf(X2 * Y)) / (1.0 + erf(Y));
+		} while (h < ksi3);
+	}
+	else
+	{
+		do
+		{
+			ksi2 = (dis(gen));
+			ksi3 = (dis(gen));
+			X2 = (1.0 / Y) * sqrt(-log(ksi2)) * cos(pi_ * ksi3 / 2.0);
+		} while (X2 >= 1.0);
+	}
+
+	X_[this->num_area] = X2;
+
+	low_type gg = 0.0;
+	if (this->num_area > 0)
+	{
+		gg = this->gam_[this->num_area - 1];
+	}
+
+	low_type p4_ = sqrtpi_ * (Y * X2) / (1.0 + sqrtpi_ * (Y * X2));                  // Для розыгрыша основного атома на границе по препринту Маламы
+	//do
+	//{
+	do
+	{
+		ksi1 = (dis(gen));
+		ksi2 = (dis(gen));
+		ksi3 = (dis(gen));
+		if (p4_ > ksi1)
+		{
+			z = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+		}
+		else
+		{
+			if (ksi2 <= 0.5)
+			{
+				z = -sqrt(-log(2.0 * ksi2));
+			}
+			else
+			{
+				z = sqrt(-log(2.0 * (1.0 - ksi2)));
+			}
+		}
+
+		Wr_[this->num_area] = z - (Y * X2);
+		h = fabs(-(Y * X2) + z) / ((Y * X2) + fabs(z));
+		ksi4 = (dis(gen));
+	} while (h <= ksi4 || z >= (Y * X2));
+
+	low_type ksi5, ksi6;
+	ksi5 = (dis(gen));
+	ksi6 = (dis(gen));
+
+	Wt_[this->num_area] = Y * sqrt(1.0 - kv(X_[this->num_area])) + sqrt(-log(ksi5)) * cos(2.0 * pi_ * ksi6);
+	Wp_[this->num_area] = sqrt(-log(ksi5)) * sin(2.0 * pi_ * ksi6);
+	//} while(Wr_[this->num_area] < 0.0 && kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) < gg * kv(Wr_[this->num_area]));
+
+	/*mu_[this->num_area] = 1.0;
+	for (int i = 0; i < this->num_area; i++)
+	{
+		mu_[this->num_area] = mu_[this->num_area] - mu_[i];
+	}*/
+
+	/*for (int i = 0; i <= this->num_area; i++)
+	{
+		cout << mu_[i] << endl;
+	}
+	cout << "----------------------------------" << endl;*/
+
+	if (this->num_area == 0)
+	{
+		mu_[this->num_area] = 1.0;
+		//cout << "A " << endl;
+		return true;
+	}
+	else
+	{
+		if (Wr_[this->num_area] >= 0.0 || kv(Wt_[this->num_area]) + kv(Wp_[this->num_area]) > this->gam_[this->num_area - 1] * kv(Wr_[this->num_area]))
+		{
+			mu_[this->num_area] = 1.0;
+			//cout << "B" << endl;
+		}
+		else
+		{
+			mu_[this->num_area] = 0.0;  // Чтобы не запускать этот атом
+			//cout << "C" << endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool MKmethod::Init_Parametrs2(Sensor* sens, vector <double>& mu_, vector <double>& Wt_, vector <double>& Wp_,
+	vector <double>& Wr_, vector <double>& X_)
 // Алгоритм Маламы из препринта
 {
 	double Y = fabs(Velosity_inf);
@@ -2065,6 +2463,271 @@ bool MKmethod::Change_Velosity4(Sensor* sens, const double& Ur, const double& Ut
 		ksi4 = sens->MakeRandom();
 		ksi5 = sens->MakeRandom();
 		ksi6 = sens->MakeRandom();
+		if (p4 < ksi1)
+		{
+			om1 = 1.0 - 2.0 * ksi4;
+			om2 = sqrt(1.0 - kv(om1)) * cos(2.0 * pi_ * ksi5);
+			om3 = sqrt(1.0 - kv(om1)) * sin(2.0 * pi_ * ksi5);
+			// Более экономичный алгоритм   --  выйгрыша нет вроде от него
+			/*do
+			{
+				om2 = 1.0 - 2.0 * sens->MakeRandom();
+				om3 = 1.0 - 2.0 * sens->MakeRandom();
+				D = kv(om2) + kv(om3);
+			} while (D > 1.0);
+			ko = sqrt((1.0 - kv(om1)) / D);
+			om2 = om2 * ko;
+			om3 = om3 * ko;*/
+
+			lo = sqrt(-log(ksi2 * ksi3));
+			y1 = lo * om1;
+			y2 = lo * om2;
+			y3 = lo * om3;
+		}
+		else
+		{
+			y1 = sqrt(-log(ksi2)) * cos(pi_ * ksi3);
+			y2 = sqrt(-log(ksi4)) * cos(2.0 * pi_ * ksi5);
+			y3 = sqrt(-log(ksi4)) * sin(2.0 * pi_ * ksi5);
+		}
+		v1 = y1 + Ur;
+		v2 = y2 + Uthe;
+		v3 = y3 + Uphi;
+		u1 = Vr - v1;
+		u2 = Vthe - v2;
+		u3 = Vphi - v3;
+		uuu = sqrt(kvv(u1, u2, u3));
+		yy = sqrt(kvv(y1, y2, y3));
+		h = ((uuu * sigma2(uuu, cp)) / (sigma2(X, cp) * (X + yy)));
+		/*if (h > 1.0)
+		{
+			cout << "ERROR h  2096 nhsbfsbfuffr" << endl;
+			exit(-22);
+		}*/
+	} while (h < ksi6); //|| (v1 < 0.0 && kv(v2) + kv(v3) < gg * kv(v1)));
+
+
+	Wr_[I] = v1;
+	Wthe_[I] = v2;
+	Wphi_[I] = v3;
+
+	/*mu_[I] = 1.0;
+	for (int i = 0; i < I; i++)
+	{
+		mu_[I] = mu_[I] - mu_[i];
+	}
+	return true;*/
+
+	if (Wr_[I] >= 0.0 || kv(Wthe_[I]) + kv(Wphi_[I]) > gg * kv(Wr_[I]))
+	{
+		mu_[I] = 1.0;
+		return true;
+		//cout << 1 << endl;
+	}
+	else
+	{
+		mu_[I] = 0.0;  // Чтобы не запускать этот атом
+		//cout << 0 << endl;
+		return false;
+	}
+
+	return true;
+}
+
+template<typename Random_type, typename Distribution_type>
+bool MKmethod::Change_Velosity5(Random_type& gen, Distribution_type& dis, const double& Ur, const double& Uthe, const double& Uphi, //
+	const double& Vr, const double& Vthe, const double& Vphi, vector <double>& Wr_, vector <double>& Wthe_,//
+	vector <double>& Wphi_, vector <double>& mu_, const double& cp, const double& r, int I, const double& x_ex,//
+	const double& y_ex, const double& z_ex)
+	// Как первая часть, но розыгрышь идёт по-частям
+{
+	// То же самое, что 4, только с новыми датчиками
+	// (dis(gen))    так генерировать значение
+	double X = sqrt(kvv(Vr - Ur, Vthe - Uthe, Vphi - Uphi));
+	double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+	//double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+
+	//double IS = this->Int_cp_1(X);
+	vector <double> gamma_(I);
+	vector <double> Wa_(I);
+	vector <double> Mho_(I);
+
+	for (int i = 0; i < I; i++)
+	{
+		gamma_[i] = 1.0 / (kv(r / this->R_[i]) - 1.0);
+	}
+
+	double ksi, gam1, gam2, Wr1, Wr2, Wr0 = -1.0, ksi1, ksi2, W1, W2, Wa;
+	int met = 0;
+	// Разыграем Wr  
+	for (int i = 0; i < I; i++)
+	{
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = gamma_[i];
+		}
+		else
+		{
+			gam1 = gamma_[i - 1];
+			gam2 = gamma_[i];
+		}
+		double pp1 = this->for_Wr_1(0.0, gam2, Ur) - this->for_Wr_1(0.0, gam1, Ur);
+		double pp2 = this->for_Wr_2(0.0, gam2, Ur, Uthe) - this->for_Wr_2(0.0, gam1, Ur, Uthe);
+
+		if ( (dis(gen)) < pp1 / (pp1 + pp2))
+		{
+			ksi = (dis(gen));
+			Wr1 = -3.0;
+			Wr2 = 0.0;
+
+			while (this->H_Wr_1(gam1, gam2, Wr1, Ur, pp1, ksi) >= 0.0)
+			{
+				Wr1 = Wr1 - 1.0;
+			}
+			int k = 0;
+			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				Wr0 = (Wr1 + Wr2) / 2.0;
+				if (this->H_Wr_1(gam1, gam2, Wr0, Ur, pp1, ksi) < 0)
+				{
+					Wr1 = Wr0;
+				}
+				else
+				{
+					Wr2 = Wr0;
+				}
+				k++;
+			}
+			Wr_[i] = Wr1;
+		}
+		else
+		{
+			ksi = (dis(gen));
+			Wr1 = -3.0;
+			Wr2 = 0.0;
+
+			while (this->H_Wr_2(gam1, gam2, Wr1, Ur, Uthe, pp2, ksi) >= 0.0)
+			{
+				Wr1 = Wr1 - 1.0;
+			}
+			int k = 0;
+			while (fabs(Wr2 - Wr1) > 0.0001)     // Деление пополам, иначе разваливается
+			{
+				Wr0 = (Wr1 + Wr2) / 2.0;
+				if (this->H_Wr_2(gam1, gam2, Wr0, Ur, Uthe, pp2, ksi) < 0)
+				{
+					Wr1 = Wr0;
+				}
+				else
+				{
+					Wr2 = Wr0;
+				}
+				k++;
+			}
+			Wr_[i] = Wr1;
+		}
+	}
+
+	// Разыгрываем  Wa
+	for (int i = 0; i < I; i++)
+	{
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = gamma_[i];
+		}
+		else
+		{
+			gam1 = gamma_[i - 1];
+			gam2 = gamma_[i];
+		}
+
+		do
+		{
+			ksi1 = (dis(gen));
+			ksi2 = (dis(gen));
+			W1 = sqrt(gam1 * kv(Wr_[i]));
+			W2 = sqrt(gam2 * kv(Wr_[i]));
+			Wa = sqrt(-log(exp(-kv(W1)) - ksi1 * (exp(-kv(W1)) - exp(-kv(W2)))));
+		} while ((1.0 + kv(Uthe * Wa)) / (1.0 + kv(Uthe * W2)) < ksi2);
+		Wa_[i] = Wa;
+	}
+
+
+
+	// Считаем веса и Mho
+	for (int i = 0; i < I; i++)
+	{
+		double c = Uthe * Wa_[i];
+		double p = this->norm_mho(c);
+		if (false)//(fabs(c) > 0.1)
+		{
+			double p1 = (pi_ / 2.0) * (p + this->norm_mho2(c) / pi_);
+			Mho_[i] = play_mho2(gen, dis, c, p * pi_, p1);
+		}
+		else
+		{
+			Mho_[i] = play_mho(gen, dis, c);
+		}
+
+		Wthe_[i] = Wa_[i] * cos(Mho_[i]);
+		Wphi_[i] = Wa_[i] * sin(Mho_[i]);
+		if (i == 0)
+		{
+			gam1 = 0.0;
+			gam2 = gamma_[i];
+		}
+		else
+		{
+			gam1 = gamma_[i - 1];
+			gam2 = gamma_[i];
+		}
+
+		double u = sqrt(kvv(Vr - Wr_[i], Vthe - Wthe_[i], Vphi - Wphi_[i]));
+
+		if (X > 7)
+		{
+			//double uu = exp(-kv(X)) / sqrtpi_ + (X + 1.0 / (2.0 * X)) * erf(X);
+			//mu_[i] = (u * sigma(u) / (uu * sigma(uu))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+			mu_[i] = (u * sigma2(u, cp) / (uu * sigma2(uu, cp))) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+			/*if (X < 7)
+			{
+				cout << (uu * sigma2(uu, cp)) << " " << this->int_1(X * cp, cp)/cp << " " << X << " " << cp << endl;
+			}*/
+		}
+		else
+		{
+			mu_[i] = (u * sigma2(u, cp) / (this->int_1(X * cp, cp) / cp)) * (f2(0.0, gam1, Ur, Uthe) - f2(0.0, gam2, Ur, Uthe)) * exp(-kv(Uthe)) * (p) / (1.0 + kv(c));
+		}
+	}
+
+
+	// Розыгрыш основного атома
+	double p4 = 0.5 * sqrtpi_ * X / (1.0 + 0.5 * sqrtpi_ * X);
+	double om1, om2, om3, lo;
+	double y1, y2, y3, v1, v2, v3, u1, u2, u3, uuu, yy, h;
+	double ksi3, ksi4, ksi5, ksi6;
+	double D, ko;
+
+	double gg;
+	if (I > 0)
+	{
+		gg = gamma_[I - 1];
+	}
+	else
+	{
+		gg = 0.0;
+	}
+
+	do
+	{
+		ksi1 = (dis(gen));
+		ksi2 = (dis(gen));
+		ksi3 = (dis(gen));
+		ksi4 = (dis(gen));
+		ksi5 = (dis(gen));
+		ksi6 = (dis(gen));
 		if (p4 < ksi1)
 		{
 			om1 = 1.0 - 2.0 * ksi4;

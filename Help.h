@@ -2,9 +2,18 @@
 
 #define pop_atom 6         // Число популяций атомов
 
+#define low_type double
+#define high_type double
+
 // Для S+  и S-
 #define n_S 100
 #define max_S 100.0           //  (i + 1) * (max_S/(n_S + 1))   - до этого значения i-ая ячейка
+
+#include <initializer_list>
+#include <random>
+#include <ctime> // подключаем clock
+#include <stdint.h>
+#include <xmmintrin.h>
 
 #include "Setka.h"
 #include "Rail.h"
@@ -15,6 +24,7 @@
 #include "sensor.h"
 #include "sensor2.h"
 #include "MKmethod.h"
+#include "Dist_func.h"
 #include <mutex>
 
 #include <vector>
@@ -33,7 +43,14 @@ double polar_angle(const double& x, const double& y);
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& x3, const double& t3, const double& y);
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& y);
 void polar_perenos(const double& x1, const double& y1, const double& x2, const double& y2, double& u, double& v);
-void dekard_skorost(double x, double y, double z, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz);
+
+double Change(std::mt19937& gen, std::uniform_real_distribution<double>& dis);
+
+
+void dekard_skorost(const double& x, const double& y, const double& z,
+	const double& Vr, const double& Vphi, const double& Vtheta, double& Vx,
+	double& Vy, double& Vz);
+
 void dekard_skorost2(double r2, double the_2, double phi_2, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz);
 void spherical_skorost(const double& x, const double& y, const double& z, const double& Vx,//
 	const double& Vy, const double& Vz, double& Vr, double& Vphi, double& Vtheta);
@@ -118,6 +135,9 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 #define L_Igor 200.0         // В распределении Игоря до какого модуля скорости считаем интегралы
 #define k_Igor 1200         // В распределении Игоря до какого модуля скорости считаем интегралы
+
+
+
 
 
 

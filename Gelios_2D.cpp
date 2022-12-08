@@ -1,17 +1,77 @@
 ﻿#include "Help.h"
 #include <iomanip>
-#include <unistd.h>
+//#include <unistd.h>
 #include <vector>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
 #include <iterator>
+#include <omp.h>
+
+
+//template<typename Random_type, typename Distribution_type>
+//auto Change(Random_type gen, Distribution_type dis)
+//{
+//    return (dis(gen));
+//}
+
 
 int main()
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
+
+    if (false)
+    {
+        auto s = new Sensor(1, 4, 8);
+
+        std::random_device rd;
+        auto gen = new std::mt19937(rd());  // mt19937    mt19937
+        auto dis = new std::uniform_real_distribution<double> (0.0000001, 1.0);
+
+        /*std::mt19937 gen2(rd());
+        std::uniform_real_distribution<double> dis2(0.0, 1.0);*/
+        float aa;
+        float bb = 1.23;
+        float cc = 2324.2323;
+        int start = clock(); // засекаем время старта
+
+
+#pragma omp parallel for
+        for (unsigned long int n = 0; n < 1000; ++n) {
+            std::mt19937 gen2(rd());
+            std::uniform_real_distribution<double> dis2(0.0, 1.0);
+
+            for (unsigned long int n2 = 0; n2 < 1000; ++n2) {
+                for (unsigned long int n3 = 0; n3 < 1000; ++n3) {
+                    //aa = exp(sin(sqrt(bb * bb + cc * cc + n))) + log(bb * cc);
+                    aa = Change(gen2, dis2);
+                    //dis(gen2);
+                    //aa = s->MakeRandom();
+                }
+            }
+        }
+
+
+        cout << SIZE_MAX << endl;
+
+        int end = clock(); // засекаем время окончания
+        double t = ((double)(end - start) / CLOCKS_PER_SEC);
+        cout << t << "  sec" << endl;
+        exit(-1);
+    }
+
+   /* Dist_func AA = Dist_func(10, 10, 10, -1.0, 2.0, 0.0, 2.0, 0.0, 2.0);
+    auto s = new Sensor(1, 4, 8);
+    double dd = 1.0 / 100000;
+    for (int i = 0; i < 100000; i++)
+    {
+        AA.Add_point(s->MakeRandom() * 6.0 - 4.0, s->MakeRandom() * 4.0 - 2.0, s->MakeRandom() * 4.0 - 2.0, dd);
+    }
+    AA.normir(1.0);
+    AA.print_1d(1);
+    exit(-1);*/
 
      //ТЕСТОВАЯ ЗАДАЧА
     //Setka* CC;
@@ -137,8 +197,26 @@ int main()
     SS->TVD_prepare();
     SS->Proverka();
 
-    SS->Print_for_Igor();
-    exit(-1);
+    // Подготовим функции распределения
+
+    double xx, yy;
+    SS->All_Cells[35]->Get_Center(xx, yy);
+    cout << "35 point   " << xx << " " << yy << endl;
+
+    auto asd = new Dist_func(30, 30, 30, -3.0, 5.0, 0.0, 5.0, 0.0, 5.0);
+    asd->call_name("S4_35");
+    SS->Dist_func_all.push_back(asd);
+    SS->All_Cells[35]->df_s4 = asd;
+    SS->All_Cells[35]->df_s4_bool = true;
+
+    asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+    asd->call_name("S3_35");
+    SS->Dist_func_all.push_back(asd);
+    SS->All_Cells[35]->df_s3 = asd;
+    SS->All_Cells[35]->df_s3_bool = true;
+
+    //SS->Print_for_Igor();
+    //exit(-1);
 
     //SS->Init_conditions();
     SS->TVD_prepare();
@@ -253,16 +331,23 @@ int main()
     }
 
 
-    SS->culc_PUI();
-
+    //SS->culc_PUI();
 
     //exit(-1);
-    //SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
-    //SS->MK_start_new();
-    
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    double start;
+    double end;
+    start = omp_get_wtime();
+
+    SS->MK_start_new();
+    //SS->MK_start_2_0();
+
+    double seconds = difftime(end, start);
+    end = omp_get_wtime();
+    printf("Work took %f seconds\n", end - start);
     //SS->Print_for_Igor();
 
-    SS->GD_prepare();
+    //SS->GD_prepare();
 
 
     //SS2 = new Setka();
@@ -329,7 +414,7 @@ int main()
     //delete SS2;
     //delete SS3;
 
-    SS->Download_Source_MK("source_vers18_16.txt");
+    //SS->Download_Source_MK("source_vers18_16.txt");
     //SS->Print_for_Igor();
     //SS->culc_K_Istok();
     //SS->Save_Source_MK("source_vers18_16.txt");
@@ -345,7 +430,7 @@ int main()
         SS->Go_5_komponent_MK(30000, false);
     }
 
-    for (int k = 0; k < 30; k++)  // 10
+    for (int k = 0; k < 0; k++)  // 10
     {
         cout << "Global step = " << k + 1 << endl;
         //SS->Go_stationary_5_komponent_inner_2(50000);
@@ -355,14 +440,22 @@ int main()
         SS->Go_5_komponent_MK(30000);
     }
 
-    SS->Save_Setka_ALL_ALPHA("vers18_22.txt");
-    //SS->Save_Source_MK("source_vers18_2.txt");
-    //SS->Print_cell2();
-    SS->Print_Gran("gran_vers18_22.txt");
+    SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
+    SS->Save_Source_MK("source_vers7_6.txt");
+    SS->Print_cell2();
+    SS->Print_Gran("gran_vers7_6.txt");
     SS->Print_Tecplot_MK();
     //SS->Print_Sourse();
     //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
     //SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
+
+    for (auto& i : SS->Dist_func_all)
+    {
+        i->print_1d(1);
+        i->print_1d(2);
+        i->print_1d(3);
+        i->print_3d();
+    }
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------

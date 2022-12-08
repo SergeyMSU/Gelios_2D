@@ -92,6 +92,7 @@ void Gran::renew(void)
 	this->cc = -this->aa * A->x - this->bb * A->y;
 }
 
+
 bool Gran::belong(const double& x, const double& y)
 {
 	if (this->type == Axis)

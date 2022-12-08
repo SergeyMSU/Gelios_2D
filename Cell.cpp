@@ -274,6 +274,8 @@ double Cell::Get_Volume_posle_rotate(const double& angle)
 
 }
 
+
+
 bool Cell::belong(const double& x, const double& y)
 {
 	// Попробуем быструю проверку

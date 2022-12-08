@@ -55,6 +55,7 @@ public:
     void Get_par_TVD_radial(Parametr& par, int i);
 
     bool belong(const double& x, const double& y);         // принадлежит ли точка полупространству грани
+
     bool belong_gran(const double& x, const double& y);         // принадлежит ли точка грани
 
     void renew(void); // Обновить значения a и b

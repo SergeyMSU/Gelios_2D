@@ -16,18 +16,7 @@ public:
 	double n1;
 	double n2;
 	double n3;
-	double dvig1 = 0.0;                   // Вектор сдвига для парных ячеек
-	double dvig2 = 0.0;                   // Вектор сдвига для парных ячеек
-	double dvig3 = 0.0;                   // Вектор сдвига для парных ячеек
-	double mo1 = 0.0;                   // Вектор сдвига для парных ячеек
-	double mo2 = 0.0;                   // Вектор сдвига для парных ячеек
-	double mo3 = 0.0;                   // Вектор сдвига для парных ячеек
-	double tension_x = 0.0;
-	double tension_y = 0.0;
-	double tension_z = 0.0;
-	double d_sosed;
 	int number = -1;
-	bool extern_boundary = false;            // Граничит ли ячейка с границей (внешней ил внутренней, не важно.
 
 	Couple(Cell* A1, Cell* A2, const double& dist);
 
