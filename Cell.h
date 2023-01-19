@@ -189,3 +189,5 @@ public:
 	void Calc_Sourse(void);  // ‘ункци€ вычисл€юща€ источники
 };
 
+
+

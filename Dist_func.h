@@ -17,6 +17,10 @@ public:
 	double c3;
 	double d3;
 	double a3;
+
+	double xxx = 0.0;        // В какой точке мерится функция распределения
+	double yyy = 0.0;
+
 	string name;
 
 	double*** V;
@@ -26,8 +30,11 @@ public:
 		const double& c2, const double& d2, //
 		const double& c3, const double& d3);
 	bool call_name(string name);         // Задать имя (лучше номер ячейки)
-	bool Add_point(const double& V1, const double& V2, const double& V3, const double& mu);
+	bool Add_point(const double& V1xyz, const double& V2xyz, const double& V3xyz, const double& y, const double& z, const double& mu);
 	bool normir(const double& ccc);
+
+	void v_cyl_to_v_xyz(double v_rho, double v_phi, double x, double y, double& vx, double& vy); //z направлен в upwind!!!!!!! x,y - остальные две оси
+	void v_cyl(double vx, double vy, double x, double y, double& w_rho, double& w_phi);
 
 	bool print_1d(int koord); // По какой координате срез
 

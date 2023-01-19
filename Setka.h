@@ -58,6 +58,10 @@ public:
 	double Mu[4][9];                  // Это и есть веса для каждой зоны (по радиусу) и каждого сорта атома (из четырёх)
 	double Mu_stat[4][9];      // Считаем статистику для весов
 	int I_stat[4][9];      // Считаем статистику для весов
+
+	double Mu_statistic[4][I_][J_];      // Считаем статистику для весов
+	double Mu_[4][I_][J_];      // Применяем статистику для весов
+	double SINKR[J_];            // Критические синусы для зон по углу по МОДУЛЮ
 	mutex m_m;
 	ofstream f_way;
 	int f_num;
@@ -223,6 +227,9 @@ public:
 	void MK_start_new(void);
 	void MK_start_2_0(void);
 
+	// БЛОК ДЛЯ РАБОТЫ НА MPI 
+	void MPI_MK_start(void);  // Версия Монте-Карло на MPI
+
 
 	Cell* Belong_point(int b, const double& x, const double& y);
 
@@ -232,30 +239,38 @@ public:
 		const double& mu_0, bool ExCh, int zone);
 	void Change_Velosity(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
 		const double& Vr, const double& Vthe, const double& Vphi, double& X, double& Y, double& Z, const double& cp);
+	
 	void Change_Velosity_Split(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
 		const double& Vr, const double& Vthe, const double& Vphi, vector <double>& Wr, vector <double>& Wthe,//
 		vector <double>& Wphi, vector <double>& mu_, const double& cp, const double& r, int I,//
 		const double& x_ex = 0.0, const double& y_ex = 0.0, const double& z_ex = 0.0);
+	
 	double w_c_v_s(const double& r, const double& v, int i);
+	
 	void Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//
 		 double KSI, double I_do, int area, const double& mu_start, int to_I , int iii); // Имитационный метод
+	
 	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1); // Смотри описание функции в коде функции
 	
-	void Fly_exchenge_Imit_Korol(MKmethod& MK, std::mt19937& gen, std::uniform_real_distribution<double>& dis, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+	void Fly_exchenge_Imit_Korol(MKmethod& MK, int& s1, int& s2, int& s3, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1);
 
 	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 		double I_do, int area, const double& mu_start);
 
-	void Fly_exchenge_Imit_Korol_2(MKmethod& MK, Sensor* sens, bool AZ[I_][J_],
-		double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
-		double I_do, int area, const double& mu_start);
+	void Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens, bool** AZ, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1);
+
+	void Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, int& s3, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
+		int area, bool ExCh, const double& mu_start, int to_I = 0, int to_J = 0, bool georaschep = true, int zon_stat = -1);
 
 	void Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, //
 		int area, bool ExCh, const double& mu_start, int to_I, int to_J, bool georaschep, int zon_stat = -1, bool pui__ = false);
 	int geo_zones(const double& r, const double& k = 1.0);
 	int alpha_zones(const double& x, const double& y);
+	double distination(const double& x0, const double& y0, const double& z0,
+		const double& Vx, const double& Vy, const double& Vz, const int& sort, int& to_iii, int& to_i, int& to_j);
 
 	void culc_K_Istok(void);
 	void proverka_Istok(int ni);
@@ -269,6 +284,11 @@ public:
 	double Velosity_2(const double& u, const double& cp);
 	double Velosity_3(const double& u, const double& cp);
 
+
+	// Тест скорости выполнения программы
+
+	void test_velosity(const double& a, const double& b);
+	void test_main(void);
 
 private:
 

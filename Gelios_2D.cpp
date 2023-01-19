@@ -8,13 +8,20 @@
 #include <fstream>
 #include <iterator>
 #include <omp.h>
+#include "Help.h"
 
+//extern inline void fff_velocity(const double& a, const double& b);
 
 //template<typename Random_type, typename Distribution_type>
 //auto Change(Random_type gen, Distribution_type dis)
 //{
 //    return (dis(gen));
 //}
+
+void fff_velocity_(const double& a, const double& b)
+{
+    double c = a + b + sin(a) + sin(b) + log(a * b);
+}
 
 
 int main()
@@ -24,43 +31,54 @@ int main()
 
     if (false)
     {
-        auto s = new Sensor(1, 4, 8);
+        Sensor* s = new Sensor(1, 4, 8);
+        Sensor& adv = *s;
 
-        std::random_device rd;
-        auto gen = new std::mt19937(rd());  // mt19937    mt19937
-        auto dis = new std::uniform_real_distribution<double> (0.0000001, 1.0);
+        //std::random_device rd;
+        //std::mt19937 gen(rd());  // mt19937    mt19937
+        //std::uniform_real_distribution<double> dis(0.0000001, 1.0);
 
         /*std::mt19937 gen2(rd());
         std::uniform_real_distribution<double> dis2(0.0, 1.0);*/
-        float aa;
-        float bb = 1.23;
-        float cc = 2324.2323;
-        int start = clock(); // засекаем время старта
+        //float aa;
+        //float bb = 1.23;
+        //float cc = 2324.2323;
 
+        double start;
+        double end;
+        start = omp_get_wtime();
+        
 
-#pragma omp parallel for
-        for (unsigned long int n = 0; n < 1000; ++n) {
-            std::mt19937 gen2(rd());
-            std::uniform_real_distribution<double> dis2(0.0, 1.0);
+//#pragma omp parallel for
+        for (unsigned long int n = 0; n < 2000; ++n) {
+            //std::mt19937 gen2(rd());
+            //std::uniform_real_distribution<double> dis2(0.0, 1.0);
 
             for (unsigned long int n2 = 0; n2 < 1000; ++n2) {
                 for (unsigned long int n3 = 0; n3 < 1000; ++n3) {
                     //aa = exp(sin(sqrt(bb * bb + cc * cc + n))) + log(bb * cc);
-                    aa = Change(gen2, dis2);
-                    //dis(gen2);
+                    //aa = Change(gen2, dis2);
+                    //dis(gen);
+                    //double a = 1.23423432;
+                    //double b = 2.23424123;
+                    //Change(a, b);
+                    adv.MakeRandom();
                     //aa = s->MakeRandom();
                 }
             }
         }
 
+        //cout << s->a1_ << " " << s->a2_ << " " << s->a3_ << endl;
+        //cout << adv.a1_ << " " << adv.a2_ << " " << adv.a3_ << endl;
 
-        cout << SIZE_MAX << endl;
+        //cout << SIZE_MAX << endl;
+        end = omp_get_wtime();
+        printf("Work took %f seconds\n", end - start);
 
-        int end = clock(); // засекаем время окончания
-        double t = ((double)(end - start) / CLOCKS_PER_SEC);
-        cout << t << "  sec" << endl;
         exit(-1);
     }
+
+   
 
    /* Dist_func AA = Dist_func(10, 10, 10, -1.0, 2.0, 0.0, 2.0, 0.0, 2.0);
     auto s = new Sensor(1, 4, 8);
@@ -199,22 +217,41 @@ int main()
 
     // Подготовим функции распределения
 
-    double xx, yy;
-    SS->All_Cells[35]->Get_Center(xx, yy);
-    cout << "35 point   " << xx << " " << yy << endl;
 
-    auto asd = new Dist_func(30, 30, 30, -3.0, 5.0, 0.0, 5.0, 0.0, 5.0);
-    asd->call_name("S4_35");
-    SS->Dist_func_all.push_back(asd);
-    SS->All_Cells[35]->df_s4 = asd;
-    SS->All_Cells[35]->df_s4_bool = true;
+    int ijk = 0;
+    string nmk;
+    for (auto& KL : SS->All_Cells)
+    {
+        double xx, yy;
+        KL->Get_Center(xx, yy);
+        //cout << "35 point   " << xx << " " << yy << endl;
 
-    asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
-    asd->call_name("S3_35");
-    SS->Dist_func_all.push_back(asd);
-    SS->All_Cells[35]->df_s3 = asd;
-    SS->All_Cells[35]->df_s3_bool = true;
+        double rrr = sqrt(xx * xx + yy * yy);
+        if (rrr < 75.0 / RR_ || rrr > 85.0 / RR_)
+        {
+            continue;
+        }
 
+        ijk++;
+        nmk = "S4_" + to_string(ijk);
+        auto asd = new Dist_func(30, 30, 30, -3.0, 5.0, 0.0, 5.0, 0.0, 5.0);
+        asd->xxx = xx;
+        asd->yyy = yy;
+        asd->call_name(nmk);
+        SS->Dist_func_all.push_back(asd);
+        KL->df_s4 = asd;
+        KL->df_s4_bool = true;
+
+        asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+        asd->xxx = xx;
+        asd->yyy = yy;
+        nmk = "S3_" + to_string(ijk);
+        asd->call_name(nmk);
+        SS->Dist_func_all.push_back(asd);
+        KL->df_s3 = asd;
+        KL->df_s3_bool = true;
+    }
+    cout << "Dist funk  ijk = " << ijk << endl;
     //SS->Print_for_Igor();
     //exit(-1);
 
@@ -336,9 +373,8 @@ int main()
     //exit(-1);
     SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     double start;
-    double end;
+    double end = 0.0;
     start = omp_get_wtime();
-
 
     SS->MK_start_new();
     //SS->MK_start_2_0();
@@ -452,9 +488,9 @@ int main()
 
     for (auto& i : SS->Dist_func_all)
     {
-        i->print_1d(1);
-        i->print_1d(2);
-        i->print_1d(3);
+        //i->print_1d(1);
+        //i->print_1d(2);
+        //i->print_1d(3);
         i->print_3d();
     }
 

@@ -34,64 +34,64 @@ void polar_provorot(const double& phi, double& u, double& v)
 //}
 
 
-double polar_angle(const double& x, const double& y)
-{
-	if (fabs(x) + fabs(y) < 0.000001/RR_)
-	{
-		return 0.0;
-	}
+//double polar_angle(const double& x, const double& y)
+//{
+//	if (fabs(x) + fabs(y) < 0.000001/RR_)
+//	{
+//		return 0.0;
+//	}
+//
+//	if (x < 0)
+//	{
+//		return atan(y / x) + 1.0 * pi_;
+//	}
+//	else if (x > 0 && y >= 0)
+//	{
+//		return atan(y / x);
+//	}
+//	else if (x > 0 && y < 0)
+//	{
+//		return atan(y / x) + 2.0 * pi_;
+//	}
+//	else if (y > 0 && x >= 0 && x <= 0)
+//	{
+//		return pi_ / 2.0;
+//	}
+//	else if (y < 0 && x >= 0 && x <= 0)
+//	{
+//		return  3.0 * pi_ / 2.0;
+//	}
+//	return 0.0;
+//}
 
-	if (x < 0)
-	{
-		return atan(y / x) + 1.0 * pi_;
-	}
-	else if (x > 0 && y >= 0)
-	{
-		return atan(y / x);
-	}
-	else if (x > 0 && y < 0)
-	{
-		return atan(y / x) + 2.0 * pi_;
-	}
-	else if (y > 0 && x >= 0 && x <= 0)
-	{
-		return pi_ / 2.0;
-	}
-	else if (y < 0 && x >= 0 && x <= 0)
-	{
-		return  3.0 * pi_ / 2.0;
-	}
-	return 0.0;
-}
+//double minmod(const double& x, const double& y)
+//{
+//	if (sign(x) + sign(y) == 0)
+//	{
+//		return 0.0;
+//	}
+//	else
+//	{
+//		return   ((sign(x) + sign(y)) / 2.0) * min(fabs(x), fabs(y));  ///minmod
+//		//return (2*x*y)/(x + y);   /// vanleer
+//	}
+//}
 
-double minmod(const double& x, const double& y)
-{
-	if (sign(x) + sign(y) == 0)
-	{
-		return 0.0;
-	}
-	else
-	{
-		return   ((sign(x) + sign(y)) / 2.0) * min(fabs(x), fabs(y));  ///minmod
-		//return (2*x*y)/(x + y);   /// vanleer
-	}
-}
-
-double sign(const double& x)
-{
-	if (x > 0)
-	{
-		return 1.0;
-	}
-	else if (x < 0)
-	{
-		return -1.0;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
+//double sign(const double& x)
+//{
+//	if (x > 0)
+//	{
+//		return 1.0;
+//	}
+//	else if (x < 0)
+//	{
+//		return -1.0;
+//	}
+//	else
+//	{
+//		return 0.0;
+//	}
+//}
 
 double linear(const double& x1, const double& t1, const double& x2, const double& t2, const double& x3, const double& t3, const double& y)
 // Главное значение с параметрами 2
@@ -120,18 +120,6 @@ double linear(const double& x1, const double& t1, const double& x2, const double
 }
 
 
-void dekard_skorost(const double& x, const double& y, const double& z,
-	const double& Vr, const double& Vphi, const double& Vtheta, double& Vx,
-	double& Vy, double& Vz)
-{
-	double r_2 = sqrt(x * x + y * y + z * z);
-	double the_2 = acos(z / r_2);
-	double phi_2 = polar_angle(x, y);
-
-	Vx = Vr * sin(the_2) * cos(phi_2) + Vtheta * cos(the_2) * cos(phi_2) - Vphi * sin(phi_2);
-	Vy = Vr * sin(the_2) * sin(phi_2) + Vtheta * cos(the_2) * sin(phi_2) + Vphi * cos(phi_2);
-	Vz = Vr * cos(the_2) - Vtheta * sin(the_2);
-}
 
 void dekard_skorost2(double r2, double the_2, double phi_2, double Vr, double Vphi, double Vtheta, double& Vx, double& Vy, double& Vz)
 {
@@ -140,17 +128,17 @@ void dekard_skorost2(double r2, double the_2, double phi_2, double Vr, double Vp
 	Vz = Vr * cos(the_2) - Vtheta * sin(the_2);
 }
 
-void spherical_skorost(const double& x, const double& y, const double& z, const double& Vx,//
-	const double& Vy, const double& Vz, double& Vr, double& Vphi, double& Vtheta)
-{
-	double r_1 = sqrt(x * x + y * y + z * z);
-	double the_1 = acos(z / r_1);
-	double phi_1 = polar_angle(x, y);
-
-	Vr = Vx * sin(the_1) * cos(phi_1) + Vy * sin(the_1) * sin(phi_1) + Vz * cos(the_1);
-	Vtheta = Vx * cos(the_1) * cos(phi_1) + Vy * cos(the_1) * sin(phi_1) - Vz * sin(the_1);
-	Vphi = -Vx * sin(phi_1) + Vy * cos(phi_1);
-}
+//void spherical_skorost(const double& x, const double& y, const double& z, const double& Vx,//
+//	const double& Vy, const double& Vz, double& Vr, double& Vphi, double& Vtheta)
+//{
+//	double r_1 = sqrt(x * x + y * y + z * z);
+//	double the_1 = acos(z / r_1);
+//	double phi_1 = polar_angle(x, y);
+//
+//	Vr = Vx * sin(the_1) * cos(phi_1) + Vy * sin(the_1) * sin(phi_1) + Vz * cos(the_1);
+//	Vtheta = Vx * cos(the_1) * cos(phi_1) + Vy * cos(the_1) * sin(phi_1) - Vz * sin(the_1);
+//	Vphi = -Vx * sin(phi_1) + Vy * cos(phi_1);
+//}
 
 
 double Godunov_squere_rad(const double& x1, const double& r1, const double& x2, const double& r2,//
@@ -171,7 +159,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 // Функция для проверки скорости работы датчиков, если их положить на регистр.
 // для этого необходимо, чтобы функция была в том же файле, откуда её вызывают
-double Change(std::mt19937& gen, std::uniform_real_distribution<double>& dis)
+void Change(const double& a, const double& b)
 {
-	return ((dis)(gen));
+	double c = a + b + sin(a) + sin(b) + log(a * b);
 }
