@@ -60,6 +60,7 @@
 #include <fstream>
 #include <math.h>
 #include <algorithm>
+#include "mpi.h"
 
 
 inline double sign(const double& x);

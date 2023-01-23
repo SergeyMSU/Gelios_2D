@@ -57,18 +57,17 @@ Dist_func::Dist_func(const unsigned short& a1, const unsigned short& a2, const u
 	this->a3 = pow(this->d3 + 1.0, 2.0 / this->n3);
 }
 
-
 void Dist_func::v_cyl_to_v_xyz(double v_rho, double v_phi, double x, double y, double& vx, double& vy) {
 	double phi = atan2(y, x);
 	vx = cos(phi) * v_rho - sin(phi) * v_phi;
 	vy = sin(phi) * v_rho + cos(phi) * v_phi;
+
 }
-
-
 void Dist_func::v_cyl(double vx, double vy, double x, double y, double& w_rho, double& w_phi) {
 	double phi = atan2(y, x);
-	w_rho = cos(phi) * vx + sin(phi) * vy;
-	w_phi = -sin(phi) * vx + cos(phi) * vy;
+	w_rho = cos(phi) * x + sin(phi) * y;
+	w_phi = -sin(phi) * x + cos(phi) * y;
+
 
 }
 
@@ -79,14 +78,13 @@ bool Dist_func::call_name(std::string name)
 	return true;
 }
 
-
 bool Dist_func::Add_point(const double& V1xyz, const double& V2xyz, const double& V3xyz, const double& y, const double& z, const double& mu)
 //скорости и координаты в твоей СК!
 {
 	double V1 = V1xyz;
 	double V2 = 0;
 	double V3 = 0;
-	v_cyl(V2xyz, V3xyz, y, z, V2, V3);
+	v_cyl(V2xyz, V3xyz, z, y, V2, V3);
 
 	// Функция добавляет точку в массив
 	//std::cout << "w_cyl " << V1 << " "<< V2 << " " << V3 << std::endl;
@@ -176,7 +174,6 @@ bool Dist_func::normir(const double& ccc)
 					r3 = -(this->c3 - 1.0 + pow(this->a3, k + 1 - this->n3 / 2));
 				}
 
-				//double S = fabs((r1 * r1 - l1 * l1) * (r2 - l2) * (r3 - l3) / 2);
 				double S = fabs((r1 - l1) * (r2 * r2 - l2 * l2) * (r3 - l3) / 2);
 				this->V[i][j][k] = this->V[i][j][k] / S;
 			}
@@ -193,7 +190,6 @@ bool Dist_func::print_1d(int koord)
 	std::string name_f = std::to_string(koord) + "_Dist_func_" + this->name + ".txt";
 	fout.open(name_f);
 
-	fout << xxx << " " << yyy << endl;
 	fout << "TITLE = \"HP\"  VARIABLES = \"v\", \"f\"," << "ZONE T = \"HP\"" << std::endl;
 
 	if (koord == 1)
@@ -314,7 +310,6 @@ bool Dist_func::print_3d(void)
 	std::string name_f = "3D_Dist_func_" + this->name + ".txt";
 	fout.open(name_f);
 
-	fout << xxx << " " << yyy << endl;
 	fout << "TITLE = \"HP\"  VARIABLES = \"vz\", \"vr\", \"vphi\", \"f\"," << "ZONE T = \"HP\"" << std::endl;
 
 

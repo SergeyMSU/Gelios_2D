@@ -228,7 +228,7 @@ public:
 	void MK_start_2_0(void);
 
 	// БЛОК ДЛЯ РАБОТЫ НА MPI 
-	void MPI_MK_start(void);  // Версия Монте-Карло на MPI
+	void MPI_MK_start(int argc, char** argv);  // Версия Монте-Карло на MPI
 
 
 	Cell* Belong_point(int b, const double& x, const double& y);

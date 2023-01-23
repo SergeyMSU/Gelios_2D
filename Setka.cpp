@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include "mpi.h"
 
 using namespace std;
 
@@ -1304,7 +1305,7 @@ void Setka::TVD_prepare(void)
 	double a, b, N;
 	Cell* A = nullptr;
 	Gran* B = nullptr;
-	cout << "Setka.cpp    " << "TVD  prepare" << endl;
+	//cout << "Setka.cpp    " << "TVD  prepare" << endl;
 
 	// Находим Sosed_up для этой грани
 	for (auto& i : this->All_Gran)
@@ -1437,7 +1438,7 @@ void Setka::TVD_prepare(void)
 		}
 	}
 
-	cout << "Setka.cpp    " << "TVD  prepare  end" << endl;
+	//cout << "Setka.cpp    " << "TVD  prepare  end" << endl;
 
 	// Подготовим всё для переинтерполяции источников
 	for (auto& i : this->All_Cells)
@@ -1492,7 +1493,7 @@ void Setka::TVD_prepare(void)
 		}
 	}
 
-	cout << "Setka.cpp    " << "TVD  prepare  end 2" << endl;
+	//cout << "Setka.cpp    " << "TVD  prepare  end 2" << endl;
 }
 
 void Setka::Print_TVD(void)
@@ -2238,7 +2239,7 @@ void Setka::Print_Tecplot_MK(void)
 
 void Setka::Proverka(void)
 {
-	cout << "Setka.cpp    " << "Proverka  Start" << endl;
+	//cout << "Setka.cpp    " << "Proverka  Start" << endl;
 	// Выписываем ячейки у которых не 4 соседа - особые
 	for (auto& i : this->All_Cells)  
 	{
@@ -2276,7 +2277,7 @@ void Setka::Proverka(void)
 
 	}
 
-	cout << "Setka.cpp    " << "Proverka TVD" << endl;
+	//cout << "Setka.cpp    " << "Proverka TVD" << endl;
 
 	if (false)
 	{
@@ -2311,7 +2312,7 @@ void Setka::Proverka(void)
 		}
 	}
 
-	cout << "Setka.cpp    " << "Proverka TVD 2" << endl;
+	//cout << "Setka.cpp    " << "Proverka TVD 2" << endl;
 
 	if (false)
 	{
@@ -2330,7 +2331,7 @@ void Setka::Proverka(void)
 		}
 	}
 	
-	cout << "Setka.cpp    " << "Proverka TVD  3" << endl;
+	//cout << "Setka.cpp    " << "Proverka TVD  3" << endl;
 
 	// Проверяем расположение точек в ячейке по кругу!  (как грани расположены тоже надо будет проверить)
 	for (auto& i : this->All_Cells)
@@ -2361,7 +2362,7 @@ void Setka::Proverka(void)
 	}
 
 
-	cout << "Setka.cpp    " << "Proverka  End" << endl;
+	//cout << "Setka.cpp    " << "Proverka  End" << endl;
 }
 
 void Setka::Copy(Setka* S)
@@ -2536,8 +2537,6 @@ void Setka::Save_Source_MK(string name)
 				<< i->par[0].H_uu[j] << " " << i->par[0].H_uv[j] << " " << i->par[0].H_vv[j] << " " << i->par[0].H_uuu[j] <<  endl;
 		}
 		fout << i->par[0].k_u << " " << i->par[0].k_v << " " << i->par[0].k_T << endl;
-
-
 	}
 
 	fout.close();
@@ -11696,9 +11695,9 @@ void Setka::M_K_prepare(void)
 
 	// Блок загрузки датчиков случайных чисел
 	ifstream fin2;
-	fin2.open("my_dat_822.txt");
+	fin2.open("rnd_my.txt");
 	double d, a1, b1, c;
-	for (int i = 0; i < 822; i++)
+	for (int i = 0; i < 1021; i++)
 	{
 		fin2 >> a1 >> b1 >> c;
 		auto s = new Sensor(a1, b1, c);
@@ -11728,10 +11727,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
-	this->Number2 = 411 * 30; // * 30; // * 30; // 30; // 30;
-	this->Number3 = 411 * 5; // * 5; // * 10; // 10;
-	this->Number4 = 411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	this->Number1 = 280 * 10; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
+	this->Number2 = 280; //411 * 30; // * 30; // * 30; // 30; // 30;
+	this->Number3 = 280; //411 * 5; // * 5; // * 10; // 10;
+	this->Number4 = 280 * 10; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -11860,6 +11859,7 @@ void Setka::M_K_prepare(void)
 	Mu[2][7] = Mu[3][7] * ss3 * 2.0;
 	Mu[2][8] = Mu[3][8] * ss3 * 2.0;
 
+	return;
 
 	fin2.open("stat_do.txt");
 	int x1;
@@ -11871,23 +11871,27 @@ void Setka::M_K_prepare(void)
 	koeff[2] = 0.5;
 	koeff[3] = 0.5;
 
-	for (size_t k = 0; k < 4; k++)
+
+	if (false)
 	{
-		for (size_t i = 0; i < I_; i++)
+		for (size_t k = 0; k < 4; k++)
 		{
-			for (size_t j = 0; j < J_; j++)
+			for (size_t i = 0; i < I_; i++)
 			{
-				fin2 >> x1 >> x1 >> x1 >> cc;
-				if (k != 3)
+				for (size_t j = 0; j < J_; j++)
 				{
-					Mu_[k][i][j] = max(cc * koeff[k], 0.00001); // * 40.0
+					fin2 >> x1 >> x1 >> x1 >> cc;
+					if (k != 3)
+					{
+						Mu_[k][i][j] = max(cc * koeff[k], 0.00001); // * 40.0
+					}
+					else
+					{
+						Mu_[k][i][j] = max(cc * koeff[k], 0.00001);
+					}
+					//Mu_[k][i][j] = Mu_[k][i][j] * 100;
+					// << Mu_[k][i][j] << endl;
 				}
-				else
-				{
-					Mu_[k][i][j] = max(cc * koeff[k], 0.00001);
-				}
-				//Mu_[k][i][j] = Mu_[k][i][j] * 100;
-				cout << Mu_[k][i][j] << endl;
 			}
 		}
 	}
@@ -12212,82 +12216,86 @@ void Setka::culc_PUI(void)
 	// Считаем всякие полезные интеграллы для последующих перезарядок
 	if (false)
 	{
-#pragma omp parallel for
-		for (auto& i : this->All_Cells)
-		{
-			double L, R;
-			double f1, f2;
-			double ff1, ff2;
-			double fff1, fff2;
-			double d;
-			int n1 = 100;
-			double dthe = pi_ / (n1 - 1);
 
-			if (i->pui_ == true)
+
+
+//#pragma omp parallel for
+			for (auto& i : this->All_Cells)
 			{
-				i->nu_pui.resize(i->i_pui);
-				i->nu2_pui.resize(i->i_pui);
-				i->nu3_pui.resize(i->i_pui);
-				if (i->number % 55 == 0)
-				{
-					cout << i->number << endl;
-				}
+				double L, R;
+				double f1, f2;
+				double ff1, ff2;
+				double fff1, fff2;
+				double d;
+				int n1 = 100;
+				double dthe = pi_ / (n1 - 1);
 
-				vector <double> pui_I1;
-				vector <double> pui_I2;
-				vector <double> pui_I3;
-
-				for (int k = 0; k < k_Igor; k++)
+				if (i->pui_ == true)
 				{
-					double LL = L_Igor / (k_Igor - 1) * k;
-					double Int1 = 0.0;
-					double Int2 = 0.0;
-					double Int3 = 0.0;
-					int kj = 0;
-					for (int ik = 0; ik < this->Nw - 1; ik++)
+					i->nu_pui.resize(i->i_pui);
+					i->nu2_pui.resize(i->i_pui);
+					i->nu3_pui.resize(i->i_pui);
+					if (i->number % 55 == 0)
 					{
-						L = this->get_w_init(ik);
-						R = this->get_w_init(ik + 1);
-						if (R > i->Wmax)
+						cout << i->number << endl;
+					}
+
+					vector <double> pui_I1;
+					vector <double> pui_I2;
+					vector <double> pui_I3;
+
+					for (int k = 0; k < k_Igor; k++)
+					{
+						double LL = L_Igor / (k_Igor - 1) * k;
+						double Int1 = 0.0;
+						double Int2 = 0.0;
+						double Int3 = 0.0;
+						int kj = 0;
+						for (int ik = 0; ik < this->Nw - 1; ik++)
 						{
-							break;
-						}
-						for (int ij = 0; ij < n1; ij++)
-						{
-							double the = dthe * ij;
-							d = sqrt(L * L + LL * LL - 2.0 * L * LL * cos(the));
-							f1 = i->fpui[ik] * d * sigma(d) * L * L * sin(the);
-							ff1 = i->fpui[ik] * d * sigma(d) * L * L * sin(the) * (LL - L * cos(the));
-							fff1 = i->fpui[ik] * d * d * d * sigma(d) * L * L * sin(the);
-							d = sqrt(R * R + LL * LL - 2.0 * R * LL * cos(the));
-							f2 = i->fpui[ik + 1] * d * sigma(d) * R * R * sin(the);
-							ff2 = i->fpui[ik + 1] * d * sigma(d) * R * R * sin(the) * (LL - R * cos(the));
-							fff2 = i->fpui[ik + 1] * d * d * d * sigma(d) * R * R * sin(the);
-							Int1 = Int1 + 0.5 * (R - L) * (f2 + f1) * dthe;
-							Int2 = Int2 + 0.5 * (R - L) * (ff2 + ff1) * dthe;
-							Int3 = Int3 + 0.5 * (R - L) * (fff2 + fff1) * dthe;
-						}
-						if (R >= i->Wmax_sort[kj])
-						{
-							i->nu_pui[kj].push_back(Int1 * 2.0 * pi_);
-							i->nu2_pui[kj].push_back(Int2 * 2.0 * pi_);
-							i->nu3_pui[kj].push_back(Int3 * 2.0 * pi_);
-							Int1 = 0.0;
-							Int2 = 0.0;
-							Int3 = 0.0;
-							kj++;
+							L = this->get_w_init(ik);
+							R = this->get_w_init(ik + 1);
+							if (R > i->Wmax)
+							{
+								break;
+							}
+							for (int ij = 0; ij < n1; ij++)
+							{
+								double the = dthe * ij;
+								d = sqrt(L * L + LL * LL - 2.0 * L * LL * cos(the));
+								f1 = i->fpui[ik] * d * sigma(d) * L * L * sin(the);
+								ff1 = i->fpui[ik] * d * sigma(d) * L * L * sin(the) * (LL - L * cos(the));
+								fff1 = i->fpui[ik] * d * d * d * sigma(d) * L * L * sin(the);
+								d = sqrt(R * R + LL * LL - 2.0 * R * LL * cos(the));
+								f2 = i->fpui[ik + 1] * d * sigma(d) * R * R * sin(the);
+								ff2 = i->fpui[ik + 1] * d * sigma(d) * R * R * sin(the) * (LL - R * cos(the));
+								fff2 = i->fpui[ik + 1] * d * d * d * sigma(d) * R * R * sin(the);
+								Int1 = Int1 + 0.5 * (R - L) * (f2 + f1) * dthe;
+								Int2 = Int2 + 0.5 * (R - L) * (ff2 + ff1) * dthe;
+								Int3 = Int3 + 0.5 * (R - L) * (fff2 + fff1) * dthe;
+							}
+							if (R >= i->Wmax_sort[kj])
+							{
+								i->nu_pui[kj].push_back(Int1 * 2.0 * pi_);
+								i->nu2_pui[kj].push_back(Int2 * 2.0 * pi_);
+								i->nu3_pui[kj].push_back(Int3 * 2.0 * pi_);
+								Int1 = 0.0;
+								Int2 = 0.0;
+								Int3 = 0.0;
+								kj++;
+							}
 						}
 					}
+					//cout << IM << endl;
 				}
-				//cout << IM << endl;
 			}
-		}
 
-		/*for (int ik = 0; ik < this->All_Cells[23]->i_pui; ik++)
-		{
-			cout << this->All_Cells[23]->nu_pui[ik][19] << " " << this->All_Cells[23]->nu2_pui[ik][19] << " " << this->All_Cells[23]->nu3_pui[ik][19] << endl;
-		}*/
+			/*for (int ik = 0; ik < this->All_Cells[23]->i_pui; ik++)
+			{
+				cout << this->All_Cells[23]->nu_pui[ik][19] << " " << this->All_Cells[23]->nu2_pui[ik][19] << " " << this->All_Cells[23]->nu3_pui[ik][19] << endl;
+			}*/
 
+		
 	}
 }
 
@@ -12955,16 +12963,16 @@ void Setka::MK_start_new(void)
 						}
 
 						bool** BZ = new bool*[I_];
-						for (size_t i = 0; i < I_; i++)
+						for (size_t i2 = 0; i2 < I_; i2++)
 						{
-							BZ[i] = new bool[J_];
+							BZ[i2] = new bool[J_];
 						}
 
-						for (size_t i = 0; i < I_; i++)
+						for (size_t i2 = 0; i2 < I_; i2++)
 						{
-							for (size_t j = 0; j < J_; j++)
+							for (size_t j2 = 0; j2 < J_; j2++)
 							{
-								BZ[i][j] = false;
+								BZ[i2][j2] = false;
 							}
 						}
 
@@ -13446,9 +13454,957 @@ void Setka::MK_start_new(void)
 	}
 }
 
-void Setka::MPI_MK_start(void)
+void Setka::MPI_MK_start(int argc, char** argv)
 {
+	cout << "START  MPI_MK_start" << endl;
+	mutex mut_1;
+	double Y = fabs(Velosity_inf);
+	int st = 1;
+	int rank = 0, size = 0;
+	int ierr;
 
+	MPI_Init(&argc, &argv);
+
+
+	MPI_Comm_size(MPI_COMM_WORLD, &size);               // Получить общее число процессов - компов
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);               // Получить номер текущего процесса - компа
+
+	cout << "START  MPI_MK_start  from  " << rank << endl;
+
+	omp_set_num_threads(28);
+
+#pragma omp parallel for // num_threads(12)
+	for (int index = 0; index < 280; index++)
+	{
+		double A1 = 1.0 + (1.0 + 1.0 / (2.0 * kv(Y))) * erf(Y) + exp(-kv(Y)) / (Y * sqrtpi_);
+		double A2 = 0.0; // Нужно задать после нахождения угла theta
+		double mu1, mu2, mu3, mu4;
+		double Vx, Vy, Vz;
+		mu1 = ((this->sqv_1) / this->sum_s) * (1.0 * this->AllNumber / this->Number1);
+		mu2 = ((this->sqv_2) / this->sum_s) * (1.0 * this->AllNumber / this->Number2);
+		mu3 = ((this->sqv_3) / this->sum_s) * (1.0 * this->AllNumber / this->Number3);
+		mu4 = ((this->sqv_4) / this->sum_s) * (1.0 * this->AllNumber / this->Number4);
+		int smax = omp_get_num_procs();
+		Sensor* sens1 = Sensors[(28 * rank + omp_get_thread_num()) % 1021];
+		Sensor* sens2 = Sensors[(50 * omp_get_thread_num() + rank) % 1021];
+		//Sensor* sens1 = Sensors[(rank) % 1021];
+		//Sensor* sens2 = Sensors[(rank + 499) % 1021];
+		MKmethod MK = MKmethod();
+		int s1 = sens2->a1_;
+		int s2 = sens2->a2_;
+		int s3 = sens2->a3_;
+
+		mut_1.lock();
+		cout << "Setka.cpp    " << "Mk_start_new   " << st << " potok  is  28;  index = " << index << "  nomer = " << omp_get_thread_num() << endl;
+		st++;
+		mut_1.unlock();
+
+		double x, y, z;
+		double ksi1, ksi2, ksi3, ksi4, ksi5, ksi6, ksi7;
+		double phi, Vphi, Vr;
+		double a, b, c;
+		double r;
+
+		for (int ii = 0; ii < Number1 / 280; ii++)  //  Вылет с полусферы   Number1 / 135
+		{
+			if (true)
+			{
+				vector <double> mu(I_ + 1);
+				vector <double> Wt(I_ + 1);
+				vector <double> Wp(I_ + 1);
+				vector <double> Wr(I_ + 1);
+				vector <double> X(I_ + 1);
+				double phi, sin_;
+				//bool bb = MK.Init_Parametrs(sens1, mu, Wt, Wp, Wr, X);
+				//cout << "Setka.cpp    " << "Mk_start_new   " << "A " << endl;
+				bool bb = MK.Init_Parametrs(sens1, mu, Wt, Wp, Wr, X);
+				//bb = true;
+				//mu[I_] = 1.0;
+				//cout << "Setka.cpp    " << "Mk_start_new   " << "B " << endl;
+
+				for (int i = 0; i <= I_; i++) // I_  от 0 было
+				{
+					sin_ = sqrt(1.0 - kv(X[i]));
+					x = (Rmax_ - 3.0 / RR_) * X[i];
+					phi = 2.0 * pi_ * sens1->MakeRandom();
+					y = (Rmax_ - 3.0 / RR_) * sin_ * cos(phi);
+					z = (Rmax_ - 3.0 / RR_) * sin_ * sin(phi);
+					Cell* Point = Belong_point(1, x, sqrt(kv(z) + kv(y)));
+					//dekard_skorost2(Rmax_, acos(X[i]), phi, Wr[i], Wp[i], Wt[i], Vy, Vz, Vx);
+					dekard_skorost(y, z, x, Wr[i], Wp[i], Wt[i], Vy, Vz, Vx);
+
+					//Fly_exchenge_Imit_Korol(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], i);
+
+					if (i != I_ || bb == true)
+					{
+						double time_do_peregel, peregel;
+						int ii_z, ii_alp;
+						if (Vx * x + Vy * y + Vz * z < 0.0)
+						{
+							time_do_peregel = (-Vx * x - Vy * y - Vz * z) / kvv(Vx, Vy, Vz);
+							peregel = sqrt(kvv(x + Vx * time_do_peregel, y + Vy * time_do_peregel, z + Vz * time_do_peregel));
+							ii_z = this->geo_zones(peregel);                     // Номер зоны перегелия атома
+							ii_alp = alpha_zones(x + Vx * time_do_peregel, sqrt(kvv(y + Vy * time_do_peregel, z + Vz * time_do_peregel, 0.0)));
+						}
+						else
+						{
+							ii_z = I_;
+							ii_alp = alpha_zones(x, sqrt(kvv(y, z, 0.0)));
+						}
+
+						/*bool** BZ = new bool* [I_];
+						for (size_t i2 = 0; i2 < I_; i2++)
+						{
+							BZ[i2] = new bool[J_];
+						}
+
+						for (size_t i2 = 0; i2 < I_; i2++)
+						{
+							for (size_t j2 = 0; j2 < J_; j2++)
+							{
+								BZ[i2][j2] = false;
+							}
+						}*/
+
+						//cout << "A" << endl;
+						//Fly_exchenge_Imit_Korol(MK, sens2, BZ, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
+
+						//Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
+						//	3, false, mu1 * mu[i], ii_z, ii_alp, true);
+
+						Fly_exchenge_Imit_Korol(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
+
+
+						//Fly_exchenge_Imit_Korol_PUI(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1, ii_z, ii_alp, true);  // mu1 * mu[i]
+
+						//Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
+						//	Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
+
+						//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
+
+						/*for (int i = 0; i < I_; ++i) {
+							delete[] BZ[i];
+						}
+						delete[] BZ;*/
+
+					}
+				}
+			}
+
+		}
+		for (int ii = 0; ii < Number2 / 280; ii++)  //  Вылет сверху 
+		{
+			//cout << "Setka.cpp    " << "Mk_start_new   " << "A" << endl;
+			ksi1 = sens1->MakeRandom();
+			ksi2 = sens1->MakeRandom();
+			ksi3 = sens1->MakeRandom();
+			ksi4 = sens1->MakeRandom();
+			ksi5 = sens1->MakeRandom();
+
+			double ll = (Left_ + 2.0 / RR_);
+			double rr = -0.5 / RR_;
+			x = ll + ksi1 * (rr - ll);
+			phi = ksi2 * 2.0 * pi_;
+			Vphi = cos(2.0 * pi_ * ksi3) * sqrt(-log(1.0 - ksi4));
+			Vx = Velosity_inf + sin(2.0 * pi_ * ksi3) * sqrt(-log(1.0 - ksi4));
+			Vr = -sqrt(-log(ksi5));
+			y = (R5_ - 2.0 / RR_) * cos(phi);
+			z = (R5_ - 2.0 / RR_) * sin(phi);
+
+			Cell* Point = Belong_point(2, x, sqrt(kv(z) + kv(y)));  // Находит ячейку, которой принадлежит точка
+			//Fly_exchenge_Imit_Korol(sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
+			//	Point, mu2, 3, false, mu2, I_ - 1);
+
+			//Fly_exchenge_Imit_Korol(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
+			//	Point, mu2, 3, false, mu2, I_ - 1, J_ - 1, false);
+
+			Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
+				Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2);
+
+			//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
+			//	Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2, I_ - 1, ii);
+		}
+		for (int ii = 0; ii < Number3 / 280; ii++)  //  Вылет сзади
+		{
+			//cout << "Setka.cpp    " << "Mk_start_new   " << "B" << endl;
+			Velosity_initial2(sens1, a, b, c);
+			ksi1 = sens1->MakeRandom();
+			ksi2 = sens1->MakeRandom();
+
+			r = sqrt(ksi1 * (R5_ - 2.0 / RR_) * (R5_ - 2.0 / RR_));
+			phi = ksi2 * 2.0 * pi_;
+			y = r * cos(phi);
+			z = r * sin(phi);
+
+			Cell* Point = Belong_point(3, Left_ + 2.0 / RR_, sqrt(kv(z) + kv(y)));  // Находит ячейку, которой принадлежит точка
+			//cout << "Setka.cpp    " << "Mk_start_new   " << "Start" << endl;
+			//Fly_exchenge_Imit_Korol(sens2, Left_ + 2.0, y, z, a, b, c, Point, mu3, 3, false, mu3, I_ - 1);
+
+			//Fly_exchenge_Imit_Korol_PUI(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c, Point, mu3, 3, false, mu3, I_ - 1, J_ - 1, false);
+
+			//Fly_exchenge_Imit(MK, sens2, Left_ + 2.0/ RR_, y, z, a, b, c, Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, //
+			//	3, mu3, I_ - 1, ii);
+
+			Fly_exchenge_Imit_Korol_2(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c,//
+				Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu3);
+		}
+		for (int ii = 0; ii < Number4 / 280; ii++)  //Number4 / 411
+		{
+			double a, b, c;
+			Velosity_initial(sens1, a, b, c);
+			ksi1 = sens1->MakeRandom();
+			ksi2 = sens1->MakeRandom();
+
+			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ - 3.0 / RR_)) + kv(Rmax_ - 3.0 / RR_));  // 0.1
+			phi = ksi2 * 2.0 * pi_;
+			y = r * cos(phi);
+			z = r * sin(phi);
+
+			Cell* Point = Belong_point(4, -0.5 / RR_, sqrt(kv(z) + kv(y)));
+
+			//Fly_exchenge_Imit_Korol(MK, sens2, -0.1/RR_, y, z, a, b, c, Point, mu4, 3, false, mu4, I_ - 1, J_ - 1, true);
+
+			Fly_exchenge_Imit_Korol_2(MK, sens2, -0.5 / RR_, y, z, a, b, c, Point, mu4, -log(1.0 - sens1->MakeRandom()), //
+				0.0, 3, mu4);
+			//Fly_exchenge_Imit(MK, sens2, -0.01 / RR_, y, z, a, b, c, Point, mu4, -log(1.0 - sens1->MakeRandom()), 0.0, //
+			//	3, mu4, I_ - 1, ii);
+		}
+		
+}
+	
+		MPI_Barrier(MPI_COMM_WORLD);
+		cout << "END calculate " << rank << endl;
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		double* all_;
+
+		if (rank == 0)
+		{
+			all_ = (double*)malloc(size * this->All_Cells.size() * sizeof(double));
+		}
+
+		double* my_send;
+		my_send = (double*)malloc(this->All_Cells.size() * sizeof(double));
+
+
+		// Пересылка данных
+		if (true)  
+		{
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].I_u;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].I_u = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].I_u = k->par[0].I_u + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].I_v;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].I_v = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].I_v = k->par[0].I_v + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].I_T;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].I_T = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].I_T = k->par[0].I_T + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].II_u;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].II_u = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].II_u = k->par[0].II_u + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].II_v;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].II_v = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].II_v = k->par[0].II_v + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].II_T;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].II_T = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].II_T = k->par[0].II_T + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].F_n;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].F_n = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].F_n = k->par[0].F_n + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].F_n;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].F_n = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].F_n = k->par[0].F_n + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].F_u;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].F_u = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].F_u = k->par[0].F_u + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].F_v;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].F_v = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].F_v = k->par[0].F_v + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+			{
+				auto k = this->All_Cells[ikld];
+				my_send[ikld] = k->par[0].F_T;
+			}
+
+			MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+				this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			if (rank == 0)
+			{
+				for (int ik = 0; ik < this->All_Cells.size(); ik++)
+				{
+					auto k = this->All_Cells[ik];
+					k->par[0].F_T = 0.0;
+					for (int ikld = 0; ikld < size; ikld++)
+					{
+						k->par[0].F_T = k->par[0].F_T + all_[ik + ikld * this->All_Cells.size()];
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (int i = 0; i < pop_atom; i++)
+			{
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_u[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_u[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_u[i] = k->par[0].H_u[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_v[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_v[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_v[i] = k->par[0].H_v[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_T[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_T[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_T[i] = k->par[0].H_T[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_uu[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_uu[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_uu[i] = k->par[0].H_uu[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_vv[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_vv[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_vv[i] = k->par[0].H_vv[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_uv[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_uv[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_uv[i] = k->par[0].H_uv[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+				////////////////////////////////////////////////////////////////////////////////////////////////////////
+				for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+				{
+					auto k = this->All_Cells[ikld];
+					my_send[ikld] = k->par[0].H_uuu[i];
+				}
+
+				MPI_Gather(my_send, this->All_Cells.size(), MPI_DOUBLE, all_,
+					this->All_Cells.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				if (rank == 0)
+				{
+					for (int ik = 0; ik < this->All_Cells.size(); ik++)
+					{
+						auto k = this->All_Cells[ik];
+						k->par[0].H_uuu[i] = 0.0;
+						for (int ikld = 0; ikld < size; ikld++)
+						{
+							k->par[0].H_uuu[i] = k->par[0].H_uuu[i] + all_[ik + ikld * this->All_Cells.size()];
+						}
+					}
+				}
+			}
+
+
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		cout << "END peresilka " << rank << endl;
+		MPI_Barrier(MPI_COMM_WORLD);
+		
+		for (int ikld = 0; ikld < this->All_Cells.size(); ikld++)
+		{
+			auto k = this->All_Cells[ikld];
+
+			// Соберём данные со всех компов
+			if (false)
+			{
+				if (false)//(k->df_s4_bool == true)
+				{
+					for (int i = 0; i < k->df_s4->n1; i++)
+					{
+						for (int j = 0; j < k->df_s4->n2; j++)
+						{
+							for (int jj = 0; jj < k->df_s4->n3; jj++)
+							{
+								MPI_Gather(&k->df_s4->V[i, j, jj], 1, MPI_DOUBLE, all_,
+									1, MPI_DOUBLE, 0, MPI_COMM_WORLD);         // Собираем число a со всех процессов в Главный
+								MPI_Barrier(MPI_COMM_WORLD);
+								if (rank == 0)
+								{
+									k->df_s4->V[i][j][jj] = 0.0;
+									for (int ii = 0; ii < size; ii++)
+									{
+										k->df_s4->V[i][j][jj] = k->df_s4->V[i][j][jj] + all_[ii];
+									}
+								}
+							}
+						}
+					}
+				}
+
+				if (false)//(k->df_s3_bool == true)
+				{
+					for (int i = 0; i < k->df_s3->n1; i++)
+					{
+						for (int j = 0; j < k->df_s3->n2; j++)
+						{
+							for (int jj = 0; jj < k->df_s3->n3; jj++)
+							{
+								MPI_Gather(&k->df_s3->V[i, j, jj], 1, MPI_DOUBLE, all_,
+									1, MPI_DOUBLE, 0, MPI_COMM_WORLD);         // Собираем число a со всех процессов в Главный
+								MPI_Barrier(MPI_COMM_WORLD);
+								if (rank == 0)
+								{
+									k->df_s3->V[i][j][jj] = 0.0;
+									for (int ii = 0; ii < size; ii++)
+									{
+										k->df_s3->V[i][j][jj] = k->df_s3->V[i][j][jj] + all_[ii];
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+		
+			if (rank == 0)
+			{
+			//cout << "Hellow" <<  endl;
+			double no = (1.0 * AllNumber * size * k->Get_Volume_rotate(360.0));
+			//cout << "no = " << no << endl;
+
+			k->par[0].I_u = sum_s * k->par[0].I_u / no;
+			k->par[0].I_v = sum_s * k->par[0].I_v / no;
+			k->par[0].I_T = sum_s * k->par[0].I_T / no;
+
+			k->par[0].II_u = sum_s * k->par[0].II_u / no;
+			k->par[0].II_v = sum_s * k->par[0].II_v / no;
+			k->par[0].II_T = sum_s * k->par[0].II_T / no;
+
+
+
+			if (k->par[0].F_n > 0.00000001)
+			{
+				k->par[0].F_u = k->par[0].F_u / k->par[0].F_n;
+				k->par[0].F_v = k->par[0].F_v / k->par[0].F_n;
+				k->par[0].F_T = (2.0 / 3.0) * (k->par[0].F_T / k->par[0].F_n - kvv(k->par[0].F_u, k->par[0].F_v, 0.0));
+			}
+			else
+			{
+				k->par[0].F_n = 0.0;
+				k->par[0].F_u = 0.0;
+				k->par[0].F_v = 0.0;
+				k->par[0].F_T = 0.0;
+			}
+
+
+
+			if (k->par[0].F_n > 0.00000001)
+			{
+				for (int i = 0; i < pop_atom; i++)
+				{
+					if (k->par[0].H_n[i] > 0.00000001)
+					{
+						k->par[0].H_u[i] = k->par[0].H_u[i] / k->par[0].H_n[i];
+						k->par[0].H_v[i] = k->par[0].H_v[i] / k->par[0].H_n[i];
+						k->par[0].H_T[i] = (2.0 / 3.0) * (k->par[0].H_T[i] / k->par[0].H_n[i] - kvv(k->par[0].H_u[i], k->par[0].H_v[i], 0.0));
+						k->par[0].H_uu[i] = k->par[0].H_uu[i] / k->par[0].H_n[i] - k->par[0].H_u[i] * k->par[0].H_u[i];
+						k->par[0].H_vv[i] = k->par[0].H_vv[i] / k->par[0].H_n[i] - k->par[0].H_v[i] * k->par[0].H_v[i];
+						k->par[0].H_uv[i] = k->par[0].H_uv[i] / k->par[0].H_n[i] - k->par[0].H_u[i] * k->par[0].H_v[i];
+						k->par[0].H_uuu[i] = 2.0 * k->par[0].H_v[i] * k->par[0].H_v[i] * k->par[0].H_v[i] + //
+							3.0 * k->par[0].H_v[i] * k->par[0].H_vv[i] - k->par[0].H_uuu[i] / k->par[0].H_n[i];
+					}
+					else
+					{
+						k->par[0].H_u[i] = 0.0;
+						k->par[0].H_v[i] = 0.0;
+						k->par[0].H_T[i] = 0.0;
+						k->par[0].H_uu[i] = 0.0;
+						k->par[0].H_vv[i] = 0.0;
+						k->par[0].H_uv[i] = 0.0;
+						k->par[0].H_uuu[i] = 0.0;
+					}
+				}
+			}
+
+
+			if (k->df_s4_bool == true)
+			{
+
+				if (rank == 0)
+				{
+					k->df_s4->normir(sum_s / no);
+				}
+			}
+
+			if (k->df_s3_bool == true)
+			{
+
+				if (rank == 0)
+				{
+					k->df_s3->normir(sum_s / no);
+				}
+			}
+
+			
+
+
+				k->par[0].F_n = sum_s * k->par[0].F_n / no;
+				for (int i = 0; i < pop_atom; i++)
+				{
+					k->par[0].H_n[i] = sum_s * k->par[0].H_n[i] / no;
+				}
+
+
+				k->par[0].I_u = (n_p_LISM_) * (k->par[0].I_u);
+				k->par[0].I_v = (n_p_LISM_) * (k->par[0].I_v);
+				k->par[0].I_T = (n_p_LISM_) * (k->par[0].I_T);
+				k->par[0].II_u = (n_p_LISM_) * (k->par[0].II_u);
+				k->par[0].II_v = (n_p_LISM_) * (k->par[0].II_v);
+				k->par[0].II_T = (n_p_LISM_) * (k->par[0].II_T);
+
+				// Считаем мультифдюидные источники
+
+				double U_M_H[pop_atom];
+				double U_H[pop_atom];
+				double sigma_H[pop_atom];
+				double nu_H[pop_atom];
+				double q2_1, q2_2, q3;
+				double u, v, ro, p, Q;
+
+				double u_H[pop_atom];
+				double v_H[pop_atom];
+				double ro_H[pop_atom];
+				double p_H[pop_atom];
+
+				for (int i = 0; i < pop_atom; i++)
+				{
+					p_H[i] = 0.5 * k->par[0].H_T[i] * k->par[0].H_n[i];
+					if (k->par[0].H_n[i] <= 0.0)
+					{
+						k->par[0].H_n[i] = 0.0000001;
+						p_H[i] = 0.0;
+					}
+				}
+
+				if (k->pui_ == true)
+				{
+					k->par[0].ro = k->par[0].ro + k->par[0].npui;
+					double dd = k->par[0].p;
+					k->par[0].p = k->par[0].pp;
+					k->par[0].pp = dd;
+				}
+
+				u = k->par[0].u;
+				v = k->par[0].v;
+				ro = k->par[0].ro;
+				p = k->par[0].p;
+
+				if (ro <= 0.0)
+				{
+					ro = 0.0000001;
+					p = 0.0;
+				}
+
+
+				for (int i = 0; i < pop_atom; i++)
+				{
+					U_M_H[i] = sqrt(kv(u - k->par[0].H_u[i]) + kv(v - k->par[0].H_v[i]) + (64.0 / (9.0 * pi_)) //
+						* (p / ro + 2.0 * p_H[i] / k->par[0].H_n[i]));
+
+					U_H[i] = sqrt(kv(u - k->par[0].H_u[i]) + kv(v - k->par[0].H_v[i]) + (4.0 / (pi_)) //
+						* (p / ro + 2.0 * p_H[i] / k->par[0].H_n[i]));
+
+					sigma_H[i] = kv(1.0 - a_2 * log(U_M_H[i]));
+
+					nu_H[i] = ro * k->par[0].H_n[i] * U_M_H[i] * sigma_H[i];
+				}
+
+				k->par[0].M_u = 0.0;
+				k->par[0].M_v = 0.0;
+				k->par[0].M_T = 0.0;
+
+				for (int i = 0; i < pop_atom; i++)
+				{
+					k->par[0].M_u = k->par[0].M_u + (n_p_LISM_ / Kn_) * nu_H[i] * (k->par[0].H_u[i] - u);
+					k->par[0].M_v = k->par[0].M_v + (n_p_LISM_ / Kn_) * nu_H[i] * (k->par[0].H_v[i] - v);
+					k->par[0].M_T = k->par[0].M_T + (n_p_LISM_ / Kn_) * nu_H[i] * ((kv(k->par[0].H_u[i]) + kv(k->par[0].H_v[i]) - kv(u) - kv(v)) / 2.0 + //
+						(U_H[i] / U_M_H[i]) * (2.0 * p_H[i] / k->par[0].H_n[i] - p / ro));
+				}
+
+
+				if (fabs(k->par[0].M_u) > 0.000001)
+				{
+					k->par[0].k_u = (k->par[0].I_u + k->par[0].II_u) / k->par[0].M_u;
+					if (k->par[0].k_u > 10.0 || k->par[0].k_u < 0.1)
+					{
+						k->par[0].k_u = 1.0;
+					}
+				}
+				else
+				{
+					k->par[0].k_u = 1.0;
+				}
+
+				if (fabs(k->par[0].M_v) > 0.000001)
+				{
+					k->par[0].k_v = (k->par[0].I_v + k->par[0].II_v) / k->par[0].M_v;
+					if (k->par[0].k_v > 10.0 || k->par[0].k_v < 0.1)
+					{
+						k->par[0].k_v = 1.0;
+					}
+				}
+				else
+				{
+					k->par[0].k_v = 1.0;
+				}
+
+				if (fabs(k->par[0].M_T) > 0.000001)
+				{
+					k->par[0].k_T = (k->par[0].I_T + k->par[0].II_T) / k->par[0].M_T;
+					if (k->par[0].k_T > 30.0 || k->par[0].k_T < 0.1)
+					{
+						k->par[0].k_T = 1.0;
+					}
+				}
+				else
+				{
+					k->par[0].k_T = 1.0;
+				}
+			}
+
+		}
+
+
+		free(all_);
+		free(my_send);
+
+		if (rank == 0)  // Это нужно только для основного компа
+		{
+			for (auto& k : this->Cell_other)
+			{
+				k->par[0].F_n = 1.0;
+				k->par[0].F_u = Velosity_inf;
+				k->par[0].F_v = 0.0;
+				k->par[0].F_T = 1.0;
+				k->par[0].H_n[0] = 0.0;
+				k->par[0].H_u[0] = 0.0;
+				k->par[0].H_v[0] = 0.0;
+				k->par[0].H_T[0] = 0.0;
+				k->par[0].H_n[1] = 0.0;
+				k->par[0].H_u[1] = 0.0;
+				k->par[0].H_v[1] = 0.0;
+				k->par[0].H_T[1] = 0.0;
+				k->par[0].H_n[2] = 0.0;
+				k->par[0].H_u[2] = 0.0;
+				k->par[0].H_v[2] = 0.0;
+				k->par[0].H_T[2] = 0.0;
+				k->par[0].H_n[3] = 1.0;
+				k->par[0].H_u[3] = Velosity_inf;
+				k->par[0].H_v[3] = 0.0;
+				k->par[0].H_T[3] = 1.0;
+
+				k->par[0].I_u = 0.0;
+				k->par[0].I_v = 0.0;
+				k->par[0].I_T = 0.0;
+
+				k->par[0].k_u = 0.0;
+				k->par[0].k_v = 0.0;
+				k->par[0].k_T = 0.0;
+			}
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		cout << "END MPI_MK_start " << rank << endl;
+		MPI_Barrier(MPI_COMM_WORLD);
+	
 }
 
 void Setka::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu,//

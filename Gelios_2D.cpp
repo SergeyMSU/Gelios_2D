@@ -9,6 +9,7 @@
 #include <iterator>
 #include <omp.h>
 #include "Help.h"
+#include "mpi.h"
 
 //extern inline void fff_velocity(const double& a, const double& b);
 
@@ -24,7 +25,7 @@ void fff_velocity_(const double& a, const double& b)
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
@@ -79,36 +80,6 @@ int main()
     }
 
    
-
-   /* Dist_func AA = Dist_func(10, 10, 10, -1.0, 2.0, 0.0, 2.0, 0.0, 2.0);
-    auto s = new Sensor(1, 4, 8);
-    double dd = 1.0 / 100000;
-    for (int i = 0; i < 100000; i++)
-    {
-        AA.Add_point(s->MakeRandom() * 6.0 - 4.0, s->MakeRandom() * 4.0 - 2.0, s->MakeRandom() * 4.0 - 2.0, dd);
-    }
-    AA.normir(1.0);
-    AA.print_1d(1);
-    exit(-1);*/
-
-     //ТЕСТОВАЯ ЗАДАЧА
-    //Setka* CC;
-
-    //CC = new Setka();
-    //CC->Download_Setka_ALL_ALPHA_2_0("vers_test1.txt");  // vers_test1.txt   vers6_130.txt
-    //exit(-1);
-
-   
-    //CC->Move_Setka_Calculate_3(0.0);
-    //for (auto& i : CC->All_Points)
-    //{
-    //    i->x = i->x2;
-    //    i->y = i->y2;
-    //    i->Vx = 0.0;
-    //    i->Vy = 0.0;
-    //    i->count = 0;
-    //}
-
 
     //CC->TVD_prepare();
     //CC->Proverka();
@@ -205,9 +176,9 @@ int main()
     SS = new Setka();
 
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
-    cout << "SLEEP  sec" << endl;
+    //cout << "SLEEP  sec" << endl;
     //sleep(7800);
-    cout << "NOT SLEEP" << endl;
+    //cout << "NOT SLEEP" << endl;
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
 
     SS->Download_Setka_ALL_ALPHA_2_0("vers7_5.txt");  //  5  10      IEX    vers18_21.txt
@@ -251,7 +222,7 @@ int main()
         KL->df_s3 = asd;
         KL->df_s3_bool = true;
     }
-    cout << "Dist funk  ijk = " << ijk << endl;
+    //cout << "Dist funk  ijk = " << ijk << endl;
     //SS->Print_for_Igor();
     //exit(-1);
 
@@ -376,123 +347,145 @@ int main()
     double end = 0.0;
     start = omp_get_wtime();
 
-    SS->MK_start_new();
+    //SS->MK_start_new();  // Была эта
+
     //SS->MK_start_2_0();
-    
-    double seconds = difftime(end, start);
-    end = omp_get_wtime();
-    printf("Work took %f seconds\n", end - start);
-    //SS->Print_for_Igor();
 
-    //SS->GD_prepare();
+    SS->MPI_MK_start(argc, argv);
+
+    int rank = 0, size = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);               // Получить общее число процессов - компов
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);               // Получить номер текущего процесса - компа
 
 
-    //SS2 = new Setka();
-    //SS3 = new Setka();
-    //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 до добавления источников 
-    //SS3->Download_Setka_ALL_ALPHA_2_0("vers6_121.txt");  // 84 до добавления источников 
-    if (false)
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << "Barrer " << rank << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0)
     {
-        for (int i = 0; i < SS->All_Cells.size(); i++)
+        double seconds = difftime(end, start);
+        end = omp_get_wtime();
+        printf("Work took %f seconds\n", end - start);
+        //SS->Print_for_Igor();
+
+        //SS->GD_prepare();
+
+
+        //SS2 = new Setka();
+        //SS3 = new Setka();
+        //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 до добавления источников 
+        //SS3->Download_Setka_ALL_ALPHA_2_0("vers6_121.txt");  // 84 до добавления источников 
+        if (false)
         {
-            auto A1 = SS->All_Cells[i];
-            auto A2 = SS2->All_Cells[i];
-            auto A3 = SS3->All_Cells[i];
+            for (int i = 0; i < SS->All_Cells.size(); i++)
+            {
+                auto A1 = SS->All_Cells[i];
+                auto A2 = SS2->All_Cells[i];
+                auto A3 = SS3->All_Cells[i];
 
-            A1->par[0].H_n2[0] = A2->par[0].H_n[0];
-            A1->par[0].H_n2[1] = A2->par[0].H_n[1];
-            A1->par[0].H_n2[2] = A2->par[0].H_n[2];
-            A1->par[0].H_n2[3] = A2->par[0].H_n[3];
+                A1->par[0].H_n2[0] = A2->par[0].H_n[0];
+                A1->par[0].H_n2[1] = A2->par[0].H_n[1];
+                A1->par[0].H_n2[2] = A2->par[0].H_n[2];
+                A1->par[0].H_n2[3] = A2->par[0].H_n[3];
 
-            A1->par[0].H_u2[0] = A2->par[0].H_u[0];
-            A1->par[0].H_u2[1] = A2->par[0].H_u[1];
-            A1->par[0].H_u2[2] = A2->par[0].H_u[2];
-            A1->par[0].H_u2[3] = A2->par[0].H_u[3];
+                A1->par[0].H_u2[0] = A2->par[0].H_u[0];
+                A1->par[0].H_u2[1] = A2->par[0].H_u[1];
+                A1->par[0].H_u2[2] = A2->par[0].H_u[2];
+                A1->par[0].H_u2[3] = A2->par[0].H_u[3];
 
-            A1->par[0].H_v2[0] = A2->par[0].H_v[0];
-            A1->par[0].H_v2[1] = A2->par[0].H_v[1];
-            A1->par[0].H_v2[2] = A2->par[0].H_v[2];
-            A1->par[0].H_v2[3] = A2->par[0].H_v[3];
+                A1->par[0].H_v2[0] = A2->par[0].H_v[0];
+                A1->par[0].H_v2[1] = A2->par[0].H_v[1];
+                A1->par[0].H_v2[2] = A2->par[0].H_v[2];
+                A1->par[0].H_v2[3] = A2->par[0].H_v[3];
 
-            A1->par[0].H_T2[0] = A2->par[0].H_T[0];
-            A1->par[0].H_T2[1] = A2->par[0].H_T[1];
-            A1->par[0].H_T2[2] = A2->par[0].H_T[2];
-            A1->par[0].H_T2[3] = A2->par[0].H_T[3];
+                A1->par[0].H_T2[0] = A2->par[0].H_T[0];
+                A1->par[0].H_T2[1] = A2->par[0].H_T[1];
+                A1->par[0].H_T2[2] = A2->par[0].H_T[2];
+                A1->par[0].H_T2[3] = A2->par[0].H_T[3];
 
-            A1->par[0].k_u2 = A2->par[0].k_u;
-            A1->par[0].k_v2 = A2->par[0].k_v;
-            A1->par[0].k_T2 = A2->par[0].k_T;
+                A1->par[0].k_u2 = A2->par[0].k_u;
+                A1->par[0].k_v2 = A2->par[0].k_v;
+                A1->par[0].k_T2 = A2->par[0].k_T;
 
-            A1->par[0].H_n3[0] = A3->par[0].H_n[0];
-            A1->par[0].H_n3[1] = A3->par[0].H_n[1];
-            A1->par[0].H_n3[2] = A3->par[0].H_n[2];
-            A1->par[0].H_n3[3] = A3->par[0].H_n[3];
+                A1->par[0].H_n3[0] = A3->par[0].H_n[0];
+                A1->par[0].H_n3[1] = A3->par[0].H_n[1];
+                A1->par[0].H_n3[2] = A3->par[0].H_n[2];
+                A1->par[0].H_n3[3] = A3->par[0].H_n[3];
 
-            A1->par[0].H_u3[0] = A3->par[0].H_u[0];
-            A1->par[0].H_u3[1] = A3->par[0].H_u[1];
-            A1->par[0].H_u3[2] = A3->par[0].H_u[2];
-            A1->par[0].H_u3[3] = A3->par[0].H_u[3];
+                A1->par[0].H_u3[0] = A3->par[0].H_u[0];
+                A1->par[0].H_u3[1] = A3->par[0].H_u[1];
+                A1->par[0].H_u3[2] = A3->par[0].H_u[2];
+                A1->par[0].H_u3[3] = A3->par[0].H_u[3];
 
-            A1->par[0].H_v3[0] = A3->par[0].H_v[0];
-            A1->par[0].H_v3[1] = A3->par[0].H_v[1];
-            A1->par[0].H_v3[2] = A3->par[0].H_v[2];
-            A1->par[0].H_v3[3] = A3->par[0].H_v[3];
+                A1->par[0].H_v3[0] = A3->par[0].H_v[0];
+                A1->par[0].H_v3[1] = A3->par[0].H_v[1];
+                A1->par[0].H_v3[2] = A3->par[0].H_v[2];
+                A1->par[0].H_v3[3] = A3->par[0].H_v[3];
 
-            A1->par[0].H_T3[0] = A3->par[0].H_T[0];
-            A1->par[0].H_T3[1] = A3->par[0].H_T[1];
-            A1->par[0].H_T3[2] = A3->par[0].H_T[2];
-            A1->par[0].H_T3[3] = A3->par[0].H_T[3];
+                A1->par[0].H_T3[0] = A3->par[0].H_T[0];
+                A1->par[0].H_T3[1] = A3->par[0].H_T[1];
+                A1->par[0].H_T3[2] = A3->par[0].H_T[2];
+                A1->par[0].H_T3[3] = A3->par[0].H_T[3];
 
-            A1->par[0].k_u3 = A3->par[0].k_u;
-            A1->par[0].k_v3 = A3->par[0].k_v;
-            A1->par[0].k_T3 = A3->par[0].k_T;
+                A1->par[0].k_u3 = A3->par[0].k_u;
+                A1->par[0].k_v3 = A3->par[0].k_v;
+                A1->par[0].k_T3 = A3->par[0].k_T;
+            }
         }
+        //delete SS2;
+        //delete SS3;
+
+        //SS->Download_Source_MK("source_vers18_16.txt");
+        //SS->Print_for_Igor();
+        //SS->culc_K_Istok();
+        //SS->Save_Source_MK("source_vers18_16.txt");
+        //SS->Print_Tecplot_MK();
+
+        for (int k = 0; k < 0; k++)  // 10
+        {
+            cout << "Global step = " << k + 1 << endl;
+            //SS->Go_stationary_5_komponent_inner_2(50000);
+            //SS->Go_5_komponent_2(50000);
+            SS->Go_stationary_5_komponent_inner_MK(15000);
+            //SS->Go_5_komponent__MK2(5000);
+            SS->Go_5_komponent_MK(30000, false);
+        }
+
+        for (int k = 0; k < 0; k++)  // 10
+        {
+            cout << "Global step = " << k + 1 << endl;
+            //SS->Go_stationary_5_komponent_inner_2(50000);
+            //SS->Go_5_komponent_2(50000);
+            SS->Go_stationary_5_komponent_inner_MK(10000);
+            //SS->Go_5_komponent__MK2(5000);
+            SS->Go_5_komponent_MK(30000);
+        }
+
+        //SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
+        SS->Save_Source_MK("source_vers7_6.txt");
+        //SS->Print_cell2();
+        //SS->Print_Gran("gran_vers7_6.txt");
+        //SS->Print_Tecplot_MK();
+        //SS->Print_Sourse();
+        //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
+        //SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
+
+        for (auto& i : SS->Dist_func_all)
+        {
+            //i->print_1d(1);
+            //i->print_1d(2);
+            //i->print_1d(3);
+            //i->print_3d();
+        }
+
     }
-    //delete SS2;
-    //delete SS3;
 
-    //SS->Download_Source_MK("source_vers18_16.txt");
-    //SS->Print_for_Igor();
-    //SS->culc_K_Istok();
-    //SS->Save_Source_MK("source_vers18_16.txt");
-    //SS->Print_Tecplot_MK();
-
-    for (int k = 0; k < 0; k++)  // 10
-    {
-        cout << "Global step = " << k + 1 << endl;
-        //SS->Go_stationary_5_komponent_inner_2(50000);
-        //SS->Go_5_komponent_2(50000);
-        SS->Go_stationary_5_komponent_inner_MK(15000);
-        //SS->Go_5_komponent__MK2(5000);
-        SS->Go_5_komponent_MK(30000, false);
-    }
-
-    for (int k = 0; k < 0; k++)  // 10
-    {
-        cout << "Global step = " << k + 1 << endl;
-        //SS->Go_stationary_5_komponent_inner_2(50000);
-        //SS->Go_5_komponent_2(50000);
-        SS->Go_stationary_5_komponent_inner_MK(10000);
-        //SS->Go_5_komponent__MK2(5000);
-        SS->Go_5_komponent_MK(30000);
-    }
-
-    SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
-    SS->Save_Source_MK("source_vers7_6.txt");
-    SS->Print_cell2();
-    SS->Print_Gran("gran_vers7_6.txt");
-    SS->Print_Tecplot_MK();
-    //SS->Print_Sourse();
-    //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-    //SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
-
-    for (auto& i : SS->Dist_func_all)
-    {
-        //i->print_1d(1);
-        //i->print_1d(2);
-        //i->print_1d(3);
-        i->print_3d();
-    }
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << "EXIT MPI  " << rank << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
 
     exit(-1);
     // ----------------------------------------------------------------------------------------------------
