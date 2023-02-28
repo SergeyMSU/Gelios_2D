@@ -130,12 +130,15 @@ public:
 	double Vyy_mom[4][54];
 	double Vxy_mom[4][54];
 	double Vxxx_mom[4][54];
+	double T_mom[4][54];
 	mutex mut_mom;
 
 
 	Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4);
 	Setka();
 	void Inizialization(void);
+
+	void normir(int ii);
 
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
 	void Save_Source_MK(string name);
@@ -184,6 +187,8 @@ public:
 	void Download_G_D(void);
 	void Save_G_D_5_komponent(void);
 	void Download_G_D_5_komponent(void);
+	void Go_stationary_inner_infty(int step);
+	void Go_5_komponent_infty(int step, bool dvig);
 	void Go_stationary_5_komponent_inner(int step);
 	void Go_stationary_5_komponent_inner_2(int step);
 	void Go_stationary_5_komponent_inner_MK(int step);  // Источники берутся из Монте-Карло

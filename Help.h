@@ -1,5 +1,19 @@
 #pragma once
 
+
+// Схема запуска:
+//  1) Установить загрузочный файл для сетки
+//  2) Установить файл сохранения
+//  3) Установить правильный параметр Kn
+//  4) Выбрать алгоритм расчёта (Монте-Карло \ Газовая динамика
+//  5) Установить число шагов\траекторий
+//
+//
+
+#define USEMPI false            // Нужно ли использовать MPI ?
+
+#define Kn_inf true            // Модель, когда кнудсен большой
+ 
 #include <iostream>
 #include <iomanip>
 
@@ -60,7 +74,10 @@
 #include <fstream>
 #include <math.h>
 #include <algorithm>
+
+#if USEMPI 
 #include "mpi.h"
+#endif
 
 
 inline double sign(const double& x);
@@ -89,7 +106,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 	double& x, double& y, double& z);
 //double max(const double& x, const double& y);
 
-
+#define Q_gran -90.0              // Маяк Q
 #define Velosity_inf -2.54338 //-4.54127 //-2.54127
 #define M_inf 1.97009
 #define chi_ 1.0 //36.1059 // 36.1059
@@ -97,7 +114,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define kurant  0.1    // 0.1
 //#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена
-#define Kn_  0.4326569808			
+#define Kn_  12.0 // 0.4326569808 // 0.4326569808 // 6.0			
 //#define Kn_  0.2	                                            // Число Кнудсена
 //#define a_2 0.102578  // 0.10263
 #define n_p_LISM_ (3.0) 
@@ -138,7 +155,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 #define polusum false  // Берём лт полусумму источников или только один
 #define mu_statistic false  // считаем ли статистику весов по зонам
-#define func_stat false     // считаем ли функцию распределения и моменты на сфере радиуса?
+#define func_stat true     // считаем ли функцию распределения и моменты на сфере радиуса?
 #define R_stat 80.0        // Сфера на которой считаем статистику
 #define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
 

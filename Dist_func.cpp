@@ -1,4 +1,5 @@
 #include "Dist_func.h"
+#include "Help.h"
 
 
 
@@ -64,11 +65,9 @@ void Dist_func::v_cyl_to_v_xyz(double v_rho, double v_phi, double x, double y, d
 
 }
 void Dist_func::v_cyl(double vx, double vy, double x, double y, double& w_rho, double& w_phi) {
-	double phi = atan2(y, x);
-	w_rho = cos(phi) * x + sin(phi) * y;
-	w_phi = -sin(phi) * x + cos(phi) * y;
-
-
+	double phi = atan2(y, x); //polar_angle(x, y); // atan2(y, x);
+	w_rho = cos(phi) * vx + sin(phi) * vy;
+	w_phi = -sin(phi) * vx + cos(phi) * vy;
 }
 
 
@@ -84,7 +83,7 @@ bool Dist_func::Add_point(const double& V1xyz, const double& V2xyz, const double
 	double V1 = V1xyz;
 	double V2 = 0;
 	double V3 = 0;
-	v_cyl(V2xyz, V3xyz, z, y, V2, V3);
+	v_cyl(V2xyz, V3xyz, y, z, V2, V3);
 
 	// Функция добавляет точку в массив
 	//std::cout << "w_cyl " << V1 << " "<< V2 << " " << V3 << std::endl;
@@ -94,7 +93,7 @@ bool Dist_func::Add_point(const double& V1xyz, const double& V2xyz, const double
 
 	// double a = pow(this->d1 + 1.0 - this->c1, 2.0 / this->n1);
 
-	i = (int)(log(fabs(V1 - this->c1) + 1) / log(this->a1));
+	i = (int)(log(fabs(V1 - this->c1) + 1.0) / log(this->a1));
 	if (i >= this->n1 / 2)
 	{
 		i = this->n1 / 2 - 1;
@@ -106,7 +105,7 @@ bool Dist_func::Add_point(const double& V1xyz, const double& V2xyz, const double
 
 	//cout << this->a1 << " " << i << endl;
 
-	j = (int)(log(fabs(V2 - this->c2) + 1) / log(this->a2));
+	j = (int)(log(fabs(V2 - this->c2) + 1.0) / log(this->a2));
 	if (j >= this->n2 / 2)
 	{
 		j = this->n2 / 2 - 1;
@@ -116,10 +115,10 @@ bool Dist_func::Add_point(const double& V1xyz, const double& V2xyz, const double
 		j = j + this->n2 / 2;
 	}
 
-	k = (int)(log(fabs(V3 - this->c3) + 1) / log(this->a3));
-	if (k >= this->n1 / 2)
+	k = (int)(log(fabs(V3 - this->c3) + 1.0) / log(this->a3));
+	if (k >= this->n3 / 2)
 	{
-		k = this->n1 / 2 - 1;
+		k = this->n3 / 2 - 1;
 	}
 	if (V3 - this->c3 < 0.0)
 	{
@@ -146,35 +145,36 @@ bool Dist_func::normir(const double& ccc)
 
 	for (int i = 0; i < this->n1; i++)
 	{
-		double l1 = this->c1 - 1.0 + pow(this->a1, i);
-		double r1 = this->c1 - 1.0 + pow(this->a1, i + 1);
+		double l1 = this->c1 - 1.0 + pow(this->a1, 1.0 * i);
+		double r1 = this->c1 - 1.0 + pow(this->a1, 1.0 * i + 1.0);
 		if (i >= this->n1 / 2)
 		{
-			l1 = -(this->c1 - 1.0 + pow(this->a1, i - this->n1 / 2));
-			r1 = -(this->c1 - 1.0 + pow(this->a1, i + 1 - this->n1 / 2));
+			l1 = -(-this->c1 - 1.0 + pow(this->a1, 1.0 * i - this->n1 / 2.0));
+			r1 = -(-this->c1 - 1.0 + pow(this->a1, 1.0 * i + 1.0 - this->n1 / 2.0));
 		}
 
 		for (int j = 0; j < this->n2; j++)
 		{
-			double l2 = this->c2 - 1.0 + pow(this->a2, j);
-			double r2 = this->c2 - 1.0 + pow(this->a2, j + 1);
+			double l2 = this->c2 - 1.0 + pow(this->a2, 1.0 * j);
+			double r2 = this->c2 - 1.0 + pow(this->a2, 1.0 * j + 1.0);
 			if (j >= this->n2 / 2)
 			{
-				l2 = -(this->c2 - 1.0 + pow(this->a2, j - this->n2 / 2));
-				r2 = -(this->c2 - 1.0 + pow(this->a2, j + 1 - this->n2 / 2));
+				l2 = -(-this->c2 - 1.0 + pow(this->a2, 1.0 * j - this->n2 / 2.0));
+				r2 = -(-this->c2 - 1.0 + pow(this->a2, 1.0 * j + 1.0 - this->n2 / 2.0));
 			}
 
 			for (int k = 0; k < this->n3; k++)
 			{
-				double l3 = this->c3 - 1.0 + pow(this->a3, k);
-				double r3 = this->c3 - 1.0 + pow(this->a3, k + 1);
+				double l3 = this->c3 - 1.0 + pow(this->a3, 1.0 * k);
+				double r3 = this->c3 - 1.0 + pow(this->a3, 1.0 * k + 1.0);
 				if (k >= this->n3 / 2)
 				{
-					l3 = -(this->c3 - 1.0 + pow(this->a3, k - this->n3 / 2));
-					r3 = -(this->c3 - 1.0 + pow(this->a3, k + 1 - this->n3 / 2));
+					l3 = -(-this->c3 - 1.0 + pow(this->a3, 1.0 * k - this->n3 / 2.0));
+					r3 = -(-this->c3 - 1.0 + pow(this->a3, 1.0 * k + 1.0 - this->n3 / 2.0));
 				}
 
-				double S = fabs((r1 - l1) * (r2 * r2 - l2 * l2) * (r3 - l3) / 2);
+				//double S = fabs((r1 - l1) * (r2 * r2 - l2 * l2) * (r3 - l3) / 2.0);
+				double S = fabs((r1 - l1) * (r2 - l2) * (r3 - l3));
 				this->V[i][j][k] = this->V[i][j][k] / S;
 			}
 		}
@@ -196,8 +196,8 @@ bool Dist_func::print_1d(int koord)
 	{
 		for (int i = 0; i < this->n1 / 2; i++)
 		{
-			double l = this->c1 - 1.0 + pow(this->a1, i);
-			double r = this->c1 - 1.0 + pow(this->a1, i + 1);
+			double l = this->c1 - 1.0 + pow(this->a1, 1.0 * i);
+			double r = this->c1 - 1.0 + pow(this->a1, 1.0 * i + 1);
 			double S = 0.0;
 
 			for (int j = 0; j < this->n2; j++)
@@ -213,8 +213,8 @@ bool Dist_func::print_1d(int koord)
 
 		for (int i = 0 + this->n1 / 2; i < this->n1; i++)
 		{
-			double l = -1.0 + pow(this->a1, i - this->n1 / 2);
-			double r = -1.0 + pow(this->a1, i + 1 - this->n1 / 2);
+			double l = -1.0 + pow(this->a1, 1.0 * i - this->n1 / 2.0);
+			double r = -1.0 + pow(this->a1, 1.0 * i + 1.0 - this->n1 / 2.0);
 			double S = 0.0;
 
 			for (int j = 0; j < this->n2; j++)
@@ -232,8 +232,8 @@ bool Dist_func::print_1d(int koord)
 	{
 		for (int j = 0; j < this->n2 / 2; j++)
 		{
-			double l = this->c2 - 1.0 + pow(this->a2, j);
-			double r = this->c2 - 1.0 + pow(this->a2, j + 1);
+			double l = this->c2 - 1.0 + pow(this->a2, 1.0 * j);
+			double r = this->c2 - 1.0 + pow(this->a2, 1.0 * j + 1.0);
 			double S = 0.0;
 
 			for (int i = 0; i < this->n1; i++)
@@ -249,8 +249,8 @@ bool Dist_func::print_1d(int koord)
 
 		for (int j = 0 + this->n2 / 2; j < this->n2; j++)
 		{
-			double l = -1.0 + pow(this->a2, j - this->n2 / 2);
-			double r = -1.0 + pow(this->a2, j + 1 - this->n2 / 2);
+			double l = -1.0 + pow(this->a2, 1.0 * j - this->n2 / 2.0);
+			double r = -1.0 + pow(this->a2, 1.0 * j + 1.0 - this->n2 / 2.0);
 			double S = 0.0;
 
 			for (int i = 0; i < this->n1; i++)
@@ -266,10 +266,10 @@ bool Dist_func::print_1d(int koord)
 	}
 	else if (koord == 3)
 	{
-		for (int k = 0; k < this->n3 / 2; k++)
+		for (int k = 0; k < this->n3 / 2.0; k++)
 		{
-			double l = this->c3 - 1.0 + pow(this->a3, k);
-			double r = this->c3 - 1.0 + pow(this->a3, k + 1);
+			double l = this->c3 - 1.0 + pow(this->a3, 1.0 * k);
+			double r = this->c3 - 1.0 + pow(this->a3, 1.0 * k + 1.0);
 			double S = 0.0;
 
 			for (int i = 0; i < this->n1; i++)
@@ -285,8 +285,8 @@ bool Dist_func::print_1d(int koord)
 
 		for (int k = 0 + this->n3 / 2; k < this->n3; k++)
 		{
-			double l = -1.0 + pow(this->a3, k - this->n3 / 2);
-			double r = -1.0 + pow(this->a3, k + 1 - this->n3 / 2);
+			double l = -1.0 + pow(this->a3, 1.0 * k - this->n3 / 2.0);
+			double r = -1.0 + pow(this->a3, 1.0 * k + 1.0 - this->n3 / 2.0);
 			double S = 0.0;
 
 			for (int i = 0; i < this->n1; i++)
@@ -310,6 +310,7 @@ bool Dist_func::print_3d(void)
 	std::string name_f = "3D_Dist_func_" + this->name + ".txt";
 	fout.open(name_f);
 
+	fout << this->xxx << " " << this->yyy << endl;
 	fout << "TITLE = \"HP\"  VARIABLES = \"vz\", \"vr\", \"vphi\", \"f\"," << "ZONE T = \"HP\"" << std::endl;
 
 
@@ -320,32 +321,32 @@ bool Dist_func::print_3d(void)
 		double r1;
 		if (i >= this->n1 / 2)
 		{
-			l1 = -(-this->c1 - 1.0 + pow(this->a1, i - this->n1 / 2));
-			r1 = -(-this->c1 - 1.0 + pow(this->a1, i + 1 - this->n1 / 2));
+			l1 = -(-this->c1 - 1.0 + pow(this->a1, 1.0 * i - this->n1 / 2.0));
+			r1 = -(-this->c1 - 1.0 + pow(this->a1, 1.0 * i + 1.0 - this->n1 / 2.0));
 		}
 		else {
-			l1 = (this->c1 - 1.0 + pow(this->a1, i));
-			r1 = (this->c1 - 1.0 + pow(this->a1, i + 1));
+			l1 = (this->c1 - 1.0 + pow(this->a1, 1.0 * i));
+			r1 = (this->c1 - 1.0 + pow(this->a1, 1.0 * i + 1.0));
 		}
 
 		for (int j = 0; j < this->n2; j++)
 		{
-			double l2 = this->c2 - 1.0 + pow(this->a2, j);
-			double r2 = this->c2 - 1.0 + pow(this->a2, j + 1);
+			double l2 = this->c2 - 1.0 + pow(this->a2, 1.0 * j);
+			double r2 = this->c2 - 1.0 + pow(this->a2, 1.0 * j + 1.0);
 			if (j >= this->n2 / 2)
 			{
-				l2 = -(-this->c2 - 1.0 + pow(this->a2, j - this->n2 / 2));
-				r2 = -(-this->c2 - 1.0 + pow(this->a2, j + 1 - this->n2 / 2));
+				l2 = -(-this->c2 - 1.0 + pow(this->a2, 1.0 * j - this->n2 / 2.0));
+				r2 = -(-this->c2 - 1.0 + pow(this->a2, 1.0 * j + 1.0 - this->n2 / 2.0));
 			}
 
 			for (int k = 0; k < this->n3; k++)
 			{
-				double l3 = this->c3 - 1.0 + pow(this->a3, k);
-				double r3 = this->c3 - 1.0 + pow(this->a3, k + 1);
+				double l3 = this->c3 - 1.0 + pow(this->a3, 1.0 * k);
+				double r3 = this->c3 - 1.0 + pow(this->a3, 1.0 * k + 1.0);
 				if (k >= this->n3 / 2)
 				{
-					l3 = -(-this->c3 - 1.0 + pow(this->a3, k - this->n3 / 2));
-					r3 = -(-this->c3 - 1.0 + pow(this->a3, k + 1 - this->n3 / 2));
+					l3 = -(-this->c3 - 1.0 + pow(this->a3, 1.0 * k - this->n3 / 2.0));
+					r3 = -(-this->c3 - 1.0 + pow(this->a3, 1.0 * k + 1.0 - this->n3 / 2.0));
 				}
 
 				fout << 0.5 * (l1 + r1) << " " << 0.5 * (l2 + r2) << " " << 0.5 * (l3 + r3) << " " << this->V[i][j][k] << std::endl;
@@ -356,3 +357,29 @@ bool Dist_func::print_3d(void)
 
 	return true;
 }
+//-----------------------------------ДЛЯ ОТЛАДКИ-------------------------------------------------------
+/*int main()
+{
+	Dist_func test(20, 20, 20, //
+		-1.5, 6, //
+		0.0, 6, //
+		0.0, 6);
+	test.Add_point(0, 0.1, 0, 0.0, 3.14/2.0, 3536);
+	//test.print_3d();
+	double x = 1.0;
+	double y = 0.0;
+	double vx = 0.8;
+	double vy = 0;
+	double vz = 0.0;
+	double w_rho = 0;
+	double w_phi = 0;
+	double v1 = 0;
+	double v2 = 0;
+
+	test.v_cyl(vx,vy,x,y,w_rho, w_phi);
+	test.v_cyl_to_v_xyz(w_rho, w_phi, x, y, v1, v2);
+	std::cout << vx << " " << vy << " " << vz << std::endl;
+	std::cout << w_rho << " " << w_phi << std::endl;
+	std::cout << v1 << " " << v2 << " " << vz << std::endl;
+	return 0;
+}*/

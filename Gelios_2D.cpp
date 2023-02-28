@@ -9,7 +9,11 @@
 #include <iterator>
 #include <omp.h>
 #include "Help.h"
+
+
+#if USEMPI
 #include "mpi.h"
+#endif
 
 //extern inline void fff_velocity(const double& a, const double& b);
 
@@ -98,71 +102,6 @@ int main(int argc, char** argv)
 
     // КОНЕЦ ТЕСТОВОЙ ЗАДАЧИ ---------------------------------------------------------------
 
-    // Проверка распадника
-    /*double P[4];
-    double PQ;
-    auto RR = new Setka();
-    double a, b, c;
-    double ro1 = 2.0;
-    double p1 = 2.0;
-    double u1 = 1.0;
-    double ro2 = 1.0;
-    double p2 = 1.0;
-    double u2 = 0.5;
-    double n1 = 1.0;
-    double w = 0.0;
-
-
-    RR->HLLC_2d_Korolkov_b_s(ro1, 1.0, p1, u1, 0.0, ro2, 1.0, p2, u2, 0.0, w, P, PQ, n1, 0.0, 10.0, 1, a, b, c);
-    for (int i = 0; i < 4; i++)
-    {
-        cout << P[i] << endl;
-    }
-
-    exit(-1);*/
-
-    //ofstream fout;
-    //fout.open("Source_3_cp12.txt");
-
-    //Setka* CC;
-    //CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
-
-    /*MKmethod* MK;
-    Setka* CC;
-    CC = new Setka(4, 3, 3, 10, 13, 6, 7, 7);
-    MK = new MKmethod();
-    double c = 18.0 * fabs(Velosity_inf);
-    double x = 70.0 * fabs(Velosity_inf);
-    double uz = CC->Velosity_1(x, c);
-    cout << MK->int_1(x, c) << " " << uz * sigma(uz) << endl;*/
-
-    //double u = 0.0, cp = 12.0;
-    //for (double u = 0.05; u/cp <= 7.0; u = u + 0.05)
-    //{
-    //    double skalar = 20.0;
-    //    double u1 = 0.8;
-    //    double uz = CC->Velosity_1(u, cp);
-    //    double uz_M = CC->Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi_);
-    //    double uz_E = CC->Velosity_3(u, cp);
-    //    double AA = (-0.25 * (3.0 * kv(cp) + 2.0 * kv(u)) * (uz_E / uz));
-    //    double BB = (-0.5 * MK->int_3(u, cp) / MK->int_1(u, cp));
-    //    cout << u << " " << u/MK->int_1(u, cp) << endl;
-    //    //cout << u << " " << BB << endl;
-    //}
-
-
-    //exit(-1);
-
-    // SS = new Setka(15, 5, 7, 15, 30, 10, 20, 20);   //  vers2_15   n_inner 15
-    // SS = new Setka(30, 7, 11, 20, 60, 20, 40, 40);    // vers3_   n_inner 30
-    // SS = new Setka(34, 7, 11, 20, 60, 20, 50, 60);    // vers4_7    n_inner 30   результаты одинаковыс с 3
-    // SS = new Setka(40, 10, 15, 25, 60, 30, 60, 60);    // vers5_7   n_inner 30   не досчитал, вроде какие-то проблемы с устойчивостью
-    // Привет
-   /* double u = 0.0;
-    double v = 1.0;
-    polar_provorot(pi_ * alpha_rot / 360.0, u, v);
-    cout << u << " " << v << endl;
-    exit(-1);*/
 
     Setka* SS, * K, *SS2, * SS3;
     if (false)
@@ -181,7 +120,7 @@ int main(int argc, char** argv)
     //cout << "NOT SLEEP" << endl;
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
 
-    SS->Download_Setka_ALL_ALPHA_2_0("vers7_5.txt");  //  5  10      IEX    vers18_21.txt
+    SS->Download_Setka_ALL_ALPHA_2_0("vers19_1.txt");  // 16_7  5  10      IEX    vers18_21.txt  vers7_9
 
     SS->TVD_prepare();
     SS->Proverka();
@@ -191,6 +130,7 @@ int main(int argc, char** argv)
 
     int ijk = 0;
     string nmk;
+    // Считаем функцию распределения для Насти
     for (auto& KL : SS->All_Cells)
     {
         double xx, yy;
@@ -198,14 +138,14 @@ int main(int argc, char** argv)
         //cout << "35 point   " << xx << " " << yy << endl;
 
         double rrr = sqrt(xx * xx + yy * yy);
-        if (rrr < 75.0 / RR_ || rrr > 85.0 / RR_)
+        if (rrr < 78.0 / RR_ || rrr > 82.0 / RR_)
         {
             continue;
         }
 
         ijk++;
         nmk = "S4_" + to_string(ijk);
-        auto asd = new Dist_func(30, 30, 30, -3.0, 5.0, 0.0, 5.0, 0.0, 5.0);
+        auto asd = new Dist_func(30, 30, 30, -3.0, 4.0, 0.0, 3.5, 0.0, 5.0);
         asd->xxx = xx;
         asd->yyy = yy;
         asd->call_name(nmk);
@@ -222,13 +162,13 @@ int main(int argc, char** argv)
         KL->df_s3 = asd;
         KL->df_s3_bool = true;
     }
-    //cout << "Dist funk  ijk = " << ijk << endl;
+    
+    
+    // PUI
     //SS->Print_for_Igor();
     //exit(-1);
 
     //SS->Init_conditions();
-    SS->TVD_prepare();
-    SS->Proverka();
     //SS->Print_Gran("gran_vers18_4.txt");
     /*SS->Print_Tecplot_MK();
     exit(-1);*/
@@ -243,20 +183,34 @@ int main(int argc, char** argv)
     cout << SS->All_Cells[34]->number << endl;
     exit(-1);*/
 
-    //SS->Line_Outer[2]->B->Vx = -0.0028;
 
-    /*SS->Move_Setka_Calculate_2(0.0);
-    
-    for (auto& i : SS->All_Points)
+    // Двигаем узлы вручную
+    if (true)
     {
-        i->x = i->x2;
-        i->y = i->y2;
-        i->Vx = 0.0;
-        i->Vy = 0.0;
-        i->count = 0;
-    }*/
 
-    // Подготовка массивов для внутренней области счёта. НЕ УДАЛЯТЬ
+        for (auto& i : SS->All_Points)
+        {
+            i->Vx = 0.0;
+            i->Vy = 0.0;
+        }
+
+        //SS->Line_Inner[47]->B->Vx = -0.022;
+        //SS->Line_Inner[48]->B->Vx = -0.005;
+
+        SS->Move_Setka_Calculate_2(0.0);
+
+        for (auto& i : SS->All_Points)
+        {
+            i->x = i->x2;
+            i->y = i->y2;
+            i->Vx = 0.0;
+            i->Vy = 0.0;
+            i->count = 0;
+        }
+    }
+
+
+    // Подготовка массивов для внутренней области счёта и перенормировка параметров, если надо. НЕ УДАЛЯТЬ
     for (auto i : SS->All_Cells)
     {
         if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
@@ -312,25 +266,6 @@ int main(int argc, char** argv)
             SS->All_Cells_Inner.push_back(i);
         }
 
-        /*if (x > 600.0 / RR_)
-        {
-            i->par[1].ro = i->par[0].ro = 4.0;
-            i->par[1].p = i->par[0].p = 2.5;
-        }*/
-
-        //if (x < -700 && y < 200)
-        //{
-        //    i->par[1].u = i->par[0].u = Velosity_inf;       // Перенормировка
-        //    i->par[1].v = i->par[0].v = 0.0;
-        //}
-
-        //if (sqrt(x * x + y * y) <= 80.0)
-        //{
-        //    i->par[1].u = i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
-        //    i->par[1].v = i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
-        //    i->par[1].ro = i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
-        //    i->par[1].p = i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
-        //}
 
         if (i->type == C_centr)
         {
@@ -339,10 +274,174 @@ int main(int argc, char** argv)
     }
 
 
+    // Блок расчёта с Kn -> infty
+    if (false)
+    {
+        for (auto i : SS->All_Cells)
+        {
+            if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+            {
+                //Для счёта монте-карло
+               i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+               i->par[0].v = i->par[0].v / (chi_real / chi_);
+               i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+               i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+
+               i->par[1].u = i->par[1].u / (chi_real / chi_);       // Перенормировка
+               i->par[1].v = i->par[1].v / (chi_real / chi_);
+               i->par[1].ro = i->par[1].ro * kv(chi_real / chi_);
+               i->par[1].Q = i->par[1].Q * kv(chi_real / chi_);
+            }
+        }
+        //SS->Print_Gran("gran_vers7_7.txt");
+        double start;
+        double end = 0.0;
+        start = omp_get_wtime();
+
+        int max_k = 1000;  // 150  считаются 30 минут, просить 40 минут
+
+        for (int k = 0; k < max_k; k++)  // 10
+        {
+            cout << "Global step = " << k + 1 << "  is " << max_k << endl;
+            SS->Go_stationary_inner_infty(1500);
+            SS->Go_5_komponent_infty(3000, true);
+            if (k % 200 == 0 && k > 1)
+            {
+                SS->Print_Gran("gran_vers18_2.txt");
+                SS->Save_Setka_ALL_ALPHA("vers18_2.txt");
+                SS->Print_Tecplot_MK();
+            }
+        }
+
+        for (auto i : SS->All_Cells)
+        {
+            if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+            {
+                //Для счёта монте-карло
+                i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
+                i->par[0].v = i->par[0].v * (chi_real / chi_);
+                i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
+                i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
+
+                i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
+                i->par[1].v = i->par[1].v * (chi_real / chi_);
+                i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
+                i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
+            }
+        }
+
+        double seconds = difftime(end, start);
+        end = omp_get_wtime();
+        printf("Work took %f seconds\n", end - start);
+        SS->Print_Gran("gran_vers18_1.txt");
+        SS->Save_Setka_ALL_ALPHA("vers18_1.txt");
+        SS->Print_Tecplot_MK();
+        return 0;
+    }
+
+    // БЛОК для расчёта газовой динамики (на CPU)
+    if (true)
+    {
+        for (auto& i : SS->All_Cells)
+        {
+            i->par[0].I_u = 0.0;
+            i->par[0].I_v = 0.0;
+            i->par[0].I_T = 0.0;
+            i->par[0].II_u = 0.0;
+            i->par[0].II_v = 0.0;
+            i->par[0].II_T = 0.0;
+            for (int j = 0; j < pop_atom; j++)
+            {
+                i->par[0].H_n[j] = 0.0;
+                i->par[0].H_u[j] = 0.0;
+                i->par[0].H_v[j] = 0.0;
+                i->par[0].H_T[j] = 0.0;
+                i->par[0].H_uu[j] = 0.0;
+                i->par[0].H_uv[j] = 0.0;
+                i->par[0].H_vv[j] = 0.0;
+                i->par[0].H_uuu[j] = 0.0;
+            }
+
+            i->par[0].k_u = 0.0;
+            i->par[0].k_v = 0.0;
+            i->par[0].k_T = 0.0;
+        }
+        //SS->Download_Source_MK("source_vers7_7.txt");
+        SS->Download_Source_MK("source_vers19_1.txt");
+        //SS->Download_Source_MK("source_vers7_9.txt");
+        double norm_istok = 1.0;
+        for (auto& i : SS->All_Cells)
+        {
+            i->par[0].I_u /= norm_istok;
+            i->par[0].I_v /= norm_istok;
+            i->par[0].I_T /= norm_istok;
+            i->par[0].II_u /= norm_istok;
+            i->par[0].II_v /= norm_istok;
+            i->par[0].II_T /= norm_istok;
+            for (int j = 0; j < pop_atom; j++)
+            {
+                i->par[0].H_n[j] /= norm_istok;
+                i->par[0].H_u[j] /= norm_istok;
+                i->par[0].H_v[j] /= norm_istok;
+                i->par[0].H_T[j] /= norm_istok;
+                i->par[0].H_uu[j] /= norm_istok;
+                i->par[0].H_uv[j] /= norm_istok;
+                i->par[0].H_vv[j] /= norm_istok;
+                i->par[0].H_uuu[j] /= norm_istok;
+            }
+
+            i->par[0].k_u /= norm_istok;
+            i->par[0].k_v /= norm_istok;
+            i->par[0].k_T /= norm_istok;
+        }
+
+        //SS->Print_Gran("gran_vers7_7.txt");
+        double start;
+        double end = 0.0;
+        start = omp_get_wtime();
+
+        //SS->normir(0);
+        SS->Print_Tecplot_MK();
+        SS->Print_Gran("gran_vers19_1.txt");
+        for (int k = 0; k < 0; k++)  // 10
+        {
+            SS->Go_stationary_5_komponent_inner_MK(15000);
+            SS->Go_5_komponent_MK(30000, false);
+            SS->Print_Tecplot_MK();
+        }
+
+        int max_k = 900;  // 150  считаются 30 минут, просить 40 минут
+        for (int k = 0; k < max_k; k++)  // 10
+        {
+            cout << "Global step = " << k + 1 << "  is " << max_k << endl;
+            //SS->Go_stationary_5_komponent_inner_2(50000);
+            //SS->Go_5_komponent_2(50000);
+            SS->Go_stationary_5_komponent_inner_MK(1500);
+            //SS->Go_5_komponent__MK2(5000);
+            SS->Go_5_komponent_MK(3000);
+            if (k % 150 == 0 && k > 1)
+            {
+                SS->Print_Tecplot_MK();
+                SS->Print_Gran("gran_vers19_1.txt");
+                SS->Save_Setka_ALL_ALPHA("vers19_1.txt");
+            }
+        }
+
+        //SS->normir(1);
+
+        double seconds = difftime(end, start);
+        end = omp_get_wtime();
+        printf("Work took %f seconds\n", end - start);
+        SS->Save_Setka_ALL_ALPHA("vers7_10.txt");
+        SS->Print_Gran("gran_vers7_10.txt");
+        SS->Print_Tecplot_MK();
+        return 0;
+    }
+
     //SS->culc_PUI();
 
     //exit(-1);
-    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    //SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     double start;
     double end = 0.0;
     start = omp_get_wtime();
@@ -351,16 +450,18 @@ int main(int argc, char** argv)
 
     //SS->MK_start_2_0();
 
-    SS->MPI_MK_start(argc, argv);
+    //SS->MPI_MK_start(argc, argv);
 
     int rank = 0, size = 0;
+
+#if USEMPI 
     MPI_Comm_size(MPI_COMM_WORLD, &size);               // Получить общее число процессов - компов
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);               // Получить номер текущего процесса - компа
-
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << "Barrer " << rank << endl;
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
     if (rank == 0)
     {
@@ -369,7 +470,7 @@ int main(int argc, char** argv)
         printf("Work took %f seconds\n", end - start);
         //SS->Print_for_Igor();
 
-        //SS->GD_prepare();
+       //SS->GD_prepare();
 
 
         //SS2 = new Setka();
@@ -436,40 +537,55 @@ int main(int argc, char** argv)
         //delete SS2;
         //delete SS3;
 
-        //SS->Download_Source_MK("source_vers18_16.txt");
+        // SS->Download_Source_MK("source_vers19_1.txt");
         //SS->Print_for_Igor();
         //SS->culc_K_Istok();
         //SS->Save_Source_MK("source_vers18_16.txt");
         //SS->Print_Tecplot_MK();
+        //SS->Print_Gran("gran_vers19_1_0.txt");
+        SS->Print_Tecplot_MK();
 
         for (int k = 0; k < 0; k++)  // 10
         {
+            start = omp_get_wtime();
             cout << "Global step = " << k + 1 << endl;
             //SS->Go_stationary_5_komponent_inner_2(50000);
             //SS->Go_5_komponent_2(50000);
             SS->Go_stationary_5_komponent_inner_MK(15000);
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(30000, false);
+            end = omp_get_wtime();
+            printf("Work took %f seconds\n", end - start);
         }
 
         for (int k = 0; k < 0; k++)  // 10
         {
+            start = omp_get_wtime();
             cout << "Global step = " << k + 1 << endl;
             //SS->Go_stationary_5_komponent_inner_2(50000);
             //SS->Go_5_komponent_2(50000);
             SS->Go_stationary_5_komponent_inner_MK(10000);
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(30000);
+            end = omp_get_wtime();
+            printf("Work took %f seconds\n", end - start);
+            if (k % 30 == 0 && k > 1)
+            {
+                string nm;
+                nm = "vers19_1_" + to_string(k) + ".txt";
+                SS->Print_Gran("gran_" + nm);
+                SS->Save_Setka_ALL_ALPHA(nm);
+            }
         }
 
         //SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
-        SS->Save_Source_MK("source_vers7_6.txt");
+        SS->Save_Source_MK("source_vers19_2.txt");
         //SS->Print_cell2();
-        //SS->Print_Gran("gran_vers7_6.txt");
-        //SS->Print_Tecplot_MK();
+       // SS->Print_Gran("gran_vers19_1.txt");
+        SS->Print_Tecplot_MK();
         //SS->Print_Sourse();
         //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
-        //SS->Save_Setka_ALL_ALPHA("vers16_7.txt");
+        //SS->Save_Setka_ALL_ALPHA("vers19_1.txt");
 
         for (auto& i : SS->Dist_func_all)
         {
@@ -477,16 +593,19 @@ int main(int argc, char** argv)
             //i->print_1d(2);
             //i->print_1d(3);
             //i->print_3d();
+            break;
         }
 
     }
 
-    
+#if USEMPI 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << "EXIT MPI  " << rank << endl;
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
+#endif
 
+    return 0;
     exit(-1);
     // ----------------------------------------------------------------------------------------------------
     delete SS;
