@@ -120,8 +120,8 @@ int main(int argc, char** argv)
     //cout << "NOT SLEEP" << endl;
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_100.txt");  // 17       IEX
 
-    SS->Download_Setka_ALL_ALPHA_2_0("vers19_1.txt");  // 16_7  5  10      IEX    vers18_21.txt  vers7_9
-
+    SS->Download_Setka_ALL_ALPHA_2_0(parameter_1);  // 16_7  5  10      IEX    vers18_21.txt  vers7_9
+    string name_gd = parameter_21;
     SS->TVD_prepare();
     SS->Proverka();
 
@@ -131,36 +131,39 @@ int main(int argc, char** argv)
     int ijk = 0;
     string nmk;
     // Считаем функцию распределения для Насти
-    for (auto& KL : SS->All_Cells)
+    if (false)
     {
-        double xx, yy;
-        KL->Get_Center(xx, yy);
-        //cout << "35 point   " << xx << " " << yy << endl;
-
-        double rrr = sqrt(xx * xx + yy * yy);
-        if (rrr < 78.0 / RR_ || rrr > 82.0 / RR_)
+        for (auto& KL : SS->All_Cells)
         {
-            continue;
+            double xx, yy;
+            KL->Get_Center(xx, yy);
+            //cout << "35 point   " << xx << " " << yy << endl;
+
+            double rrr = sqrt(xx * xx + yy * yy);
+            if (rrr < 78.0 / RR_ || rrr > 82.0 / RR_)
+            {
+                continue;
+            }
+
+            ijk++;
+            nmk = "S4_" + to_string(ijk);
+            auto asd = new Dist_func(30, 30, 30, -3.0, 4.0, 0.0, 3.5, 0.0, 5.0);
+            asd->xxx = xx;
+            asd->yyy = yy;
+            asd->call_name(nmk);
+            SS->Dist_func_all.push_back(asd);
+            KL->df_s4 = asd;
+            KL->df_s4_bool = true;
+
+            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            asd->xxx = xx;
+            asd->yyy = yy;
+            nmk = "S3_" + to_string(ijk);
+            asd->call_name(nmk);
+            SS->Dist_func_all.push_back(asd);
+            KL->df_s3 = asd;
+            KL->df_s3_bool = true;
         }
-
-        ijk++;
-        nmk = "S4_" + to_string(ijk);
-        auto asd = new Dist_func(30, 30, 30, -3.0, 4.0, 0.0, 3.5, 0.0, 5.0);
-        asd->xxx = xx;
-        asd->yyy = yy;
-        asd->call_name(nmk);
-        SS->Dist_func_all.push_back(asd);
-        KL->df_s4 = asd;
-        KL->df_s4_bool = true;
-
-        asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
-        asd->xxx = xx;
-        asd->yyy = yy;
-        nmk = "S3_" + to_string(ijk);
-        asd->call_name(nmk);
-        SS->Dist_func_all.push_back(asd);
-        KL->df_s3 = asd;
-        KL->df_s3_bool = true;
     }
     
     
@@ -340,7 +343,7 @@ int main(int argc, char** argv)
     }
 
     // БЛОК для расчёта газовой динамики (на CPU)
-    if (true)
+    if (parameter_4)
     {
         for (auto& i : SS->All_Cells)
         {
@@ -367,7 +370,7 @@ int main(int argc, char** argv)
             i->par[0].k_T = 0.0;
         }
         //SS->Download_Source_MK("source_vers7_7.txt");
-        SS->Download_Source_MK("source_vers19_1.txt");
+        SS->Download_Source_MK(parameter_22);
         //SS->Download_Source_MK("source_vers7_9.txt");
         double norm_istok = 1.0;
         for (auto& i : SS->All_Cells)
@@ -401,8 +404,12 @@ int main(int argc, char** argv)
         start = omp_get_wtime();
 
         //SS->normir(0);
-        SS->Print_Tecplot_MK();
-        SS->Print_Gran("gran_vers19_1.txt");
+        //SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
+        cout << "SSSSS   " << endl;
+        cout << SS->B_Rails[SS->B_Rails.size() - 1]->Key_point[0]->x << " " << SS->B_Rails[SS->B_Rails.size() - 1]->Key_point[0]->y << endl;
+        cout << SS->C_Rails[0]->Key_point[0]->x << " " << SS->C_Rails[0]->Key_point[0]->y << endl;
+        SS->Print_cell();
+        SS->Print_Gran("DO_gran_" + name_gd);
         for (int k = 0; k < 0; k++)  // 10
         {
             SS->Go_stationary_5_komponent_inner_MK(15000);
@@ -411,19 +418,32 @@ int main(int argc, char** argv)
         }
 
         int max_k = 900;  // 150  считаются 30 минут, просить 40 минут
+        //SS->Init_conditions();
         for (int k = 0; k < max_k; k++)  // 10
         {
-            cout << "Global step = " << k + 1 << "  is " << max_k << endl;
+            if (k % 10 == 0 && k > 1)
+            {
+                cout << "Global step = " << k + 1 << "  is " << max_k << endl;
+            }
             //SS->Go_stationary_5_komponent_inner_2(50000);
             //SS->Go_5_komponent_2(50000);
             SS->Go_stationary_5_komponent_inner_MK(1500);
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(3000);
-            if (k % 150 == 0 && k > 1)
+            //SS->Init_conditions();
+            if (k % 10 == 0 && k > 1)
             {
-                SS->Print_Tecplot_MK();
-                SS->Print_Gran("gran_vers19_1.txt");
-                SS->Save_Setka_ALL_ALPHA("vers19_1.txt");
+                SS->Print_Gran("gran_" + name_gd);
+            }
+
+            if (k % 170 == 0 && k > 1)
+            {
+                SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
+            }
+
+            if (k % 230 == 0 && k > 1)
+            {
+                SS->Save_Setka_ALL_ALPHA(name_gd);
             }
         }
 
@@ -432,25 +452,26 @@ int main(int argc, char** argv)
         double seconds = difftime(end, start);
         end = omp_get_wtime();
         printf("Work took %f seconds\n", end - start);
-        SS->Save_Setka_ALL_ALPHA("vers7_10.txt");
-        SS->Print_Gran("gran_vers7_10.txt");
-        SS->Print_Tecplot_MK();
+        SS->Save_Setka_ALL_ALPHA(name_gd);
+        SS->Print_Gran("gran_" + name_gd);
+        SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
         return 0;
     }
 
     //SS->culc_PUI();
 
     //exit(-1);
-    //SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     double start;
     double end = 0.0;
     start = omp_get_wtime();
 
-    //SS->MK_start_new();  // Была эта
+    SS->MK_start_new();  // Была эта
 
     //SS->MK_start_2_0();
 
     //SS->MPI_MK_start(argc, argv);
+
 
     int rank = 0, size = 0;
 
@@ -472,7 +493,7 @@ int main(int argc, char** argv)
 
        //SS->GD_prepare();
 
-
+        SS->Print_cell2();
         //SS2 = new Setka();
         //SS3 = new Setka();
         //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 до добавления источников 
@@ -543,7 +564,7 @@ int main(int argc, char** argv)
         //SS->Save_Source_MK("source_vers18_16.txt");
         //SS->Print_Tecplot_MK();
         //SS->Print_Gran("gran_vers19_1_0.txt");
-        SS->Print_Tecplot_MK();
+        //SS->Print_Tecplot_MK("21_2");
 
         for (int k = 0; k < 0; k++)  // 10
         {
@@ -579,10 +600,10 @@ int main(int argc, char** argv)
         }
 
         //SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
-        SS->Save_Source_MK("source_vers19_2.txt");
+        SS->Save_Source_MK(parameter_22);
         //SS->Print_cell2();
        // SS->Print_Gran("gran_vers19_1.txt");
-        SS->Print_Tecplot_MK();
+        //SS->Print_Tecplot_MK();
         //SS->Print_Sourse();
         //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
         //SS->Save_Setka_ALL_ALPHA("vers19_1.txt");

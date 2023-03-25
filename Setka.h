@@ -160,7 +160,7 @@ public:
 	void Print_connect(void); // Посмотреть, как связаны ячейки
 	void Print_point_connect(void); // Посмотреть, как связаны узлы с ячейками
 	void Print_Tecplot(void);
-	void Print_Tecplot_MK(void);
+	void Print_Tecplot_MK(string name0 = "none");
 	void Print_Sourse(void);
 
 	void Print_for_Igor(void);

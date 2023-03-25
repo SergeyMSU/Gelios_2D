@@ -1799,27 +1799,58 @@ void Setka::Print_Gran(string name)
 	int ll = this->Line_Contact.size() + this->Line_Inner.size() + this->Line_Outer.size();
 	ofstream fout;
 	fout.open(name);
+	ofstream fout2;
+	fout2.open("position_" + name);
 	fout << "TITLE = \"HP\" ";
 	fout << " VARIABLES = \"X\", \"Y\"  ZONE T= \"HP\", N=  " << 2 * ll;
 	fout << " , E= " << ll;
 	fout << " , F=FEPOINT, ET=LINESEG  " << endl;
 	double x1, y1;
 	double LL = 1.0;
+	double aa, bb;
+	int kk = 0;
 	for (auto& i : this->Line_Contact)
 	{
 		fout << i->A->x / LL << " " << i->A->y / LL << endl;
 		fout << i->B->x / LL << " " << i->B->y / LL << endl;
+		if (kk == 0)
+		{
+			kk = 1;
+			aa = i->A->x / LL;
+			bb = i->A->y / LL;
+		}
 	}
+
+	fout2 << aa << " " << bb << endl;
+	kk = 0;
 	for (auto& i : this->Line_Inner)
 	{
 		fout << i->A->x / LL << " " << i->A->y / LL << endl;
 		fout << i->B->x / LL << " " << i->B->y / LL << endl;
+		if (kk == 0)
+		{
+			kk = 1;
+			aa = i->A->x / LL;
+			bb = i->A->y / LL;
+		}
 	}
+
+	fout2 << aa << " " << bb << endl;
+	kk = 0;
 	for (auto& i : this->Line_Outer)
 	{
 		fout << i->A->x / LL << " " << i->A->y / LL << endl;
 		fout << i->B->x / LL << " " << i->B->y / LL << endl;
+		if (kk == 0)
+		{
+			kk = 1;
+			aa = i->A->x / LL;
+			bb = i->A->y / LL;
+		}
 	}
+
+	fout2 << aa << " " << bb << endl;
+
 	for (int i = 0; i < ll; i++)
 	{
 		fout << 2 * i + 1 << " " << 2 * i + 2 << endl;
@@ -2145,7 +2176,7 @@ void Setka::Print_Sourse(void)
 	fout.close();
 }
 
-void Setka::Print_Tecplot_MK(void)
+void Setka::Print_Tecplot_MK(string name0)
 {
 	double r_o = RR_;    // Размер расстояния
 	double ro_o = 1.0; // 0.06;   // Размер плотности
@@ -2155,7 +2186,7 @@ void Setka::Print_Tecplot_MK(void)
 	double T_o = 1.0;  // 6527.0
 
 	ofstream fout;
-	string name_f = "2D_tecplot.txt";
+	string name_f = "2D_tecplot_" + name0 + ".txt";
 	fout.open(name_f);
 	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Rho\", \"P\", \"Vx\", \"Vy\", \"M\",\"Q\",\"Rho_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
 		"\"Rho_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Rho_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Rho_H4\", \"P_H4\"," << //
@@ -2603,13 +2634,26 @@ void Setka::Download_Source_MK(string name)
 	for (auto& i : this->All_Cells)
 	{
 		fout >> a >> b >> c;
-		i->par[0].I_u += a;
-		i->par[0].I_v += b;
-		i->par[0].I_T += c;
+		i->par[0].I_u = a;
+		i->par[0].I_v = b;
+		i->par[0].I_T = c;
 		fout >> a >> b >> c;
-		i->par[0].II_u += a;
-		i->par[0].II_v += b;
-		i->par[0].II_T += c;
+		i->par[0].II_u = a;
+		i->par[0].II_v = b;
+		i->par[0].II_T = c;
+
+		for (int j = 0; j < pop_atom; j++)
+		{
+			i->par[0].H_n[j] = 0.0;
+			i->par[0].H_u[j] = 0.0;
+			i->par[0].H_v[j] = 0.0;
+			i->par[0].H_T[j] = 0.0;
+			i->par[0].H_uu[j] = 0.0;
+			i->par[0].H_uv[j] = 0.0;
+			i->par[0].H_vv[j] = 0.0;
+			i->par[0].H_uuu[j] = 0.0;
+		}
+
 		for (int j = 0; j < pop_atom; j++)
 		{
 			fout >> a >> b >> c >> d >> e >> f >> g >> h;
@@ -2621,15 +2665,13 @@ void Setka::Download_Source_MK(string name)
 			i->par[0].H_uv[j] += f;
 			i->par[0].H_vv[j] += g;
 			i->par[0].H_uuu[j] += h;
-			//fout >> i->par[0].H_n[j] >> i->par[0].H_u[j] >> i->par[0].H_v[j] >> i->par[0].H_T[j]  //
-			//	>> i->par[0].H_uu[j] >> i->par[0].H_uv[j] >> i->par[0].H_vv[j] >> i->par[0].H_uuu[j];
 		}
 
 		fout >> a >> b >> c;
 		//fout >> i->par[0].k_u >> i->par[0].k_v >> i->par[0].k_T;
-		i->par[0].k_u += a;
-		i->par[0].k_v += b;
-		i->par[0].k_T += c;
+		i->par[0].k_u = a;
+		i->par[0].k_v = b;
+		i->par[0].k_T = c;
 
 	}
 
@@ -3685,7 +3727,9 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
-	double koef = 0.05; // 0.3;
+	double koef1 =  0.05; // 0.05; // 0.3;
+	double koef2 =  0.005; // 0.005;
+	double koef3 =  0.1; // 0.1;
 	// Разбираемся с контактом
 
 	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -3742,7 +3786,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			//S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
 
 			double Max = sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro));
-			VV = VV * koef * 0.3;// * 0.3;
+			VV = VV * koef1;// * 0.3;
 
 			//VV = 0.2;
 
@@ -3904,11 +3948,11 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vl = Vl * koef * 0.01;  // 0.1
+			Vl = Vl * koef2;  // 0.1
 			double t1 = -n2;
 			double t2 = n1;
 
-			if (fabs(par2.u * t1 + par2.v * t2) < 0.1)
+			if (true)//(fabs(par2.u * t1 + par2.v * t2) < 0.1) // 0.1
 			{
 				i->A->Vx += Vl * n1;
 				i->A->Vy += Vl * n2;
@@ -3919,9 +3963,9 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			}
 			else
 			{
-				i->B->Vx += Vl * n1;
-				i->B->Vy += Vl * n2;
-				i->B->count++;
+				i->A->Vx += Vl * n1;
+				i->A->Vy += Vl * n2;
+				i->A->count++;
 			}
 
 			/*if ( fabs(par2.u * t1 + par2.v * t2) < 0.01)
@@ -4025,7 +4069,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 		for (int j = 0; j < this->Line_Inner.size(); j++)  // Вычисляем скорость контакта
 		{
-			auto i = this->Line_Contact[j];
+			auto i = this->Line_Inner[j];
 			// Можно что-то ещё придумать с узлом где count = 0
 			if (i->A->count > 0)
 			{
@@ -4042,6 +4086,42 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 		this->Line_Inner[this->Line_Inner.size() - 1]->B->Vx = this->Line_Inner[this->Line_Inner.size() - 1]->A->Vx + //
 			(this->Line_Inner[this->Line_Inner.size() - 1]->A->x - this->Line_Inner[this->Line_Inner.size() - 1]->B->x)/dt;
+
+
+		// Поверхностное натяжение
+		double nat = 0.0;
+		if (false)
+		{
+			for (int j = 47; j <= 50; j++)
+			{
+				auto i = this->Line_Inner[j];
+				auto i2 = this->Line_Inner[j - 1];
+				auto i3 = this->Line_Inner[j + 1];
+
+				double x, y, x2, y2, xx, yy;
+				x = (i->A->x + i->B->x) / 2.0;
+				y = (i->A->y + i->B->y) / 2.0;
+
+				x2 = (i2->A->x + i2->B->x) / 2.0;
+				y2 = (i2->A->y + i2->B->y) / 2.0;
+
+				xx = (x + x2) / 2.0;
+				yy = (y + y2) / 2.0;
+
+				i->A->Vx = i->A->Vx + (xx - i->A->x) * nat;
+				i->A->Vy = i->A->Vy + (yy - i->A->y) * nat;
+
+				x2 = (i3->A->x + i3->B->x) / 2.0;
+				y2 = (i3->A->y + i3->B->y) / 2.0;
+
+				xx = (x + x2) / 2.0;
+				yy = (y + y2) / 2.0;
+
+				i->B->Vx = i->B->Vx + (xx - i->B->x) * nat;
+				i->B->Vy = i->B->Vy + (yy - i->B->y) * nat;
+
+			}
+		}
 
 	}
 
@@ -4091,7 +4171,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
 				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
-			Vp = Vp * koef * 0.05;  // 0.1
+			Vp = Vp * koef3;  // 0.1
 			//cout << "Setka.cpp    " << Vp << endl;
 
 			double t1 = -n2;
@@ -4791,6 +4871,16 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 			//i->Key_point[0]->y2 = R_distant_shok_1 * sin(i->s);
 		}
 
+		i->Key_point[0]->Vx = i->Key_point[0]->Vy = 0.0;
+
+		// Особое движение для стыковой точки
+		/*if (jj == this->B_Rails.size() - 1)
+		{
+			r = sqrt(kv(this->B_Rails[jj - 1]->Key_point[0]->x2) + kv(this->B_Rails[jj - 1]->Key_point[0]->y2));
+			i->Key_point[0]->x2 = r * cos(i->s);
+			i->Key_point[0]->y2 = r * sin(i->s);
+		}*/
+
 		V = i->Key_point[1]->Vx * 0.0 + i->Key_point[1]->Vy * 1.0;
 		i->Key_point[1]->x2 = i->Key_point[0]->x2;
 		i->Key_point[1]->y2 = i->Key_point[1]->y + dt * V;
@@ -4902,15 +4992,27 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 
 	}
 
-	for (auto& i : this->C_Rails)
+	for (int jj = 0; jj < this->C_Rails.size(); jj++)
 	{
+		auto i = this->C_Rails[jj];
 		/*V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
 		i->Key_point[0]->x2 = R_distant_shok_1 * cos(i->s);
 		i->Key_point[0]->y2 = R_distant_shok_1 * sin(i->s);*/
 
 		V = i->Key_point[0]->Vx * cos(i->s) + i->Key_point[0]->Vy * sin(i->s);
-		i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
-		i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
+
+		if (jj != 0) // Этот узел уже был подвинут в B - лучах
+		{
+			i->Key_point[0]->x2 = i->Key_point[0]->x + dt * V * cos(i->s);
+			i->Key_point[0]->y2 = i->Key_point[0]->y + dt * V * sin(i->s);
+
+			/*if (jj == 1)
+			{
+				r = sqrt(kv(this->C_Rails[jj - 1]->Key_point[0]->x2) + kv(this->C_Rails[jj - 1]->Key_point[0]->y2));
+				i->Key_point[0]->x2 = r * cos(i->s);
+				i->Key_point[0]->y2 = r * sin(i->s);
+			}*/
+		}
 		//i->Key_point[0]->x2 = i->Key_point[0]->x / 1.3;
 		//i->Key_point[0]->y2 = i->Key_point[0]->y / 1.3;
 
@@ -5458,54 +5560,23 @@ void Setka::Move_Setka_Calculate(const double& dt)
 void Setka::Init_conditions(void)
 {
 	double x, y, dist;
-	double ro = 1.0/RR_;
 
 
 	for (auto& i : this->All_Cells)
 	{
 		i->Get_Center(x, y);
-		dist = sqrt(kv(x) + kv(y));
+		dist = sqrt(x * x + y * y);
 
-		double p_inf = 1.0;
-		double ro_inf = 1.0;
-		double v_inf = 2.54338;
-		double rr = 1.0 / RR_;
-		double roe = 116.667;
-		double pe = 913.546;
-		double Ve = 36.1275;
-		
-		if (i->type == C_5)
+		if (dist <= 0.1)
 		{
-			i->par[0] = { ro_inf, p_inf, Velosity_inf, 0.0, 100.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-			i->par[1] = i->par[0];
-		}
-		else if (i->type == C_4)
-		{
-			double xx = x - 1300.0 / RR_;
-			double yy = y - 0.0;
-			double n = sqrt(kv(xx) + kv(yy));
-			xx = xx / n;
-			yy = yy / n;
+			double ro = 1.0 / (kv(chi_real) * dist * dist);
+			double P_E = ro * chi_real * chi_real / (ggg * 10.0 * 10.0);
 
-			i->par[0] = { 2.0 * ro_inf, 7.0 * p_inf, 0.25 * v_inf * xx, 0.25 * v_inf * yy, 100.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-			i->par[1] = i->par[0];
-		}
-		else if (i->type == C_3 || i->type == C_2)
-		{
-			i->par[0] = { ro_inf / 20.0, p_inf * 10.0, 0.1 * Ve * x / dist, 0.1 * Ve * y / dist, 100.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-			i->par[1] = i->par[0];
-		}
-		else 
-		{
-			i->par[0] = { roe * kv(rr/dist), pe * pow(rr / dist,2.0 * ggg), Ve * x / dist, Ve * y / dist, 100.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0, 0.000001, 0.000001, 0.0, 0.0,//
-			0.000001, 0.000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+			i->par[0].ro = ro;
+			i->par[0].p = P_E;
+			i->par[0].u = chi_real * x / dist;
+			i->par[0].v = chi_real * y / dist;
+			i->par[0].Q = ro;
 			i->par[1] = i->par[0];
 		}
 	}
@@ -8114,7 +8185,7 @@ void Setka::Go_stationary_5_komponent_inner_MK2(int step)
 
 void Setka::Go_stationary_5_komponent_inner_MK(int step)
 {
-	cout << "Setka.cpp    " << "START " << step << endl;
+	//cout << "Setka.cpp    " << "START " << step << endl;
 	int now1 = 1;
 	int now2 = 0;
 	double T[2];
@@ -8258,6 +8329,9 @@ void Setka::Go_stationary_5_komponent_inner_MK(int step)
 			q2_2 = a2;
 			q3 = a3; // / (chi_real / chi_);
 
+			//q2_1 = q2_2 = q3 = 0.0;
+
+			//cout << q2_1 << " " << q2_2 << " " << q3 << endl;
 
 			u = par1.u;
 			v = par1.v;
@@ -10598,7 +10672,7 @@ void Setka::Go_5_komponent_2(int step)
 
 void Setka::Go_5_komponent_MK(int step, bool dvig)
 {
-	cout << "Setka.cpp    " << "START " << step << endl;
+	//cout << "Setka.cpp    " << "START " << step << endl;
 	int now1 = 1;
 	int now2 = 0;
 	double T[2];
@@ -10607,10 +10681,10 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 
 	for (int st = 0; st < step; st++)
 	{
-		if (st % 1000 == 0 && st > 0)
+		/*if (st % 1000 == 0 && st > 0)
 		{
 			cout << "Setka.cpp    " << st << " " << T[now2] << endl;
-		}
+		}*/
 		now1 = (now1 + 1) % 2; // Какие параметры сейчас берём
 		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
 		double time = 10000000;
@@ -10942,21 +11016,22 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 			p = par1.p;
 			Q = par1.Q;
 
+			//q2_1 = q2_2 = q3 = 0.0;
 
 			double ro3, Q33, u3, v3, p3;
 
 			if (K->type != C_centr)
 			{
-				ro3 = ro - T[now1] * (K->Potok[0] / Volume + ro * v / y);
-				Q33 = Q - (T[now1] / Volume) * K->Potok[4] - T[now1] * Q * v / y;
+				ro3 = ro * Volume / Volume2 - T[now1] * (K->Potok[0] / Volume2 + ro * v / y);
+				Q33 = Q * Volume / Volume2 - (T[now1] / Volume2) * K->Potok[4] - T[now1] * Q * v / y;
 				if (ro3 <= 0)
 				{
 					printf("Problemsssss  ro < 0!   %lf,  %lf\n", x, y);
 					ro3 = 0.00001;
 				}
-				u3 = (ro * u - T[now1] * (K->Potok[1] / Volume + ro * v * u / y - q2_1)) / ro3;
-				v3 = (ro * v - T[now1] * (K->Potok[2] / Volume + ro * v * v / y - q2_2)) / ro3;
-				p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) - T[now1] * (K->Potok[3] / Volume + //
+				u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + ro * v * u / y - q2_1)) / ro3;
+				v3 = (ro * v * Volume / Volume2 - T[now1] * (K->Potok[2] / Volume2 + ro * v * v / y - q2_2)) / ro3;
+				p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) * Volume / Volume2 - T[now1] * (K->Potok[3] / Volume2 + //
 					+v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - q3)) - //
 					0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
 				if (p3 <= 0)
@@ -10964,6 +11039,8 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 					cout << "problem p  " << x << " " << y << " " << p3 << endl;
 					p3 = 0.000001;
 				}
+
+				
 
 				K->par[now2].ro = ro3;
 				K->par[now2].Q = Q33;
@@ -12177,7 +12254,7 @@ Cell* Setka::Belong_point(int b, const double& x, const double& y)
 
 	cout << "Setka.cpp    " << "ERRORRRORORfireubfvwcefrvjywgkvygdcwkug324h324334" << endl;
 	cout << "Setka.cpp    " << "FFF  " << x << " " << y << " " << b << endl;
-	for (auto& i : this->Cell_sphere)
+	for (auto& i : this->Cell_disk)
 	{
 		double x1, y1;
 		i->Get_Center(x1, y1);
@@ -12192,6 +12269,7 @@ void Setka::M_K_prepare(void)
 	double xx2, yy2;
 	bool bb1 = false;
 	bool bb2 = false;
+	bool bb3 = false;
 
 
 	// Заполним граничные ячейки
@@ -12222,12 +12300,12 @@ void Setka::M_K_prepare(void)
 		for (auto& j : i->contour)
 		{
 
-			if (sqrt(kvv(j->x, j->y, 0.0)) <= (Rmax_ + 4.0 / RR_) && j->x > -0.1 / RR_)
+			if (sqrt(kvv(j->x, j->y, 0.0)) <= (Rmax_ + 10.0 / RR_) && j->x > -10.1 / RR_)
 			{
 				bb1 = true;
 			}
 
-			if (sqrt(kvv(j->x, j->y, 0.0)) >= (Rmax_ - 4.0 / RR_) && j->x > -0.1 / RR_)
+			if (sqrt(kvv(j->x, j->y, 0.0)) >= (Rmax_ - 10.0 / RR_) && j->x > -10.1 / RR_)
 			{
 				bb2 = true;
 			}
@@ -12323,20 +12401,26 @@ void Setka::M_K_prepare(void)
 	{
 		bb1 = false;
 		bb2 = false;
+		bb3 = true;
 
 		for (auto& j : i->contour)
 		{
-			if (j->x <= -1.0 / RR_ && j->y > Rmax_)
+			if (j->x <= 10.0 / RR_ && j->y > Rmax_ - 10.0 / RR_)
 			{
 				bb1 = true;
 			}
-			else if (j->x >= -1.0 / RR_ && j->y > Rmax_)
+			else if (j->x >= -10.0 / RR_ && j->y > Rmax_ - 10.0 / RR_)
 			{
 				bb2 = true;
 			}
+
+			if (j->x <= 3.0 / RR_ && j->x >= -3.0 / RR_ && j->y > Rmax_ - 10.0 / RR_)
+			{
+				bb3 = true;
+			}
 		}
 
-		if (bb1 == true && bb2 == true)
+		if ((bb1 == true && bb2 == true)||(bb3 == true))
 		{
 			this->Cell_disk.push_back(i);
 		}
@@ -12389,6 +12473,11 @@ void Setka::M_K_prepare(void)
 	// Блок загрузки датчиков случайных чисел
 	ifstream fin2;
 	fin2.open("rnd_my.txt");
+	if (fin2.is_open() == false)
+	{
+		cout << "ERROR open  rnd_my.txt " << endl;
+		exit(-100);
+	}
 	double d, a1, b1, c;
 	for (int i = 0; i < 1021; i++)
 	{
@@ -12420,10 +12509,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 5 * 80 * 36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
-	this->Number2 = 411 * 5 * 80 * 36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
-	this->Number3 = 411 * 80; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
-	this->Number4 = 411 * 5 * 80 * 36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	this->Number1 = 411 * 5 * 770; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
+	this->Number2 = 411 * 500; //411 * 500;// * 500;// * 80 * 40;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
+	this->Number3 = 411 * 300; // 411 * 300;// * 300;// * 80 * 10;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
+	this->Number4 = 411 * 500; //411 * 500;// * 500;// * 80 * 40;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -12442,7 +12531,7 @@ void Setka::M_K_prepare(void)
 	for (int ik = 0; ik < J_; ++ik)
 	{
 		SINKR[ik] = max(fabs(sin((ik + 1) * pi_ / J_)), fabs(sin(ik * pi_ / J_)));
-		cout << "SINKR = " << SINKR[ik] << endl;
+		//cout << "SINKR = " << SINKR[ik] << endl;
 	}
 
 
@@ -12555,7 +12644,12 @@ void Setka::M_K_prepare(void)
 
 	//return;
 
-	fin2.open("stat_do.txt");
+	fin2.open(parameter_6);
+	if (fin2.is_open() == false)
+	{
+		cout << "ERROR open  stat_do.txt " << endl;
+		exit(-100);
+	}
 	int x1;
 	double cc;
 
@@ -12578,16 +12672,16 @@ void Setka::M_K_prepare(void)
 					//cc = 0.0;
 					if (k != 3)
 					{
-						Mu_[k][i][j] = max(cc * koeff[k], 0.00001); // * 40.0
+						Mu_[k][i][j] = max(cc * koeff[k], 0.000001); // * 40.0
 					}
 					else
 					{
-						Mu_[k][i][j] = max(cc * koeff[k], 0.00001);
+						Mu_[k][i][j] = max(cc * koeff[k], 0.000001);
 					}
 					//Mu_[k][i][j] = Mu_[k][i][j] * 100;
 					// << Mu_[k][i][j] << endl;
 					//Mu_[k][i][j] = Mu[k][i];
-					cout << "Mu_[k][i][j] = " << Mu_[k][i][j] << endl;
+					//cout << "Mu_[k][i][j] = " << Mu_[k][i][j] << endl;
 				}
 			}
 		}
@@ -13549,7 +13643,7 @@ void Setka::MK_start_new(void)
 	int st = 1;
 
 	ofstream fout;
-	fout.open("stat.txt");
+	fout.open(parameter_7);
 
 	ofstream fout2;
 	fout2.open("stat_moments.txt");
@@ -13660,7 +13754,7 @@ void Setka::MK_start_new(void)
 							ii_alp = alpha_zones(x, sqrt(kvv(y, z, 0.0)));
 						}
 
-						/*bool** BZ = new bool*[I_];
+						bool** BZ = new bool*[I_];
 						for (size_t i2 = 0; i2 < I_; i2++)
 						{
 							BZ[i2] = new bool[J_];
@@ -13672,7 +13766,7 @@ void Setka::MK_start_new(void)
 							{
 								BZ[i2][j2] = false;
 							}
-						}*/
+						}
 
 
 						// Расчёт весов
@@ -13696,10 +13790,10 @@ void Setka::MK_start_new(void)
 						//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
 					
 
-						/*for (int i = 0; i < I_; ++i) {
+						for (int i = 0; i < I_; ++i) {
 							delete[] BZ[i];
 						}
-						delete[] BZ;*/
+						delete[] BZ;
 					
 					}
 				}
@@ -13769,7 +13863,7 @@ void Setka::MK_start_new(void)
 			ksi1 = sens1->MakeRandom();
 			ksi2 = sens1->MakeRandom();
 
-			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ - 3.0 / RR_)) + kv(Rmax_ - 3.0 / RR_));  // 0.1
+			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ + 1.0 / RR_)) + kv(Rmax_ + 1.0 / RR_));  // 0.1
 			phi = ksi2 * 2.0 * pi_;
 			y = r * cos(phi);
 			z = r * sin(phi);
@@ -14049,7 +14143,7 @@ void Setka::MK_start_new(void)
 
 		if (fabs(k->par[0].M_u) > 0.000001)
 		{
-			k->par[0].k_u = (k->par[0].I_u + k->par[0].II_u) / k->par[0].M_u;
+			k->par[0].k_u = (k->par[0].I_u) / k->par[0].M_u;
 			if (k->par[0].k_u > 10.0 || k->par[0].k_u < 0.1)
 			{
 				k->par[0].k_u = 1.0;
@@ -14062,7 +14156,7 @@ void Setka::MK_start_new(void)
 
 		if (fabs(k->par[0].M_v) > 0.000001)
 		{
-			k->par[0].k_v = (k->par[0].I_v + k->par[0].II_v) / k->par[0].M_v;
+			k->par[0].k_v = (k->par[0].I_v) / k->par[0].M_v;
 			if (k->par[0].k_v > 10.0 || k->par[0].k_v < 0.1)
 			{
 				k->par[0].k_v = 1.0;
@@ -14075,7 +14169,7 @@ void Setka::MK_start_new(void)
 
 		if (fabs(k->par[0].M_T) > 0.000001)
 		{
-			k->par[0].k_T = (k->par[0].I_T + k->par[0].II_T) / k->par[0].M_T;
+			k->par[0].k_T = (k->par[0].I_T) / k->par[0].M_T;
 			if (k->par[0].k_T > 30.0 || k->par[0].k_T < 0.1)
 			{
 				k->par[0].k_T = 1.0;
@@ -14197,7 +14291,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 
 	cout << "START  MPI_MK_start  from  " << rank << endl;
 
-	omp_set_num_threads(28);
+	omp_set_num_threads(24);
 
 	/*if (omp_get_num_procs() < 28)
 	{
@@ -14206,7 +14300,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 	}*/
 
 #pragma omp parallel for // num_threads(12)
-	for (int index = 0; index < 280; index++)
+	for (int index = 0; index < 240; index++)
 	{
 		double A1 = 1.0 + (1.0 + 1.0 / (2.0 * kv(Y))) * erf(Y) + exp(-kv(Y)) / (Y * sqrtpi_);
 		double A2 = 0.0; // Нужно задать после нахождения угла theta
@@ -14239,7 +14333,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 		double a, b, c;
 		double r;
 
-		for (int ii = 0; ii < Number1 / 280; ii++)  //  Вылет с полусферы   Number1 / 135
+		for (int ii = 0; ii < Number1 / 240; ii++)  //  Вылет с полусферы   Number1 / 135
 		{
 			if (true)
 			{
@@ -14326,7 +14420,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 			}
 
 		}
-		for (int ii = 0; ii < Number2 / 280; ii++)  //  Вылет сверху 
+		for (int ii = 0; ii < Number2 / 240; ii++)  //  Вылет сверху 
 		{
 			//cout << "Setka.cpp    " << "Mk_start_new   " << "A" << endl;
 			ksi1 = sens1->MakeRandom();
@@ -14358,7 +14452,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 			//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi,//
 			//	Point, mu2, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu2, I_ - 1, ii);
 		}
-		for (int ii = 0; ii < Number3 / 280; ii++)  //  Вылет сзади
+		for (int ii = 0; ii < Number3 / 240; ii++)  //  Вылет сзади
 		{
 			//cout << "Setka.cpp    " << "Mk_start_new   " << "B" << endl;
 			Velosity_initial2(sens1, a, b, c);
@@ -14379,22 +14473,31 @@ void Setka::MPI_MK_start(int argc, char** argv)
 			//Fly_exchenge_Imit(MK, sens2, Left_ + 2.0/ RR_, y, z, a, b, c, Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, //
 			//	3, mu3, I_ - 1, ii);
 
-			Fly_exchenge_Imit_Korol_2(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c,//
-				Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu3);
+			//Fly_exchenge_Imit_Korol_2(MK, sens2, Left_ + 2.0 / RR_, y, z, a, b, c,//
+			//	Point, mu3, -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu3);                // Была эта, потом решили поменять
+			 
+			Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, Left_ + 2.0 / RR_, y, z, a, b, c, Point, mu3,
+				3, false, mu3, 0, 0, true);
 		}
-		for (int ii = 0; ii < Number4 / 280; ii++)  //Number4 / 411
+		for (int ii = 0; ii < Number4 / 240; ii++)  //Number4 / 411
 		{
 			double a, b, c;
 			Velosity_initial(sens1, a, b, c);
 			ksi1 = sens1->MakeRandom();
 			ksi2 = sens1->MakeRandom();
 
-			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ - 3.0 / RR_)) + kv(Rmax_ - 3.0 / RR_));  // 0.1
+			r = sqrt(ksi1 * (kv(R5_ - 2.0 / RR_) - kv(Rmax_ - 0.1 / RR_)) + kv(Rmax_ - 0.1 / RR_));  // 0.1
 			phi = ksi2 * 2.0 * pi_;
 			y = r * cos(phi);
 			z = r * sin(phi);
 
 			Cell* Point = Belong_point(4, -0.5 / RR_, sqrt(kv(z) + kv(y)));
+
+			if (Point == nullptr)
+			{
+				cout << "MIMO  odin  44444" << endl;
+				continue;
+			}
 
 			//Fly_exchenge_Imit_Korol(MK, sens2, -0.1/RR_, y, z, a, b, c, Point, mu4, 3, false, mu4, I_ - 1, J_ - 1, true);
 
@@ -15226,7 +15329,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 
 				if (fabs(k->par[0].M_u) > 0.000001)
 				{
-					k->par[0].k_u = (k->par[0].I_u + k->par[0].II_u) / k->par[0].M_u;
+					k->par[0].k_u = (k->par[0].I_u) / k->par[0].M_u;
 					if (k->par[0].k_u > 10.0 || k->par[0].k_u < 0.1)
 					{
 						k->par[0].k_u = 1.0;
@@ -15239,7 +15342,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 
 				if (fabs(k->par[0].M_v) > 0.000001)
 				{
-					k->par[0].k_v = (k->par[0].I_v + k->par[0].II_v) / k->par[0].M_v;
+					k->par[0].k_v = (k->par[0].I_v) / k->par[0].M_v;
 					if (k->par[0].k_v > 10.0 || k->par[0].k_v < 0.1)
 					{
 						k->par[0].k_v = 1.0;
@@ -15252,7 +15355,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 
 				if (fabs(k->par[0].M_T) > 0.000001)
 				{
-					k->par[0].k_T = (k->par[0].I_T + k->par[0].II_T) / k->par[0].M_T;
+					k->par[0].k_T = (k->par[0].I_T) / k->par[0].M_T;
 					if (k->par[0].k_T > 30.0 || k->par[0].k_T < 0.1)
 					{
 						k->par[0].k_T = 1.0;
@@ -17705,6 +17808,8 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, int& s1, int& s2, int& s3, dou
 	/*double X = x_ex + t2 * Vx;
 	double Y = y_ex + t2 * Vy;
 	double Z = z_ex + t2 * Vz;*/
+
+
 	double X = x_0 + b * Vx;
 	double Y = y_0 + b * Vy;
 	double Z = z_0 + b * Vz;
@@ -20131,9 +20236,25 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 	/*double X = x_ex + t2 * Vx;
 	double Y = y_ex + t2 * Vy;
 	double Z = z_ex + t2 * Vz;*/
+
+	bool goto1 = false;
+aa1:
+
 	double X = x_0 + b * Vx;
 	double Y = y_0 + b * Vy;
 	double Z = z_0 + b * Vz;
+
+	if (goto1 == true && X < 2.0 && X > -3.0)
+	{
+		if (Vx > 0)
+		{
+			X = X + 0.00001;
+		}
+		else
+		{
+			X = X - 0.00001;
+		}
+	}
 
 	Cell* next = nullptr;             // В какую ячейку попадаем следующую
 	double xk, yk;
@@ -20222,10 +20343,17 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 
 	if (next == nullptr)
 	{
+		if (goto1 == false)
+		{
+			goto1 = true;
+			b = b * 1.01;
+			b = b + 0.00001;
+			goto aa1;
+		}
 		this->Smut.lock();
-		cout << "Setka.cpp    " << "Fly_ex_Korol   " << "Long   find  " << endl;
-		cout << "Setka.cpp    " << "Fly_ex_Korol  end " << xk << " " << yk << endl;
-		cout << "Setka.cpp    " << "Fly_ex_Korol  start " << x_0 << " " << y_start << endl;
+		cout << "Setka.cpp    " << "1ds Fly_ex_Korol   " << "Long   find  " << endl;
+		cout << "Setka.cpp    " << "1ds Fly_ex_Korol  end " << xk << " " << yk << endl;
+		cout << "Setka.cpp    " << "1ds Fly_ex_Korol  start " << x_0 << " " << y_start << endl;
 		this->Smut.unlock();
 		//exit(-10);
 		//cout << "Setka.cpp    " << "Fly_ex_Korol   "<< x_0 << " " << sqrt(kvv(0.0, y_0, z_0)) << endl;
