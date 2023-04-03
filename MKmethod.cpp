@@ -986,6 +986,7 @@ bool MKmethod::Init_Parametrs(Sensor* sens, vector <double>& mu_, vector <double
 		{
 			cout << Wa << "    ERROR  Wa  311" << endl;
 			cout << ksi1 << endl;
+			
 			exit(-1);
 		}
 
