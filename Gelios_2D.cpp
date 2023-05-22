@@ -370,7 +370,9 @@ int main(int argc, char** argv)
             i->par[0].k_T = 0.0;
         }
         //SS->Download_Source_MK("source_vers7_7.txt");
+        
         SS->Download_Source_MK(parameter_22);
+        
         //SS->Download_Source_MK("source_vers7_9.txt");
         double norm_istok = 1.0;
         for (auto& i : SS->All_Cells)
@@ -408,9 +410,10 @@ int main(int argc, char** argv)
         cout << "SSSSS   " << endl;
         cout << SS->B_Rails[SS->B_Rails.size() - 1]->Key_point[0]->x << " " << SS->B_Rails[SS->B_Rails.size() - 1]->Key_point[0]->y << endl;
         cout << SS->C_Rails[0]->Key_point[0]->x << " " << SS->C_Rails[0]->Key_point[0]->y << endl;
-        SS->Print_cell();
+        //SS->Print_cell();
         SS->Print_Gran("DO_gran_" + name_gd);
         SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
+        return 0;
 
         for (int k = 0; k < 0; k++)  // 10
         {
@@ -419,7 +422,7 @@ int main(int argc, char** argv)
             SS->Print_Tecplot_MK();
         }
 
-        int max_k = 900;  // 150  считаются 30 минут, просить 40 минут
+        int max_k = 900;  // 150  считаются 30 минут, просить 40 минут   900
         //SS->Init_conditions();
         for (int k = 0; k < max_k; k++)  // 10
         {
@@ -433,7 +436,7 @@ int main(int argc, char** argv)
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(3000);
             //SS->Init_conditions();
-            if (k % 20 == 0 && k > 1)
+            if (k % 10 == 0 && k > 1)
             {
                 SS->Print_Gran("gran_" + name_gd);
             }

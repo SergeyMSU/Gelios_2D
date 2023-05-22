@@ -59,6 +59,10 @@ public:
 	double Mu_stat[4][9];      // Считаем статистику для весов
 	int I_stat[4][9];      // Считаем статистику для весов
 
+	double pogloshenie[90][90];
+	double pogVmin;
+	double pogVmax;
+
 	double Mu_statistic[4][I_][J_];      // Считаем статистику для весов
 	double Mu_[4][I_][J_];      // Применяем статистику для весов
 	double SINKR[J_];            // Критические синусы для зон по углу по МОДУЛЮ
