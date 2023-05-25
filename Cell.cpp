@@ -28,6 +28,16 @@ void Cell::Initial(void)
 	this->par[0].num_atoms[3] = 0;
 	this->axis_ = false;
 	this->y_ax = 0.0;
+
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < pogl_rad_; j++)
+		{
+			pogloshenie[i][j] = 0.0;
+		}
+	}
+	
+
 }
 
 void Cell::Get_Center2(double& x, double& y)

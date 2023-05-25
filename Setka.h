@@ -59,9 +59,12 @@ public:
 	double Mu_stat[4][9];      // Считаем статистику для весов
 	int I_stat[4][9];      // Считаем статистику для весов
 
-	double pogloshenie[90][90];
-	double pogVmin;
-	double pogVmax;
+
+	
+	//double pogloshenie[4][pogl_alf_][pogl_rad_];
+	//const double pogVmin = -10.0;
+	//const double pogVmax = 5.0;
+	//const double pogRmax = 2.0;
 
 	double Mu_statistic[4][I_][J_];      // Считаем статистику для весов
 	double Mu_[4][I_][J_];      // Применяем статистику для весов
@@ -241,6 +244,7 @@ public:
 
 
 	Cell* Belong_point(int b, const double& x, const double& y);
+	Cell* Find_cell(int& b, const double& x, const double& y);
 
 	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, //
 		double mu, const double& mu_0, bool ExCh);
@@ -287,6 +291,10 @@ public:
 	void culc_PUI(void);
 	void GD_prepare(void);
 	double get_w_init(const int& k);
+
+	// Поглощение
+
+	void func_pogloshenie(void);
 
 	// Перезарядка с расщеплением на траектории
 	double Velosity_1(const double& u, const double& cp);

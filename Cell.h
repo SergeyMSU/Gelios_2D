@@ -111,6 +111,8 @@ public:
 	vector <Point*> contour;    // √арантируетс€ расположение точек по кругу
 	vector <Gran*> Grans;
 
+	double pogloshenie[4][pogl_rad_];
+
 	int i_pui = 0;             //  оличество сортов пуи
 	vector <double> fpui;
 	vector <double> Wmin_sort;
@@ -150,6 +152,10 @@ public:
     // Ѕлок переменных чисто дл€ монте-карло
 	bool axis_; // явл€етс€ ли €чейка граничной с осью (дл€ сноса скорости в монте-карло
 	double y_ax; // ¬ысота центра граничной €чейки над осью
+
+	double x_center;
+	double y_center;
+	double alf_center;
 
 	Cell(Point* A, Point* B, Point* C, Point* D);
 	Cell(void);

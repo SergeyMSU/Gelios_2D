@@ -1,6 +1,13 @@
 #pragma once
 #include "Help.h"
 #include <string>
+#include <vector>
+#include <mutex>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+
 class Dist_func
 {
 public:

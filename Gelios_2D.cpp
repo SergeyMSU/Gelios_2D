@@ -371,7 +371,7 @@ int main(int argc, char** argv)
         }
         //SS->Download_Source_MK("source_vers7_7.txt");
         
-        SS->Download_Source_MK(parameter_22);
+        SS->Download_Source_MK(parameter_22); // ТУТ ЗАНУЛЯЮТСЯ ИСТОЧНИКИ
         
         //SS->Download_Source_MK("source_vers7_9.txt");
         double norm_istok = 1.0;
@@ -472,6 +472,11 @@ int main(int argc, char** argv)
     start = omp_get_wtime();
 
     SS->MK_start_new();  // Была эта
+
+    
+    //SS->Download_Source_MK(parameter_22);
+    SS->func_pogloshenie();
+    //SS->Print_Tecplot_MK();
 
     //SS->MK_start_2_0();
 
@@ -622,6 +627,24 @@ int main(int argc, char** argv)
             //i->print_3d();
             break;
         }
+
+        ofstream fout_cr;
+        fout_cr.open("Pogloshenie.txt");
+
+        for (int k = 3; k < 4; k++)
+        {
+            for (int i = 0; i < 1; i++)
+            {
+               // double alf = (i + 1) * (pi_ / 2.0) / (pogl_alf_ + 1.0);
+                for (int j = 0; j < pogl_rad_; j++)
+                {
+                  //  fout_cr << (SS->pogVmin + (j + 0.5) * (SS->pogVmax - SS->pogVmin) / pogl_rad_) << " "
+                  //      << SS->pogloshenie[k][i][j] * 3.0/(2.0 * pi_ * sin(alf) * ((SS->pogVmax - SS->pogVmin) / pogl_rad_) ) << endl;
+                }
+            }
+        }
+
+        fout_cr.close();
 
     }
 
