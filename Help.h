@@ -6,7 +6,7 @@
 #define parameter_1 "vers7_6.txt"
 //  2) Установить файл сохранения газодинамических параметров
 #define parameter_21 "vers7_6*.txt"   //  газодинамических параметров
-#define parameter_22 "source_vers7_6*.txt"   //  источников монте-карло (это и для сохранения, и для скачивания)
+#define parameter_22 "source_vers7_6.txt"   //  источников монте-карло (это и для сохранения, и для скачивания)
 //  3) Установить правильный параметр Kn
 #define Kn_  0.4326569 // 0.4326569808 // 0.4326569808 // 6.0		
 //  4) Выбрать алгоритм расчёта (Монте-Карло \ Газовая динамика)
@@ -62,12 +62,19 @@
 #define a_2 0.1307345665  // 0.102578  // 0.10263
 
 
+#define pogVmin -10.0
+#define pogVmax 20.0
+#define pogRmax 2.0
+#define pogl_rad_ 120
+
 
 #include <initializer_list>
 #include <random>
 #include <ctime> // подключаем clock
 #include <stdint.h>
 #include <xmmintrin.h>
+#include <string>
+
 
 #include "Setka.h"
 #include "Rail.h"
@@ -78,8 +85,8 @@
 #include "sensor.h"
 #include "sensor2.h"
 #include "MKmethod.h"
-#include "Dist_func.h"
 #include <mutex>
+
 
 #include <vector>
 #include <string>
@@ -89,6 +96,8 @@
 #include <fstream>
 #include <math.h>
 #include <algorithm>
+
+#include "Dist_func.h"
 
 #if USEMPI 
 #include "mpi.h"

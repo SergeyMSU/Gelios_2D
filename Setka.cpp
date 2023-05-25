@@ -1151,16 +1151,7 @@ void Setka::Inizialization(void)
 
 	this->k_1 = 0;
 
-	for (int i = 0; i < 90; i++)
-	{
-		for (int j = 0; j < 90; j++)
-		{
-			pogloshenie[i][j] = 0.0;
-		}
-	}
 
-	pogVmin = -5.0;
-	pogVmax = 5.0;
 }
 
 void Setka::normir(int ii)
@@ -12308,6 +12299,21 @@ void Setka::Init_Pozision(Sensor* sens, const double& A1, double& phi, double& t
 
 	the = acos(X);
 }
+
+Cell* Setka::Find_cell(int& b, const double& x, const double& y)
+{
+	for (auto& i : this->All_Cells)
+	{
+		if (i->belong(x, y))
+		{
+			b = 1;
+			return i;
+		}
+	}
+
+	b = 0;
+	return nullptr;
+}
  
 
 Cell* Setka::Belong_point(int b, const double& x, const double& y)
@@ -12471,6 +12477,9 @@ void Setka::M_K_prepare(void)
 
 		double xxx, yyy;
 		i->Get_Center(xxx, yyy);
+		i->x_center = xxx;
+		i->y_center = yyy;
+		i->alf_center = polar_angle(xxx, yyy);
 		i->y_ax = yyy;
 		i->axis_ = false;
 		for (auto& j : i->Grans)
@@ -12610,10 +12619,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 280 * 1000 * 4932;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
-	this->Number2 = 411 * 500 * 4;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
-	this->Number3 = 411 * 300 * 4;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
-	this->Number4 = 411 * 500 * 4;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	this->Number1 = 411 * 1000 * 9 * 8;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
+	this->Number2 = 411 * 30;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
+	this->Number3 = 411 * 30;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
+	this->Number4 = 411 * 30;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -13865,8 +13874,8 @@ void Setka::MK_start_new(void)
 							//Fly_exchenge_Imit_Korol(MK, sens2, BZ, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
 							//cout << "B" << endl;
 
-							//Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
-							//	3, false, mu1 * mu[i], ii_z, ii_alp, true);
+							Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
+								3, false, mu1 * mu[i], ii_z, ii_alp, true);
 
 
 							// Работающая с заданными аналитически весами
@@ -13875,8 +13884,10 @@ void Setka::MK_start_new(void)
 
 							//Fly_exchenge_Imit_Korol_PUI(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1, ii_z, ii_alp, true);  // mu1 * mu[i]
 
-							Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
-								Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
+
+							// Эта для иммитационного метода
+							//Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
+							//	Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
 
 							//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
 
@@ -14357,6 +14368,20 @@ void Setka::MK_start_new(void)
 				fout2 << this->mu_mom[i][j] << " " << this->Vx_mom[i][j] << " " << this->Vy_mom[i][j] //
 					<< " " << this->Vxx_mom[i][j] << " " << this->Vyy_mom[i][j] << " " << this->Vxy_mom[i][j] //
 					<< " " << this->Vxxx_mom[i][j] << " " << this->T_mom[i][j] << endl;
+			}
+		}
+	}
+
+
+	for (auto& kk : this->All_Cells)
+	{
+		double no = (1.0 * AllNumber * kk->Get_Volume_rotate(360.0));
+
+		for (int k = 0; k < 4; k++)
+		{
+			for (int j = 0; j < pogl_rad_; j++)
+			{
+				kk->pogloshenie[k][j] = kk->pogloshenie[k][j] * this->sum_s / no;
 			}
 		}
 	}
@@ -19850,6 +19875,26 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 		double r = sqrt(kvv(x_ex, y_ex, z_ex));
 		double all = polar_angle(x_ex, sqrt(kv(y_ex) + kv(z_ex)));
 
+		// Находим пересечение с лучами зрения
+		if (true)
+		{
+			double xk = now->x_center;
+			double yk = now->y_center;
+			double alf = now->alf_center;
+			double aa = tan(alf);
+
+
+			double nn = sqrt(kvv(x_ex, y_ex, z_ex));
+			double e1 = x_ex / nn;
+			double e2 = y_ex / nn;
+			double e3 = z_ex / nn;
+			
+			double Vu = Vx * e1 + Vy * e2 + Vz * e3;
+
+			now->pogloshenie[area][min(pogl_rad_ - 1, max(0 , (int)( (Vu - pogVmin) / ( (pogVmax - pogVmin) / pogl_rad_) )))] += t_ex * mu_ex + mu2 * time;
+			
+		}
+
 		// для сбора статистики
 		if (func_stat)
 		{
@@ -23721,6 +23766,81 @@ double Setka::w_c_v_s(const double& r, const double& v, int i)  // W для перезар
 {
 	double gamma = 1.0 / (kv(r) / kv(Ri[i]) - 1.0);
 	return sqrt(gamma * kv(v));
+}
+
+void Setka::func_pogloshenie(void)
+{
+	// Считаем поглощение вдоль луча
+
+	for (int ijk = 0; ijk <= 18; ijk++)
+	{
+		for (int sort = 0; sort < 4; sort++)
+		{
+			double alf = ijk * (pi_ / 2.0) / (9.0);
+			double e1 = cos(alf);
+			double e2 = sin(alf);
+			double dl = pogRmax / 300;
+			double x = 0.0, y = 0.0;
+			double du = (pogVmax - pogVmin) / pogl_rad_;
+			double u = 0.0;
+
+			int b;
+
+			double n = 1.0, cp = 1.0, ux = 0.0, uy = 0.0;
+
+			double pogl[pogl_rad_];
+			double pogl2[pogl_rad_];
+			for (int i = 0; i < pogl_rad_; i++)
+			{
+				pogl[i] = 0.0;
+				pogl2[i] = 0.0;
+			}
+
+
+			for (int i = 0; i < 300; i++)
+			{
+				x = e1 * (i * dl + dl / 2.0);
+				y = e2 * (i * dl + dl / 2.0);
+
+				auto C = Find_cell(b, x, y);
+				if (b == 0)
+				{
+					cout << "ERRE 22423424343324  " << x << " " << y << endl;
+					continue;
+				}
+
+				n = C->par[0].H_n[sort];
+				cp = sqrt(C->par[0].H_T[sort]);
+				ux = C->par[0].H_u[sort];
+				uy = C->par[0].H_v[sort];
+
+				if (cp <= 0.00000001) cp = 1.0;
+
+				//cout << n << " " << ux << " " << uy << " " << cp << endl;
+
+				for (int j = 0; j < pogl_rad_; j++)
+				{
+					u = pogVmin + (j + 0.5) * du;
+
+					pogl[j] += dl * exp(-kv(u - ux * e1 - uy * e2) / kv(cp)) * 3.0 * n / (sqrtpi_ * cp);
+					pogl2[j] += 3.0 * dl * C->pogloshenie[sort][j] / du;
+				}
+			}
+
+			ofstream fout_cr;
+			fout_cr.open(to_string(sort) + "_Pogloshenie_maxwell_" + to_string(ijk) + ".txt");
+
+			for (int j = 0; j < pogl_rad_; j++)
+			{
+				u = pogVmin + (j + 0.5) * du;
+				fout_cr << u << " " << pogl[j] << " " << pogl2[j] << endl;
+				// << exp(-pogl[j] * 45.2717) << endl;
+			}
+
+			fout_cr.close();
+		}
+	}
+
 }
 
 double Setka::Velosity_1(const double& u, const double& cp)
