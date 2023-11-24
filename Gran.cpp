@@ -13,6 +13,7 @@ Gran::Gran(Point* A, Point* B, Gran_type type)
 	this->main_gran = true;
 	this->Sosed_down = nullptr;
 	this->Sosed_up = nullptr;
+	this->metod_HLLC = 1;
 	if (fabs(A->x - B->x) > 0.00001 / RR_)
 	{
 		this->parallel = false;
@@ -214,9 +215,9 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	{
 		par = this->Master->par[i];
 		//par.p = par.p / 1000000.0;
-		if (par.u >= 0.0)                                                         // ОТСОС ЖИДКОСТИ!!!!!!!!!!!!!!!!!!!!!!!!!!
+		if (par.u >= Velosity_inf)                                                         // ОТСОС ЖИДКОСТИ!!!!!!!!!!!!!!!!!!!!!!!!!!
 		{
-			par.u = -0.1;
+			par.u = Velosity_inf;
 		}
 	}
 	else if (this->type == Upper_wall)  // Не надо менять
@@ -475,9 +476,9 @@ void Gran::Get_par_TVD(Parametr& par, int i)  // Здесь задаются граничные услови
 	else if (this->type == Extern)  // Не надо менять
 	{
 		par = this->Master->par[i];
-		if (par.u >= 0.0)
+		if (par.u >= Velosity_inf)
 		{
-			par.u = -0.01;
+			par.u = Velosity_inf;
 		}
 	}
 	else if (this->type == Upper_wall)  // Не надо менять

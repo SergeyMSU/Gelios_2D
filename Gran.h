@@ -40,6 +40,7 @@ public:
     bool main_gran;      // true - для основной грани, false для фантомной
     int koef;            // коеффициент для умножения уравнения прямой для определения с какой стороны точка  (y - ax - b = 0)
                          // должен быть меньше нуля
+    int metod_HLLC;
 
     Gran(Point* A, Point* B, Gran_type type = G_no);
     void Get_Center(double& x, double& y);

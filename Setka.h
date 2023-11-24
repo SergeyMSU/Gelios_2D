@@ -169,6 +169,7 @@ public:
 	void Print_Tecplot(void);
 	void Print_Tecplot_MK(string name0 = "none");
 	void Print_Sourse(void);
+	void Print_Tecplot_MK_2d(string name0);
 
 	void Print_for_Igor(void);
 
@@ -183,6 +184,10 @@ public:
 	// здесь внутренняя ударная волны выделяется только до Pi/2, а внешняя до -500 а.е. примерно
 	void Move_surface(int ii, const double& dt);  // Вычисление скоростей поверхностей   ii - какие параметры активные par[ii]
 	void Move_surface_hand(void);  // Ручное движение сетки
+	void Smooth_kvadr3(const double& x1, const double& y1, const double& z1, //
+		const double& x2, const double& y2, const double& z2, const double& x3, const double& y3,//
+		const double& z3, const double& x4, const double& y4, const double& z4, const double& x5,//
+		const double& y5, const double& z5, double& xx, double& yy, double& zz);
 
 	void TVD_prepare(void);
 	void M_K_prepare(void);

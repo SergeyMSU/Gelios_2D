@@ -2178,6 +2178,279 @@ void Setka::Print_Sourse(void)
 	fout.close();
 }
 
+void Setka::Print_Tecplot_MK_2d(string name0)
+{
+	double r_o = 1.0; // RR_;    // Размер расстояния
+	double ro_o = 1.0; // 0.06;   // Размер плотности
+	double ro_o_H = 1.0;    //0.18;   // Размер плотности
+	double p_o = 1.0;    //1.0;   // Размер давления
+	double u_o = 1.0; // 10.38;   // Размер скорости
+	double T_o = 1.0;  // 6527.0
+	int n;
+
+	n = this->All_Cells.size();
+
+	Cell* A, *B, *C, *D, *E, *M;
+
+	ofstream fout;
+	string name_f = "Interpol_2D_tecplot_" + name0 + ".txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Rho\", \"P\", \"Vx\", \"Vy\", \"M\",\"Q\",\"Rho_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\"," << //
+		"\"Rho_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Rho_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\",\"Rho_H4\", \"P_H4\"," << //
+		" \"Vx_H4\", \"Vy_H4\", \"RO_H\", \"F_n\", \"F_u\", \"F_v\", \"F_T\", \"I_u\", \"I_v\", \"I_T\", \"II_u\", \"II_v\", \"II_T\", \"M_u\", \"M_v\", \"M_T\",\"H1_n\", \"H1_u\", \"H1_v\", \"H1_T\"," << //
+		"\"H2_n\", \"H2_u\", \"H2_v\", \"H2_T\", \"H3_n\", \"H3_u\", \"H3_v\", \"H3_T\", \"H4_n\", \"H4_u\", \"H4_v\", \"H4_T\", \"H5_n\", \"H5_u\", \"H5_v\", \"H5_T\", \"H6_n\", \"H6_u\", \"H6_v\", \"H6_T\", \"k_u\", \"k_v\", \"k_T\", \"m_1\",  \"m_2\",  \"m_3\",  \"m_4\",  \"m_5\",  \"m_6\",  \"m_7\",  \"num1\", \"num2\", \"num3\", \"num4\", ZONE T = \"HP\"" << //
+		", N= " << 5 * (n) + (Line_Inner.size() - 1) * 4 << ", E =  "<<  4 * (n) + 2 * (Line_Inner.size() - 1)<< ", F=FEPOINT, ET=TRIANGLE "<< endl;
+	
+	for (auto& i : this->All_Cells)
+	{
+		double kk = 1.0;
+		double Max = 0.0;
+		double QQ = 0.0;
+		double x, y;
+		double x1, y1;
+		double x2, y2;
+		double x3, y3;
+		double x4, y4;
+		double x5, y5;
+		double u1, v1;
+		double u2, v2;
+		double u3, v3;
+		double u4, v4;
+		double n1, n2, n3, n4;
+		bool b1, b2, b3;
+
+		b1 = b2 = b3 = false;
+
+		A = i;
+		B = i->Grans[0]->Sosed;
+		C = i->Grans[1]->Sosed;
+		D = i->Grans[2]->Sosed;
+
+		if (i->Grans.size() == 3)
+		{
+			E = A;
+		}
+		else if (i->Grans.size() <= 3)
+		{
+			cout << "ERROR  56278476526r7duhf34r" << endl;
+		}
+		else
+		{
+			E = i->Grans[3]->Sosed;
+		}
+
+		if (B == nullptr)  B = A;
+		if (C == nullptr)  C = A;
+		if (D == nullptr)  D = A;
+		if (E == nullptr)  E = A;
+
+		a1:
+		A->Get_Center(x1, y1);
+		B->Get_Center(x2, y2);
+		C->Get_Center(x3, y3);
+		D->Get_Center(x4, y4);
+		E->Get_Center(x5, y5);
+
+		u1 = x2 - x1;
+		v1 = y2 - y1;
+
+		u2 = x3 - x1;
+		v2 = y3 - y1;
+
+		u3 = x4 - x1;
+		v3 = y4 - y1;
+
+		u4 = x5 - x1;
+		v4 = y5 - y1;
+
+		n1 = sqrt(u1 * u1 + v1 * v1);
+		n2 = sqrt(u2 * u2 + v2 * v2);
+		n3 = sqrt(u3 * u3 + v3 * v3);
+		n4 = sqrt(u4 * u4 + v4 * v4);
+
+		if (n1 < 0.000001 || n2 < 0.000001 || n3 < 0.000001 || n4 < 0.000001) goto a2;
+
+		u1 /= n1;
+		v1 /= n1;
+
+		u2 /= n2;
+		v2 /= n2;
+
+		u3 /= n3;
+		v3 /= n3;
+
+		u4 /= n4;
+		v4 /= n4;
+
+		if (u1 * u2 + v1 * v2 < -0.95 && b1 == false)
+		{
+			b1 = true;
+			M = B;
+			B = C;
+			C = D;
+			D = E;
+			E = M;
+			goto a1;
+		}
+		else if(u3 * u2 + v3 * v2 < -0.95 && b2 == false)
+		{
+			b2 = true;
+			M = C;
+			C = D;
+			D = E;
+			E = M;
+			goto a1;
+		}
+		else if (u3 * u4 + v3 * v4 < -0.95 && b3 == false)
+		{
+			b3 = true;
+			M = E;
+			D = E;
+			E = M;
+			goto a1;
+		}
+		a2:
+
+		for (int ij = 1; ij <= 5; ij++)
+		{
+			if (ij == 1) i = A;
+			if (ij == 2) i = B;
+			if (ij == 3) i = C;
+			if (ij == 4) i = D;
+			if (ij == 5) i = E;
+
+			i->Get_Center(x, y);
+			if (i->par[0].ro > 0.000000000001)
+			{
+				QQ = i->par[0].Q / i->par[0].ro;
+				Max = sqrt(kvv(i->par[0].u, i->par[0].v, 0.0) / (ggg * i->par[0].p / i->par[0].ro));
+			}
+
+			fout << x << " " << y << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
+				" " << i->par[0].ro * ro_o / kv(kk) << " " << i->par[0].p * p_o << " " //
+				<< i->par[0].u * u_o * kk << " " << i->par[0].v * u_o * kk << " " << Max << " " << QQ << //
+				" " << i->par[0].ro_H1 * ro_o_H << " " << i->par[0].p_H1 * p_o << " " //
+				<< i->par[0].u_H1 * u_o << " " << i->par[0].v_H1 * u_o << //
+				" " << i->par[0].ro_H2 * ro_o_H << " " << i->par[0].p_H2 * p_o << " " //
+				<< i->par[0].u_H2 * u_o << " " << i->par[0].v_H2 * u_o << //
+				" " << i->par[0].ro_H3 * ro_o_H << " " << i->par[0].p_H3 * p_o << " " //
+				<< i->par[0].u_H3 * u_o << " " << i->par[0].v_H3 * u_o << //
+				" " << i->par[0].ro_H4 * ro_o_H << " " << i->par[0].p_H4 * p_o << " " //
+				<< i->par[0].u_H4 * u_o << " " << i->par[0].v_H4 * u_o << " " <<//
+				(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << //
+				" " << i->par[0].F_n << " " << i->par[0].F_u << " " << i->par[0].F_v << " " << i->par[0].F_T << " " //
+				<< i->par[0].I_u * 0.00001107 << " " << i->par[0].I_v * 0.00001107 << " " << i->par[0].I_T * 11.4767 << " " << //
+				i->par[0].II_u * 0.00001107 << " " << i->par[0].II_v * 0.00001107 << " " << i->par[0].II_T * 11.4767 << " " << //
+				i->par[0].M_u * 0.00001107 << " " << i->par[0].M_v * 0.00001107 << " " << i->par[0].M_T * 11.4767 << " " << //
+				i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_u[0] * u_o << " " << i->par[0].H_v[0] * u_o << " " << i->par[0].H_T[0] * T_o << " " //
+				<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_u[1] * u_o << " " << i->par[0].H_v[1] * u_o << " " << i->par[0].H_T[1] * T_o << " " //
+				<< i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_u[2] * u_o << " " << i->par[0].H_v[2] * u_o << " " << i->par[0].H_T[2] * T_o << " " //
+				<< i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " << i->par[0].H_T[3] * T_o << " " //
+				<< i->par[0].H_n[4] * ro_o_H << " " << i->par[0].H_u[4] * u_o << " " << i->par[0].H_v[4] * u_o << " " << i->par[0].H_T[4] * T_o << " " //
+				<< i->par[0].H_n[5] * ro_o_H << " " << i->par[0].H_u[5] * u_o << " " << i->par[0].H_v[5] * u_o << " " << i->par[0].H_T[5] * T_o << //
+				" " << i->par[0].k_u << " " << i->par[0].k_v << " " << i->par[0].k_T << //
+				" " << i->par[0].w_m[0] << //
+				" " << i->par[0].w_m[1] << //
+				" " << i->par[0].w_m[2] << //
+				" " << i->par[0].w_m[3] << //
+				" " << i->par[0].w_m[4] << //
+				" " << i->par[0].w_m[5] << //
+				" " << i->par[0].w_m[6] << //
+				" " << i->par[0].num_atoms[0] << //
+				" " << i->par[0].num_atoms[1] << //
+				" " << i->par[0].num_atoms[2] << //
+				" " << i->par[0].num_atoms[3] << endl;
+		}
+
+	}
+
+	for (int ii = 0; ii < Line_Inner.size() - 1; ii++)
+	{
+		double kk = 1.0;
+		double Max = 0.0;
+		double QQ = 0.0;
+		double x, y;
+		auto m1 = Line_Inner[ii];
+		auto m2 = Line_Inner[ii + 1];
+		Cell* i;
+
+		A = m1->Master;
+		B = m2->Master;
+
+		for (int ij = 1; ij <= 4; ij++)
+		{
+			if (ij == 1) i = A;
+			if (ij == 2) i = A;
+			if (ij == 3) i = B;
+			if (ij == 4) i = B;
+
+			if (ij == 1) i->Get_Center(x, y);
+			if (ij == 2) m1->Get_Center(x, y);
+			if (ij == 3) i->Get_Center(x, y);
+			if (ij == 4) m2->Get_Center(x, y);
+
+
+			if (i->par[0].ro > 0.000000000001)
+			{
+				QQ = i->par[0].Q / i->par[0].ro;
+				Max = sqrt(kvv(i->par[0].u, i->par[0].v, 0.0) / (ggg * i->par[0].p / i->par[0].ro));
+			}
+
+			fout << x << " " << y << " " << sqrt(x * r_o * x * r_o + y * r_o * y * r_o) << //
+				" " << i->par[0].ro * ro_o / kv(kk) << " " << i->par[0].p * p_o << " " //
+				<< i->par[0].u * u_o * kk << " " << i->par[0].v * u_o * kk << " " << Max << " " << QQ << //
+				" " << i->par[0].ro_H1 * ro_o_H << " " << i->par[0].p_H1 * p_o << " " //
+				<< i->par[0].u_H1 * u_o << " " << i->par[0].v_H1 * u_o << //
+				" " << i->par[0].ro_H2 * ro_o_H << " " << i->par[0].p_H2 * p_o << " " //
+				<< i->par[0].u_H2 * u_o << " " << i->par[0].v_H2 * u_o << //
+				" " << i->par[0].ro_H3 * ro_o_H << " " << i->par[0].p_H3 * p_o << " " //
+				<< i->par[0].u_H3 * u_o << " " << i->par[0].v_H3 * u_o << //
+				" " << i->par[0].ro_H4 * ro_o_H << " " << i->par[0].p_H4 * p_o << " " //
+				<< i->par[0].u_H4 * u_o << " " << i->par[0].v_H4 * u_o << " " <<//
+				(i->par[0].ro_H1 + i->par[0].ro_H2 + i->par[0].ro_H3 + i->par[0].ro_H4) * ro_o_H << //
+				" " << i->par[0].F_n << " " << i->par[0].F_u << " " << i->par[0].F_v << " " << i->par[0].F_T << " " //
+				<< i->par[0].I_u * 0.00001107 << " " << i->par[0].I_v * 0.00001107 << " " << i->par[0].I_T * 11.4767 << " " << //
+				i->par[0].II_u * 0.00001107 << " " << i->par[0].II_v * 0.00001107 << " " << i->par[0].II_T * 11.4767 << " " << //
+				i->par[0].M_u * 0.00001107 << " " << i->par[0].M_v * 0.00001107 << " " << i->par[0].M_T * 11.4767 << " " << //
+				i->par[0].H_n[0] * ro_o_H << " " << i->par[0].H_u[0] * u_o << " " << i->par[0].H_v[0] * u_o << " " << i->par[0].H_T[0] * T_o << " " //
+				<< i->par[0].H_n[1] * ro_o_H << " " << i->par[0].H_u[1] * u_o << " " << i->par[0].H_v[1] * u_o << " " << i->par[0].H_T[1] * T_o << " " //
+				<< i->par[0].H_n[2] * ro_o_H << " " << i->par[0].H_u[2] * u_o << " " << i->par[0].H_v[2] * u_o << " " << i->par[0].H_T[2] * T_o << " " //
+				<< i->par[0].H_n[3] * ro_o_H << " " << i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " << i->par[0].H_T[3] * T_o << " " //
+				<< i->par[0].H_n[4] * ro_o_H << " " << i->par[0].H_u[4] * u_o << " " << i->par[0].H_v[4] * u_o << " " << i->par[0].H_T[4] * T_o << " " //
+				<< i->par[0].H_n[5] * ro_o_H << " " << i->par[0].H_u[5] * u_o << " " << i->par[0].H_v[5] * u_o << " " << i->par[0].H_T[5] * T_o << //
+				" " << i->par[0].k_u << " " << i->par[0].k_v << " " << i->par[0].k_T << //
+				" " << i->par[0].w_m[0] << //
+				" " << i->par[0].w_m[1] << //
+				" " << i->par[0].w_m[2] << //
+				" " << i->par[0].w_m[3] << //
+				" " << i->par[0].w_m[4] << //
+				" " << i->par[0].w_m[5] << //
+				" " << i->par[0].w_m[6] << //
+				" " << i->par[0].num_atoms[0] << //
+				" " << i->par[0].num_atoms[1] << //
+				" " << i->par[0].num_atoms[2] << //
+				" " << i->par[0].num_atoms[3] << endl;
+		}
+	}
+
+	for (int ij = 0; ij < n; ij++)
+	{
+		fout << 1 + 5 * ij << " " << 2 + 5 * ij << " " << 3 + 5 * ij << endl;
+		fout << 1 + 5 * ij << " " << 3 + 5 * ij << " " << 4 + 5 * ij << endl;
+		fout << 1 + 5 * ij << " " << 4 + 5 * ij << " " << 5 + 5 * ij << endl;
+		fout << 1 + 5 * ij << " " << 5 + 5 * ij << " " << 2 + 5 * ij << endl;
+	}
+
+
+	for (int ij = 0; ij < Line_Inner.size() - 1; ij++)
+	{
+		fout << 5*n + 1 + 4 * ij << " " << 5 * n + 2 + 4 * ij << " " << 5 * n + 3 + 4 * ij << endl;
+		fout << 5 * n + 2 + 4 * ij << " " << 5 * n + 3 + 4 * ij << " " << 5 * n + 4 + 4 * ij << endl;
+	}
+
+	fout.close();
+
+}
 void Setka::Print_Tecplot_MK(string name0)
 {
 	double r_o = 1.0; // RR_;    // Размер расстояния
@@ -2307,7 +2580,7 @@ void Setka::Print_Tecplot_MK(string name0)
 
 	// Выводим каждый источник отдельно  -------------------------------------=-=-========================================================================
 
-	name_f = "1D_SOURSE_" + name0 + ".txt";
+	name_f = "1D_SOURSE_Multifluid_" + name0 + ".txt";
 	fout.open(name_f);
 	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"I1_u\", \"I1_v\", \"I1_T\", \"I2_u\", \"I2_v\", \"I2_T\", \"I3_u\", \"I3_v\", \"I3_T\", \"I4_u\", \"I4_v\", \"I4_T\", \"I5_u\", \"I5_v\", \"I5_T\", \"I6_u\", \"I6_v\", \"I6_T\"" << //
 		"ZONE T = \"HP\"" << endl;
@@ -2725,6 +2998,7 @@ void Setka::Download_Source_MK(string name)
 		i->par[0].I_u = a;
 		i->par[0].I_v = b;
 		i->par[0].I_T = c;
+		//cout << "Istok = " << a << " " << b << " " << c << endl;
 		fout >> a >> b >> c;
 		i->par[0].II_u = a;
 		i->par[0].II_v = b;
@@ -2760,7 +3034,7 @@ void Setka::Download_Source_MK(string name)
 		i->par[0].k_u = a;
 		i->par[0].k_v = b;
 		i->par[0].k_T = c;
-
+		//cout << "koeff = " << a << " " << b << " " << c << endl;
 	}
 
 	fout.close();
@@ -3815,9 +4089,9 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
-	double koef1 =  0.08; // 0.05; // 0.3;
-	double koef2 =  0.005; // 0.005;
-	double koef3 =  0.1; // 0.1;
+	double koef1 = 0.01 * 1.0; // 0.08; // 0.3;
+	double koef2 = 0.1 * 0.05; // 0.005;
+	double koef3 = 0.1 * 1.0; // 0.1;
 	// Разбираемся с контактом
 
 	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -3872,10 +4146,16 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			qqq2[3] = par2.v;
 			qqq2[4] = 0.0;
 
-			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
+			/*double x, y;
 
+			i->Get_Center(x, y);*/
+
+			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp, false);
+
+			
 			S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
+			
 
 			double Max = max(sqrt((kv(par1.u) + kv(par1.v)) / (ggg * par1.p / par1.ro)), sqrt((kv(par2.u) + kv(par2.v)) / (ggg * par2.p / par2.ro)));
 			VV = VV * koef1;// * 0.3;
@@ -3968,9 +4248,10 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			auto i = this->Line_Contact[j];
 			if (i->A->count > 0)
 			{
-				i->A->Vx /= (1.0 * i->A->count);
-				i->A->Vy /= (1.0 * i->A->count);
+				i->A->Vx /= koef1 * (1.0 * i->A->count);
+				i->A->Vy /= koef1 * (1.0 * i->A->count);
 			}
+
 		}
 
 		this->Line_Contact[0]->A->Vx = this->Line_Contact[0]->B->Vx + (this->Line_Contact[0]->B->x - this->Line_Contact[0]->A->x)/dt;
@@ -3983,6 +4264,40 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			this->Line_Contact[bb]->A->Vx *= 2.0;
 			this->Line_Contact[bb]->A->Vy *= 2.0;
 		}*/
+
+		// Делаем поверхостное натяжение
+		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
+		{
+			if (j <= 0 || j >= this->Line_Contact.size() - 2)
+			{
+				continue;
+			}
+
+			auto i = this->Line_Contact[j];
+			auto i1 = this->Line_Contact[j + 1];
+			auto i2 = this->Line_Contact[j + 2];
+			auto i3 = this->Line_Contact[j - 1];
+
+			double x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, xx, yy, zz;
+
+			x1 = i2->B->x;
+			y1 = i2->B->y;
+			x2 = i1->B->x;
+			y2 = i1->B->y;
+			x3 = i->B->x;
+			y3 = i->B->y;
+			x4 = i->A->x;
+			y4 = i->A->y;
+			x5 = i3->A->x;
+			y5 = i3->A->y;
+
+			//this->Smooth_kvadr3(x1, y1, 0.0, x2, y2, 0.0, x3, y3, 0.0, x4, y4, 0.0, x5, y5, 0.0, xx, yy, zz);
+			xx = (x2  + x4) / 2.0;
+			yy = (y2  + y4) / 2.0;
+			i->B->Vx += koef1 * 0.1 * (xx - x3)/ dt;
+			i->B->Vy += koef1 * 0.1 * (yy - y3) / dt;
+
+		}
 	}
 
 	// Движение внутренней ударной волны
@@ -4181,38 +4496,38 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 
 
 		// Поверхностное натяжение
-		double nat = 0.0;
-		if (false)
+		// Делаем поверхостное натяжение
+		for (int j = 0; j < this->Line_Inner.size(); j++)  // Вычисляем скорость контакта
 		{
-			for (int j = 47; j <= 50; j++)
+			if (j <= 0 || j >= this->Line_Inner.size() - 2)
 			{
-				auto i = this->Line_Inner[j];
-				auto i2 = this->Line_Inner[j - 1];
-				auto i3 = this->Line_Inner[j + 1];
-
-				double x, y, x2, y2, xx, yy;
-				x = (i->A->x + i->B->x) / 2.0;
-				y = (i->A->y + i->B->y) / 2.0;
-
-				x2 = (i2->A->x + i2->B->x) / 2.0;
-				y2 = (i2->A->y + i2->B->y) / 2.0;
-
-				xx = (x + x2) / 2.0;
-				yy = (y + y2) / 2.0;
-
-				i->A->Vx = i->A->Vx + (xx - i->A->x) * nat;
-				i->A->Vy = i->A->Vy + (yy - i->A->y) * nat;
-
-				x2 = (i3->A->x + i3->B->x) / 2.0;
-				y2 = (i3->A->y + i3->B->y) / 2.0;
-
-				xx = (x + x2) / 2.0;
-				yy = (y + y2) / 2.0;
-
-				i->B->Vx = i->B->Vx + (xx - i->B->x) * nat;
-				i->B->Vy = i->B->Vy + (yy - i->B->y) * nat;
-
+				continue;
 			}
+
+			auto i = this->Line_Inner[j];
+			auto i1 = this->Line_Inner[j + 1];
+			auto i2 = this->Line_Inner[j + 2];
+			auto i3 = this->Line_Inner[j - 1];
+
+			double x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, xx, yy, zz;
+
+			x1 = i2->B->x;
+			y1 = i2->B->y;
+			x2 = i1->B->x;
+			y2 = i1->B->y;
+			x3 = i->B->x;
+			y3 = i->B->y;
+			x4 = i->A->x;
+			y4 = i->A->y;
+			x5 = i3->A->x;
+			y5 = i3->A->y;
+
+			//this->Smooth_kvadr3(x1, y1, 0.0, x2, y2, 0.0, x3, y3, 0.0, x4, y4, 0.0, x5, y5, 0.0, xx, yy, zz);
+			xx = (x2 + x4) / 2.0;
+			yy = (y2 + y4) / 2.0;
+			i->B->Vx += koef2 * 0.0001 * (xx - x3) / dt;
+			i->B->Vy += koef2 * 0.0001 * (yy - y3) / dt;
+
 		}
 
 	}
@@ -10815,6 +11130,11 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 			double W = 0.0;
 			bool np = true;
 
+			double q2_1, q2_2, q3;
+			q2_1 = 0.0;
+			q2_2 = 0.0;
+			q3 = 0.0;
+
 			for (auto& i : K->Grans)
 			{
 				double x2, y2, x4, y4;
@@ -10830,7 +11150,7 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 				i->Get_normal(n1, n2);
 				double Vc, Vl, Vp;
 				W = ((x4 - x2) * n1 + (y4 - y2) * n2) / T[now1];
-				int met = 1;
+				int met = i->metod_HLLC;
 				double dis = sqrt(kv(x2) + kv(y2));
 
 
@@ -10899,10 +11219,15 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 				}
 
 
-				/*if ((i->A->type == P_Contact && i->B->type != P_Contact)||(i->A->type != P_Contact && i->B->type == P_Contact))
+				if ((i->A->type == P_Contact && i->B->type != P_Contact)||(i->A->type != P_Contact && i->B->type == P_Contact))
 				{
 					met = 0;
-				}*/
+				}
+
+				if ((i->A->type == P_Inner_shock && i->B->type != P_Inner_shock) || (i->A->type != P_Inner_shock && i->B->type == P_Inner_shock))
+				{
+					met = 0;
+				}
 
 				np = true;  // Сглаживание
 				if ((i->A->type == P_Contact && i->B->type == P_Contact))
@@ -10911,9 +11236,55 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 					met = 1;
 				}
 				//np = true;  // Сглаживание
-				
-				if (K->type != C_centr)
+
+				if (x < -2.0 && y < 0.5)
 				{
+					met = 0;
+				}
+				
+				met = 0;
+				
+				if (false)//(K->type != C_centr && np == false)
+				{
+					vector<double> qqq1(5);
+					vector<double> qqq2(5);
+					vector<double> qqq(5);
+					vector<double> n(3);
+
+					auto SS = Solvers();
+					n[0] = n1;
+					n[1] = n2;
+					n[2] = 0.0;
+
+					qqq1[0] = par11.ro;
+					qqq1[1] = par11.p;
+					qqq1[2] = par11.u;
+					qqq1[3] = par11.v;
+					qqq1[4] = 0.0;
+
+					qqq2[0] = par2.ro;
+					qqq2[1] = par2.p;
+					qqq2[2] = par2.u;
+					qqq2[3] = par2.v;
+					qqq2[4] = 0.0;
+
+
+					time = min(time, SS.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, Vc, W, dist));
+					PQ = 0.0;
+					P[0] = qqq[0];
+					P[1] = qqq[1];
+					P[2] = qqq[2];
+					P[3] = qqq[3];
+					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
+					{
+						K->Potok[k] = K->Potok[k] + P[k] * S;
+					}
+					K->Potok[4] = K->Potok[4] + PQ * S;
+
+				}
+				else if (K->type != C_centr)
+				{
+					
 					time = min(time, this->HLLC_2d_Korolkov_b_s(par11.ro, par11.Q, par11.p, par11.u, par11.v, par2.ro, par2.Q, //
 						par2.p, par2.u, par2.v, W, P, PQ, n1, n2, dist, met, Vl, Vc, Vp, np));
 					for (int k = 0; k < 4; k++)  // Суммируем все потоки в ячейке
@@ -10921,6 +11292,68 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 						K->Potok[k] = K->Potok[k] + P[k] * S;
 					}
 					K->Potok[4] = K->Potok[4] + PQ * S;
+				}
+
+
+				// Для источников при Kn = 0
+				if (i->type == Usualy && i->Sosed->type == C_5 && (i->A->type == P_Outer_shock && i->B->type == P_Outer_shock))//(i->Sosed->type == C_4 || i->Sosed->type == C_5)
+				{
+					double Vn_0 = -(n1 * par2.u + n2 * par2.v);
+					double c_2 = sqrt(par2.p / par2.ro);
+					double k_0 = 0.5 * (1.0 + erf(Vn_0 / c_2));
+
+					//Vn_0 = Vn_0 + c_2 * exp(-kv(Vn_0 / c_2)) / (sqrtpi_ * (1.0 + erf(Vn_0 / c_2)));
+
+					//q2_1 = n_p_LISM_ * k_0 * par2.ro * (par2.u - par11.u) * Vn_0 * S / Volume2;
+					//q2_2 = n_p_LISM_ * k_0 * par2.ro * (par2.v - par11.v) * Vn_0 * S / Volume2;
+					//q3 = n_p_LISM_ * 0.5 * k_0 * par2.ro * (kvv(par2.u, par2.v, 0.0) - kvv(par11.u, par11.v, 0.0)) * Vn_0 * S / Volume2;
+				
+				}
+
+				//if (i->type == Usualy && i->Sosed->type == C_4 && (i->A->type == P_Outer_shock && i->B->type == P_Outer_shock))//(i->Sosed->type == C_4 || i->Sosed->type == C_5)
+				//{
+				//	double Vn_0 = -(n1 * par2.u + n2 * par2.v);
+				//	double c_2 = sqrt(par2.p / par2.ro);
+				//	double k_0 = 0.5 * (1.0 + erf(Vn_0 / c_2));
+
+				//	q2_1 = n_p_LISM_ * k_0 * par2.ro * (-c_2 * n1 - par11.u) * c_2 * S / Volume2;
+				//	q2_2 = n_p_LISM_ * k_0 * par2.ro * (-c_2 * n2 - par11.v) * c_2 * S / Volume2;
+				//	q3 = n_p_LISM_ * 0.5 * k_0 * par2.ro * (kvv(c_2 * n1, c_2 * n2, 0.0) - kvv(par11.u, par11.v, 0.0)) * c_2 * S / Volume2;
+				//}
+
+
+				if (i->type == Usualy && i->Sosed->type == C_4 && (i->A->type == P_Contact && i->B->type == P_Contact))//(i->Sosed->type == C_4 || i->Sosed->type == C_5)
+				{
+					double Vn_0 = 0.0; // -(n1 * par2.u + n2 * par2.v);
+					double c_2 = sqrt(par2.p / par2.ro);
+					double k_0 = 0.5 * (1 + erf(Vn_0 / c_2));
+
+					Vn_0 = Vn_0 + c_2 * exp(-kv(Vn_0 / c_2)) / (sqrtpi_ * (1.0 + erf(Vn_0 / c_2)));
+
+					//q2_1 = n_p_LISM_ * k_0 * par2.ro * (-Vn_0 * n1 - par11.u * (chi_real / chi_)) * Vn_0 * S / Volume2;
+					//q2_2 = n_p_LISM_ * k_0 * par2.ro * (-Vn_0 * n2 - par11.v * (chi_real / chi_)) * Vn_0 * S / Volume2;
+					//q3 = n_p_LISM_ * 0.5 * k_0 * par2.ro * (kvv(Vn_0, 0.0, 0.0) - kvv(par11.u * (chi_real / chi_), par11.v * (chi_real / chi_), 0.0)) * Vn_0 * S / Volume2 / (chi_real / chi_);
+				
+				}
+
+				if (i->type == Usualy && i->Sosed->type == C_3 && (i->A->type == P_Contact && i->B->type == P_Contact))//(i->Sosed->type == C_4 || i->Sosed->type == C_5)
+				{
+					double Vn_0 = 0.0; //-(n1 * par2.u + n2 * par2.v);
+					double Vn_1 = 0.0;// (n1* par11.u + n2 * par11.v);
+					double c_2 = sqrt(par2.p / par2.ro) * (chi_real / chi_);
+					double c_1 = sqrt(par11.p / par11.ro);
+					double k_0 = 0.5 * (1 + erf(Vn_0 / c_2));
+					double k_1 = 0.5 * (1 + erf(Vn_1 / c_1));
+
+					Vn_0 = Vn_0 + c_2 * exp(-kv(Vn_0 / c_2)) / (sqrtpi_ * (1.0 + erf(Vn_0 / c_2)));
+					Vn_1 = Vn_1 + c_1 * exp(-kv(Vn_1 / c_1)) / (sqrtpi_ * (1.0 + erf(Vn_1 / c_1)));
+
+					/*q2_1 = 0.0 * n_p_LISM_ * k_1 * k_0 * par1.ro * (-Vn_0 * n1 - par11.u) * Vn_1 * S / Volume2;
+					q2_2 = 0.0 * n_p_LISM_ * k_1 * k_0 * par1.ro * (-Vn_0 * n2 - par11.v) * Vn_1 * S / Volume2;
+					q3 = 0.0 * n_p_LISM_ * 0.5 * k_1 * k_0 * par1.ro * (kvv(Vn_0, 0.0, 0.0) - kvv(par11.u, par11.v, 0.0)) * Vn_1 * S / Volume2;
+					*/
+					//cout << x2 << "  " << q2_1 << "  " << q2_2 << "  " << q3 << endl;
+				
 				}
 			}
 
@@ -11080,7 +11513,7 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 			double Q = par1.Q;
 
 			double a1, a2, a3;
-			double q2_1, q2_2, q3;
+			
 
 			if (par1.Q / par1.ro < Q_gran)// (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)
 			{
@@ -11096,6 +11529,7 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 			q2_1 = a1;
 			q2_2 = a2;
 			q3 = a3;
+
 
 			if (par1.Q / par1.ro < Q_gran)// (K->type == C_centr || K->type == C_1 || K->type == C_2 || K->type == C_3)
 			{
@@ -11119,7 +11553,7 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 				if (ro3 <= 0)
 				{
 					printf("Problemsssss  ro < 0!   %lf,  %lf\n", x, y);
-					ro3 = 0.00001;
+					ro3 = 0.001;
 				}
 				u3 = (ro * u * Volume / Volume2 - T[now1] * (K->Potok[1] / Volume2 + ro * v * u / y - q2_1)) / ro3;
 				v3 = (ro * v * Volume / Volume2 - T[now1] * (K->Potok[2] / Volume2 + ro * v * v / y - q2_2)) / ro3;
@@ -12619,10 +13053,10 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 1000 * 9 * 8;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
-	this->Number2 = 411 * 30;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
-	this->Number3 = 411 * 30;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
-	this->Number4 = 411 * 30;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	this->Number1 = 411 * 1000 * 282;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
+	this->Number2 = 411 * 30 * 282;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
+	this->Number3 = 411 * 30 * 282;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
+	this->Number4 = 411 * 30 * 282;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -13874,8 +14308,8 @@ void Setka::MK_start_new(void)
 							//Fly_exchenge_Imit_Korol(MK, sens2, BZ, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
 							//cout << "B" << endl;
 
-							Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
-								3, false, mu1 * mu[i], ii_z, ii_alp, true);
+							//Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
+							//	3, false, mu1 * mu[i], ii_z, ii_alp, true);
 
 
 							// Работающая с заданными аналитически весами
@@ -13886,8 +14320,8 @@ void Setka::MK_start_new(void)
 
 
 							// Эта для иммитационного метода
-							//Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
-							//	Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
+							Fly_exchenge_Imit_Korol_2(MK, sens2, x, y, z, Vx, Vy, Vz,//
+								Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1 * mu[i]);
 
 							//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
 
@@ -15327,7 +15761,7 @@ void Setka::MPI_MK_start(int argc, char** argv)
 						k->par[0].H_vv[i] = k->par[0].H_vv[i] / k->par[0].H_n[i] - k->par[0].H_v[i] * k->par[0].H_v[i];
 						k->par[0].H_uv[i] = k->par[0].H_uv[i] / k->par[0].H_n[i] - k->par[0].H_u[i] * k->par[0].H_v[i];
 						k->par[0].H_uuu[i] = 2.0 * k->par[0].H_v[i] * k->par[0].H_v[i] * k->par[0].H_v[i] + //
-							3.0 * k->par[0].H_v[i] * k->par[0].H_vv[i] - k->par[0].H_uuu[i] / k->par[0].H_n[i];
+							3.0 * k->par[0].H_v[i] * k->par[0].H_vv[i] - k->par[0].H_uuu[i] / k->par[0].H_n[i]; !ERROR
 					}
 					else
 					{
@@ -20935,7 +21369,7 @@ my_start:
 		mu_ex = mu;
 
 		I = I_do;
-		//double drob = 5;
+		double drob = 3.0;
 		//if (y_start < 40.0 / RR_)
 		//{
 		//	drob = 30.0;  // 30.0
@@ -20949,51 +21383,47 @@ my_start:
 		//	drob = 15.0;
 		//}
 
-		//double vy_ = vy;
-		//double kappa = 0.0;
-		//for (double tt = 0.0; tt < time * 0.99; tt += time / drob)
+		double vy_ = vy;
+		nu_ex = 0.0;
+		for (double tt = 0.0; tt < time * 0.99; tt += time / drob)
+		{
+			vy_ = vy;
+			double yy = sqrt(kv(y_0 + (tt + time / (2.0 * drob)) * Vy) + kv(z_0 + (tt + time / (2.0 * drob)) * Vz));
+
+			alpha = polar_angle(y_0 + (tt + time / (2.0 * drob)) * Vy, z_0 + (tt + time / (2.0 * drob)) * Vz);
+			u = sqrt(kvv(Vx - vx, Vy - vy_ * cos(alpha), Vz - vy_ * sin(alpha)));
+
+			if (true)//(u / cp > 7.0)
+			{
+				uz = Velosity_1(u, cp);
+				nu_ex += (ro * uz * sigma(uz)) / Kn_;
+			}
+			else
+			{
+				nu_ex += (ro * MK.int_1(u, cp)) / Kn_;        // Пробуем вычислять интеграллы численно
+			}
+			//kappa += (nu_ex * time / drob);
+		}
+
+		nu_ex = nu_ex / drob;
+
+		//alpha = polar_angle(y_0 + time / 2.0 * Vy, z_0 + time / 2.0 * Vz);
+		//u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+		//if (u / cp > 7.0)
 		//{
-		//	vy_ = vy;
-		//	double yy = sqrt(kv(y_0 + (tt + time / (2.0 * drob)) * Vy) + kv(z_0 + (tt + time / (2.0 * drob)) * Vz));
-
-		//	if (now->axis_ == true && yy < now->y_ax)
-		//	{
-		//		vy_ = vy * yy / now->y_ax;
-		//	}
-		//	alpha = polar_angle(y_0 + (tt + time / (2.0 * drob)) * Vy, z_0 + (tt + time / (2.0 * drob)) * Vz);
-		//	u = sqrt(kvv(Vx - vx, Vy - vy_ * cos(alpha), Vz - vy_ * sin(alpha)));
-
-		//	if (true)//(u / cp > 7.0)
-		//	{
-		//		uz = Velosity_1(u, cp);
-		//		nu_ex = (ro * uz * sigma(uz)) / Kn_;
-		//		//cout << x_0 << " " << y_start << " " << u / cp << " " << u << " " << cp <<  endl;
-		//	}
-		//	else
-		//	{
-		//		nu_ex = (ro * MK.int_1(u, cp)) / Kn_;        // Пробуем вычислять интеграллы численно
-		//	}
-		//	kappa += (nu_ex * time / drob);
+		//	uz = Velosity_1(u, cp);
+		//	nu_ex = (ro * uz * sigma(uz)) / Kn_;
+		//	//cout << x_0 << " " << y_start << " " << u / cp << " " << u << " " << cp <<  endl;
+		//}
+		//else
+		//{
+		//	//uz = Velosity_1(u, cp);
+		//	nu_ex = (ro * MK.int_1(u, cp)) / Kn_;
+		//	//double sig = sqrt(kvv(Vx, Vy, Vz)) / ((1.0 / Kn_) * ro * uz * sigma(uz));
 		//}
 
-
-		alpha = polar_angle(y_0 + time / 2.0 * Vy, z_0 + time / 2.0 * Vz);
-		u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
-		if (u / cp > 7.0)
-		{
-			uz = Velosity_1(u, cp);
-			nu_ex = (ro * uz * sigma(uz)) / Kn_;
-			//cout << x_0 << " " << y_start << " " << u / cp << " " << u << " " << cp <<  endl;
-		}
-		else
-		{
-			//uz = Velosity_1(u, cp);
-			nu_ex = (ro * MK.int_1(u, cp)) / Kn_;
-			//double sig = sqrt(kvv(Vx, Vy, Vz)) / ((1.0 / Kn_) * ro * uz * sigma(uz));
-		}
-
 		sig = sqrt(kvv(Vx, Vy, Vz)) / (nu_ex);
-		//double sig = sqrt(kvv(Vx, Vy, Vz)) / (kappa);
+		//sig = sqrt(kvv(Vx, Vy, Vz)) / (kappa);
 		if (charge_x_1)
 		{
 			if (x_0 <= 1.0)
@@ -23898,4 +24328,155 @@ void Setka::test_main(void)
 			}
 		}
 	}
+}
+
+void Setka::Smooth_kvadr3(const double& x1, const double& y1, const double& z1, //
+	const double& x2, const double& y2, const double& z2, const double& x3, const double& y3,//
+	const double& z3, const double& x4, const double& y4, const double& z4, const double& x5,//
+	const double& y5, const double& z5, double& xx, double& yy, double& zz)
+{
+	//Функция определяющая новвое положение точки x, y, z
+		   //В соответствии с тремя другими точками, строя квадратичный сплайн по методу наименьших квадратов
+
+	double ex[3], ey[3], c[3], xx2, yy2, xx3, yy3, xx4, yy4, xx5, nn;
+	double a, b, cc, g2, g3, g4, h2, h4;
+
+
+	ex[0] = x5 - x1;
+	ex[1] = y5 - y1;
+	ex[2] = z5 - z1;
+
+	ey[0] = x3 - x1;
+	ey[1] = y3 - y1;
+	ey[2] = z3 - z1;
+
+	nn = sqrt(kv(ex[0]) + kv(ex[1]) + kv(ex[2]));
+	ex[0] /= nn;
+	ex[1] /= nn;
+	ex[2] /= nn;
+
+	nn = sqrt(kv(ey[0]) + kv(ey[1]) + kv(ey[2]));
+	ey[0] /= nn;
+	ey[1] /= nn;
+	ey[2] /= nn;
+
+
+	//Если они не сонаправлены
+	if (fabs(DOT_PRODUCT(ex, ey)) < 0.99)
+	{
+		c[0] = ex[1] * ey[2] - ex[2] * ey[1];
+		c[1] = ex[2] * ey[0] - ex[0] * ey[2];
+		c[2] = ex[0] * ey[1] - ex[1] * ey[0];
+
+		ey[0] = c[1] * ex[2] - c[2] * ex[1];
+		ey[1] = c[2] * ex[0] - c[0] * ex[2];
+		ey[2] = c[0] * ex[1] - c[1] * ex[0];
+
+
+		nn = sqrt( kv(ey[0]) + kv(ey[1]) + kv(ey[2]));
+		ey[0] /= nn;
+		ey[1] /= nn;
+		ey[2] /= nn;
+
+
+		c[0] = x2 - x1; c[1] = y2 - y1; c[2] = z2 - z1;
+		xx2 = DOT_PRODUCT(ex, c);
+		yy2 = DOT_PRODUCT(ey, c);
+
+		c[0] = x3 - x1; c[1] = y3 - y1; c[2] = z3 - z1;
+		xx3 = DOT_PRODUCT(ex, c);
+		yy3 = DOT_PRODUCT(ey, c);
+
+		c[0] = x4 - x1; c[1] = y4 - y1; c[2] = z4 - z1;
+		xx4 = DOT_PRODUCT(ex, c);
+		yy4 = DOT_PRODUCT(ey, c);
+
+		c[0] = x5 - x1; c[1] = y5 - y1; c[2] = z5 - z1;
+		xx5 = DOT_PRODUCT(ex, c);
+
+		g2 = xx2 / xx5;
+		g3 = xx3 / xx5;
+		g4 = xx4 / xx5;
+
+		if (fabs(y3) < 0.0000001) 
+		{
+			goto a11;
+		}
+
+		h2 = yy2 / yy3;
+		h4 = yy4 / yy3;
+
+
+		a = ((-1 + g4) * g4 * ((-1 + g4) * (1 + h2) + 3 * h4) + kv3(g3) * (h2 + g4 * h2 + h4 - 3 * g4 * h4) +
+			kv3(g2) * (1 + g4 + g3 * (-3 + h4) + h4 - 3 * g4 * h4) + g3 * (-3 + h2 + h4 + g4 * (1 + g4 *
+				(1 + g4 * (-3 + h2) - 2 * h4) + h4)) + g2 * (1 - 3 * h2 +
+					g3 * (1 + kv(g4)) * (1 + h2) + h4 - 2 * g3 * kv(g4) * h4 + kv3(g3) * (-3 * h2 + h4) +
+					g4 * (h2 + g4 * (g4 + h2 - 3 * g4 * h2 - 2 * h4) + h4) + kv(g3) *
+					(-2 + h2 + g4 * (-2 + h2 + h4))) + kv(g3) * (3 - 2 * h2 - 2 * h4 +
+						g4 * (-2 + h4 + g4 * (3 - 2 * h2 + 3 * h4))) + kv(g2) * (-2 + 3 * h2 +
+							kv(g3) * (3 + 3 * h2 - 2 * h4) - 2 * h4 + g3 * (1 + g4 - 2 * h2 - 2 * g4 * h2 + g4 * h4) + g4 * (-2 * h2 + h4 +
+								g4 * (-2 + 3 * h2 + 3 * h4)))) / (3 * kv(-1 + g4) * kv(g4) -
+									2 * g3 * kv(-1 + g4) * g4 * (1 + g4) + 2 * kv3(g3) * (-3 + g4 + kv(g4) - 3 * kv3(g4)) +
+									kv4(g3) * (3 + g4 * (-2 + 3 * g4)) + kv4(g2) * (3 + 3 * kv(g3) -
+										2 * g3 * (1 + g4) + g4 * (-2 + 3 * g4)) + 2 * kv3(g2) * (-3 - 3 * kv3(g3) + g4 + kv(g4) -
+											3 * kv3(g4) + kv(g3) * (1 + g4) + g3 * (1 + kv(g4))) + 2 * g2 * (-(kv4(g3) * (1 + g4)) -
+												kv(-1 + g4) * g4 * (1 + g4) + kv3(g3) * (1 + kv(g4)) + kv(g3) * (1 + kv3(g4)) -
+												g3 * (1 + kv4(g4))) + kv(g3) * (3 + g4 * (2 +
+													g4 * (-6 + g4 * (2 + 3 * g4)))) + kv(g2) * (3 + 3 * kv4(g3) + 2 * kv3(g3) * (1 + g4) - 6 * kv(g3) * (1 + kv(g4)) +
+														2 * g3 * (1 + kv3(g4)) + g4 * (2 + g4 * (-6 + g4 * (2 + 3 * g4)))));
+
+		b = ((-1 + g4) * g4 * (1 + h2 - kv(g4) * (1 + h2) - 3 * h4) - g3 * (-3 + kv4(g4) * (-3 + h2) +
+			h2 - kv(g4) * (-2 + h4) + h4) - kv4(g3) * (h2 + g4 * h2 + h4 - 3 * g4 * h4) - kv4(g2) * (1 + g4 + g3 * (-3 + h4) +
+				h4 - 3 * g4 * h4) + kv3(g3) * (h2 + kv(g4) * h2 + h4 - 3 * kv(g4) * h4) + kv3(g2) * (1 + kv(g4) +
+					kv(g3) * (-3 + h4) + h4 - 3 * kv(g4) * h4) + kv(g3) * (-3 + h2 + h4 + g4 * (1 - 2 * h4 + g4 * (1 + g4 * (-3 + h2) + h4))) + g2 *
+			(-1 + 3 * h2 + kv4(g3) * (3 * h2 - h4) - h4 + kv(g4) * (-2 * h2 + kv(g4) * (-1 + 3 * h2) + h4) + kv(g3) * (1 - 2 * h2 +
+				kv(g4) * (1 - 2 * h2 + h4))) + kv(g2) * (1 + g3 * (1 + kv(g4)) * (-2 + h2) - 3 * h2 + h4 + g3 * kv(g4) * h4 + kv3(g3) * (-3 * h2 + h4) +
+					kv(g3) * (1 + g4 + h2 + g4 * h2 - 2 * g4 * h4) + g4 * (h2 - 2 * h4 + g4 * (g4 + h2 - 3 * g4 * h2 + h4)))) /
+			(3 * kv(-1 + g4) * kv(g4) - 2 * g3 * kv(-1 + g4) * g4 * (1 + g4) + 2 * kv3(g3) * (-3 + g4 + kv(g4) - 3 * kv3(g4)) +
+				kv4(g3) * (3 + g4 * (-2 + 3 * g4)) + kv4(g2) * (3 + 3 * kv(g3) - 2 * g3 * (1 + g4) + g4 * (-2 + 3 * g4)) + 2 * kv3(g2) *
+				(-3 - 3 * kv3(g3) + g4 + kv(g4) - 3 * kv3(g4) + kv(g3) * (1 + g4) + g3 * (1 + kv(g4))) + 2 * g2 * (-(kv4(g3) * (1 + g4)) -
+					kv(-1 + g4) * g4 * (1 + g4) + kv3(g3) * (1 + kv(g4)) + kv(g3) * (1 + kv3(g4)) - g3 * (1 + kv4(g4))) +
+				kv(g3) * (3 + g4 * (2 + g4 * (-6 + g4 * (2 + 3 * g4)))) + kv(g2) * (3 + 3 * kv4(g3) + 2 * kv3(g3) * (1 + g4) -
+					6 * kv(g3) * (1 + kv(g4)) + 2 * g3 * (1 + kv3(g4)) + g4 * (2 + g4 * (-6 + g4 * (2 + 3 * g4)))));
+
+		cc = (kv(-1 + g4) * kv(g4) * (1 + h2) - g3 * (-1 + g4) * g4 * (-1 + kv(g4) - h4) + kv4(g3) * (h2 + kv(g4) * h2 + h4 - g4 * h4) +
+			kv3(g3) * (-2 * (1 + kv3(g4)) * h2 + (-2 + g4 + kv(g4)) * h4) + kv(g3) * (h2 + h4 + g4 * (1 + g4 * (-2 + g4 + kv(g4) * h2 -
+				2 * h4) + h4)) + kv4(g2) * (1 + kv(g4) + h4 + kv(g3) * h4 - g4 * h4 - g3 * (1 + g4 + g4 * h4)) + g2 * (kv(g3) * (1 + kv3(g4)) * (1 + h2) -
+					g3 * (1 + kv4(g4)) * (1 + h2) + (-1 + g4) * g4 * (h2 - kv(g4) * h2 + h4) - kv4(g3) * (h2 + g4 * h2 + g4 * h4) + kv3(g3) *
+					(h2 + kv(g4) * h2 + kv(g4) * h4)) + kv3(g2) * (-2 * (1 + kv3(g4)) - 2 * kv3(g3) * h4 + (-2 + g4 + kv(g4)) * h4 + kv(g3) * (1 + g4 + g4 * h4) +
+						g3 * (1 + kv(g4) * (1 + h4))) + kv(g2) * (1 + g3 * (1 + kv3(g4)) * (1 + h2) + h4 + kv4(g3) * h4 + kv3(g3) * (h2 + g4 * h2 + g4 * h4) -
+							2 * kv(g3) * (1 + h2 + kv(g4) * (1 + h2 + h4)) + g4 * (h2 + h4 + g4 * (g4 * (g4 + h2) - 2 * (h2 + h4))))) /
+			(3 * kv(-1 + g4) * kv(g4) - 2 * g3 * kv(-1 + g4) * g4 * (1 + g4) + 2 * kv3(g3) * (-3 + g4 + kv(g4) - 3 * kv3(g4)) +
+				kv4(g3) * (3 + g4 * (-2 + 3 * g4)) + kv4(g2) * (3 + 3 * kv(g3) - 2 * g3 * (1 + g4) + g4 * (-2 + 3 * g4)) + 2 * kv3(g2) * (-3 - 3 * kv3(g3) + g4 + kv(g4) -
+					3 * kv3(g4) + kv(g3) * (1 + g4) + g3 * (1 + kv(g4))) + 2 * g2 * (-(kv4(g3) * (1 + g4)) - kv(-1 + g4) * g4 * (1 + g4) +
+						kv3(g3) * (1 + kv(g4)) + kv(g3) * (1 + kv3(g4)) - g3 * (1 + kv4(g4))) + kv(g3) * (3 + g4 * (2 +
+							g4 * (-6 + g4 * (2 + 3 * g4)))) + kv(g2) * (3 + 3 * kv4(g3) + 2 * kv3(g3) * (1 + g4) - 6 * kv(g3) * (1 + kv(g4)) +
+								2 * g3 * (1 + kv3(g4)) + g4 * (2 + g4 * (-6 + g4 * (2 + 3 * g4)))));
+
+
+			yy3 = (a * kv(xx3 / xx5) + b * (xx3 / xx5) + cc) * yy3;
+
+
+		xx = x1 + xx3 * ex[1] + yy3 * ey[1];
+		yy = y1 + xx3 * ex[2] + yy3 * ey[2];
+		zz = z1 + xx3 * ex[3] + yy3 * ey[3];
+
+		return;
+		}
+		else
+		{
+			xx = x3;
+			yy = y3;
+			zz = z3;
+
+			return;
+		}
+
+				a11:
+				xx = x3;
+				yy = y3;
+				zz = z3;
+
+				return;
+
 }

@@ -83,8 +83,58 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-   
+    if (false)
+    {
+        MKmethod MK = MKmethod();
 
+        int s1, s2, s3, I;
+        double Ur, Uthe, Uphi, Vr, Vthe, Vphi, cp, r, x_ex, y_ex, z_ex;
+
+        I = 2;
+        vector <double> Wr(I + 1);
+        vector <double> Wthe(I + 1);
+        vector <double> Wphi(I + 1);
+        vector <double> mu_(I + 1);
+
+        s1 = s2 = s3 = 1;
+        Ur = -1.0;
+        Uthe = 0.1;
+        Uphi = 0.2;
+        Vr = 0.1;
+        Vthe = 0.3;
+        Vphi = -0.23;
+        cp = 1.0;
+        r = 0.25;
+        x_ex = 0.24;
+        y_ex = 0.01;
+        z_ex = -0.01;
+
+        MK.Change_Velosity4(s1, s2, s3, Ur, Uthe, Uphi, Vr, Vthe, Vphi, Wr, Wthe,//
+            Wphi, mu_, cp, r, I, x_ex,
+            y_ex, z_ex);
+
+        cout << mu_[0] << " " << mu_[1] << " " << mu_[2] << endl;
+        cout << Wr[0] << " " << Wr[1] << " " << Wr[2] << endl;
+
+        return 0;
+    }
+
+    if (false)
+    {
+        MKmethod MK = MKmethod();
+        cout << MK.int_1(0.1, 1.23) << endl;
+        cout << MK.int_1(1.1, 1.23) << endl;
+        cout << MK.int_1(2.2, 1.23) << endl;
+        cout << MK.int_1(3.3, 1.23) << endl;
+        cout << MK.int_1(4.4, 1.23) << endl;
+        cout << MK.int_1(5.5, 1.23) << endl;
+        cout << MK.int_1(6.6, 1.23) << endl;
+        cout << "    " << endl;
+        cout << MK.int_1_f1(1.23) << endl;
+        cout << MK.int_1_f2(1.23) << endl;
+        cout << MK.int_1_f3(1.23) << endl;
+        return 0;
+    }
     //CC->TVD_prepare();
     //CC->Proverka();
 
@@ -342,6 +392,118 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    // Настройка схемы счёта для различных граней
+    if (true)
+    {
+        cout << "Hellow 1" << endl;
+        for (auto& i : SS->All_Gran)
+        {
+            if (i == nullptr) continue;
+            if (i->Master == nullptr) continue;
+            if (i->Sosed == nullptr) continue;
+
+            if (i->A->type == P_Contact || i->B->type == P_Contact)
+            {
+                i->metod_HLLC = 0;
+            }
+
+            for (auto& j : i->Master->Grans)
+            {
+                if (j == nullptr) continue;
+                if (j->A->type == P_Contact || j->B->type == P_Contact)
+                {
+                    i->metod_HLLC = 0;
+                }
+            }
+
+            for (auto& k : i->Master->Grans)
+            {
+                if (k == nullptr) continue;
+                if (k->Sosed == nullptr) continue;
+                for (auto& j : k->Sosed->Grans)
+                {
+                    if (j == nullptr) continue;
+                    if (j->A->type == P_Contact || j->B->type == P_Contact)
+                    {
+                        i->metod_HLLC = 0;
+                    }
+                }
+            }
+
+            for (auto& j : i->Sosed->Grans)
+            {
+                if (j == nullptr) continue;
+                if (j->A->type == P_Contact || j->B->type == P_Contact)
+                {
+                    i->metod_HLLC = 0;
+                }
+            }
+        }
+
+        for (auto& i : SS->All_Gran_copy)
+        {
+            if (i == nullptr) continue;
+            if (i->Master == nullptr) continue;
+            if (i->Sosed == nullptr) continue;
+
+            if (i->A->type == P_Contact || i->B->type == P_Contact)
+            {
+                i->metod_HLLC = 0;
+            }
+
+            for (auto& j : i->Master->Grans)
+            {
+                if (j == nullptr) continue;
+                if (j->A->type == P_Contact || j->B->type == P_Contact)
+                {
+                    i->metod_HLLC = 0;
+                }
+            }
+
+            for (auto& k : i->Master->Grans)
+            {
+                if (k == nullptr) continue;
+                if (k->Sosed == nullptr) continue;
+                for (auto& j : k->Sosed->Grans)
+                {
+                    if (j == nullptr) continue;
+                    if (j->A->type == P_Contact || j->B->type == P_Contact)
+                    {
+                        i->metod_HLLC = 0;
+                    }
+                }
+            }
+
+            for (auto& j : i->Sosed->Grans)
+            {
+                if (j == nullptr) continue;
+                if (j->A->type == P_Contact || j->B->type == P_Contact)
+                {
+                    i->metod_HLLC = 0;
+                }
+            }
+        }
+
+        cout << "Hellow 2" << endl;
+    }
+
+    //for (auto i : SS->All_Cells)
+    //{
+    //    if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
+    //    {
+    //        //Для счёта монте-карло
+    //        i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
+    //        i->par[0].v = i->par[0].v / (chi_real / chi_);
+    //        i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
+    //        i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
+
+    //        i->par[1].u = i->par[1].u / (chi_real / chi_);       // Перенормировка
+    //        i->par[1].v = i->par[1].v / (chi_real / chi_);
+    //        i->par[1].ro = i->par[1].ro * kv(chi_real / chi_);
+    //        i->par[1].Q = i->par[1].Q * kv(chi_real / chi_);
+    //    }
+    //}
+
     // БЛОК для расчёта газовой динамики (на CPU)
     if (parameter_4)
     {
@@ -370,9 +532,9 @@ int main(int argc, char** argv)
             i->par[0].k_T = 0.0;
         }
         //SS->Download_Source_MK("source_vers7_7.txt");
-        
+
         SS->Download_Source_MK(parameter_22); // ТУТ ЗАНУЛЯЮТСЯ ИСТОЧНИКИ
-        
+
         //SS->Download_Source_MK("source_vers7_9.txt");
         double norm_istok = 1.0;
         for (auto& i : SS->All_Cells)
@@ -413,7 +575,6 @@ int main(int argc, char** argv)
         //SS->Print_cell();
         SS->Print_Gran("DO_gran_" + name_gd);
         SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
-        return 0;
 
         for (int k = 0; k < 0; k++)  // 10
         {
@@ -422,31 +583,33 @@ int main(int argc, char** argv)
             SS->Print_Tecplot_MK();
         }
 
-        int max_k = 900;  // 150  считаются 30 минут, просить 40 минут   900
+        int max_k = 100;  // 150  считаются 30 минут, просить 40 минут   900
         //SS->Init_conditions();
-        for (int k = 0; k < max_k; k++)  // 10
+        cout << "FFFFF = " << 0.0 << endl;
+        for (int k = 1; k <= max_k; k++)  // 10
         {
-            if (k % 10 == 0 && k > 1)
+            if (true)//(k % 5 == 0)
             {
-                cout << "Global step = " << k + 1 << "  is " << max_k << endl;
+                cout << "Global step = " << k << "  is " << max_k << endl;
             }
             //SS->Go_stationary_5_komponent_inner_2(50000);
             //SS->Go_5_komponent_2(50000);
-            SS->Go_stationary_5_komponent_inner_MK(1500);
+            SS->Go_stationary_5_komponent_inner_MK(300);
+            cout << "Outer" << endl;
             //SS->Go_5_komponent__MK2(5000);
-            SS->Go_5_komponent_MK(3000);
+            SS->Go_5_komponent_MK(1500);
             //SS->Init_conditions();
-            if (k % 10 == 0 && k > 1)
+            if (k % 1 == 0 && k > 1)
             {
                 SS->Print_Gran("gran_" + name_gd);
             }
 
-            if (k % 170 == 0 && k > 1)
+            if ((k % 5 == 0 && k > 1)||(k == 5))
             {
                 SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
             }
 
-            if (k % 230 == 0 && k > 1)
+            if (k % 100 == 0 && k > 1)
             {
                 SS->Save_Setka_ALL_ALPHA(name_gd);
             }
@@ -458,8 +621,9 @@ int main(int argc, char** argv)
         end = omp_get_wtime();
         printf("Work took %f seconds\n", end - start);
         SS->Save_Setka_ALL_ALPHA(name_gd);
-        SS->Print_Gran("gran_" + name_gd);
-        SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
+        //SS->Print_Gran("gran_" + name_gd);
+        //SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
+        SS->Print_Tecplot_MK_2d("tecplot_MK_" + name_gd);
         return 0;
     }
 
@@ -475,7 +639,7 @@ int main(int argc, char** argv)
 
     
     //SS->Download_Source_MK(parameter_22);
-    SS->func_pogloshenie();
+    //SS->func_pogloshenie();
     //SS->Print_Tecplot_MK();
 
     //SS->MK_start_2_0();
@@ -629,7 +793,7 @@ int main(int argc, char** argv)
         }
 
         ofstream fout_cr;
-        fout_cr.open("Pogloshenie.txt");
+        //fout_cr.open("Pogloshenie.txt");
 
         for (int k = 3; k < 4; k++)
         {

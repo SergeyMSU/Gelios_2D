@@ -514,18 +514,19 @@ void Cell::Get_Sourse_MK1(double& q1, double& q2, double& q3, const double& u, c
 	q3 = 0.0;
 	return;*/
 
+	if (false)//(xx < -0.8 && xx > -2.0)
+	{
+		q1 = this->par[0].I_u;// +this->par[0].II_u;
+		q2 = this->par[0].I_v;// +this->par[0].II_v;
+		q3 = this->par[0].I_T;// +this->par[0].II_T;
+		return;
+	}
 
 	double xx, yy;
 	this->Get_Center(xx, yy);
 	double rr = sqrt(kv(xx) + kv(yy));
 
-	if (false)//(xx < -0.8 && xx > -2.0)
-	{
-		q1 = this->par[0].I_u + this->par[0].II_u;
-		q2 = this->par[0].I_v + this->par[0].II_v;
-		q3 = this->par[0].I_T + this->par[0].II_T;
-		return;
-	}
+	
 
 
 	double r1, r2;

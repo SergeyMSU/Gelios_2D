@@ -2746,6 +2746,8 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 		gamma_[i] = 1.0 / (kv(r / this->R_[i]) - 1.0);
 	}
 
+
+
 	double ksi, gam1, gam2, Wr1, Wr2, Wr0 = -1.0, ksi1, ksi2, W1, W2, Wa;
 	int met = 0;
 	// Разыграем Wr  
@@ -2763,6 +2765,8 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 		}
 		double pp1 = this->for_Wr_1(0.0, gam2, Ur) - this->for_Wr_1(0.0, gam1, Ur);
 		double pp2 = this->for_Wr_2(0.0, gam2, Ur, Uthe) - this->for_Wr_2(0.0, gam1, Ur, Uthe);
+
+
 
 		if (MyRandom(s1, s2, s3) < pp1 / (pp1 + pp2))
 		{
@@ -2909,6 +2913,8 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 		gg = 0.0;
 	}
 
+
+
 	do
 	{
 		ksi1 = MyRandom(s1, s2, s3);
@@ -2917,6 +2923,7 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 		ksi4 = MyRandom(s1, s2, s3);
 		ksi5 = MyRandom(s1, s2, s3);
 		ksi6 = MyRandom(s1, s2, s3);
+
 		if (p4 < ksi1)
 		{
 			om1 = 1.0 - 2.0 * ksi4;
@@ -2944,6 +2951,7 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 			y2 = sqrt(-log(ksi4)) * cos(2.0 * pi_ * ksi5);
 			y3 = sqrt(-log(ksi4)) * sin(2.0 * pi_ * ksi5);
 		}
+
 		v1 = y1 + Ur;
 		v2 = y2 + Uthe;
 		v3 = y3 + Uphi;
@@ -2953,6 +2961,7 @@ bool MKmethod::Change_Velosity4(int& s1, int& s2, int& s3, const double& Ur, con
 		uuu = sqrt(kvv(u1, u2, u3));
 		yy = sqrt(kvv(y1, y2, y3));
 		h = ((uuu * sigma2(uuu, cp)) / (sigma2(X, cp) * (X + yy)));
+
 		/*if (h > 1.0)
 		{
 			cout << "ERROR h  2096 nhsbfsbfuffr" << endl;

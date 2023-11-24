@@ -3,17 +3,17 @@
 
 // Схема запуска:
 //  1) Установить загрузочный файл для сетки
-#define parameter_1 "vers7_6.txt"
+#define parameter_1 "vers17_10.txt"
 //  2) Установить файл сохранения газодинамических параметров
-#define parameter_21 "vers7_6*.txt"   //  газодинамических параметров
-#define parameter_22 "source_vers7_6.txt"   //  источников монте-карло (это и для сохранения, и для скачивания)
+#define parameter_21 "vers17_11.txt"   //  газодинамических параметров
+#define parameter_22 "source_vers17_12.txt"   //  источников монте-карло (это и для сохранения, и для скачивания)
 //  3) Установить правильный параметр Kn
-#define Kn_  0.4326569 // 0.4326569808 // 0.4326569808 // 6.0		
+#define Kn_  0.01 //0.4326569 // 0.4326569808 // 0.4326569808 // 6.0		
 //  4) Выбрать алгоритм расчёта (Монте-Карло \ Газовая динамика)
-#define parameter_4 false   // Считаем газовую динамику? Если да, то true, если монте-карло, то false
+#define parameter_4 true   // Считаем газовую динамику? Если да, то true, если монте-карло, то false
 //  5) Установить число шагов\траекторий
 //  6) Установить файл загрузки весов
-#define parameter_6 "stat_do_7_5.txt"
+#define parameter_6 "stat_do_17_8.txt"
 //  7) Установить файл сохранения весов
 #define parameter_7 "stat_do_7_--.txt"
 
@@ -49,12 +49,17 @@
 #define ggg (5.0/3.0)
 #define g1 (ga - 1.0)
 #define kv(x) ( (x)*(x) )
+#define kv3(x) ( (x)*(x)*(x) )
+#define kv4(x) ( (x)*(x)*(x)*(x) )
+#define kv5(x) ( (x)*(x)*(x)*(x)*(x) )
+#define kv6(x) ( (x)*(x)*(x)*(x)*(x)*(x) )
 #define pow3(x) ( (x)*(x)*(x) )
 #define pow4(x) ( (x)*(x)*(x)*(x) )
 #define pow5(x) ( (x)*(x)*(x)*(x)*(x) )
 #define pow6(x) ( (x)*(x)*(x)*(x)*(x)*(x) )
 #define pow7(x) ( (x)*(x)*(x)*(x)*(x)*(x)*(x) )
 #define kvv(x,y,z)  (kv(x) + kv(y) + kv(z))
+#define DOT_PRODUCT(x, y) ( ((x[0]) * (y[0])) + ((x[1]) * (y[1])) + ((x[2]) * (y[2])) )
 
 #define pi_ 3.14159265358979323846
 #define sqrtpi_ 1.77245385
@@ -135,12 +140,12 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define M_inf 1.97009
 #define chi_ 1.0 //36.1059 // 36.1059
 #define chi_real 36.1275
-#define kurant  0.1    // 0.1
+#define kurant  0.9    // 0.1
 //#define Kn_  0.622171
 //#define Kn_  0.4326569808  // 0.622171 // 0.5  // 242.785									// Число Кнудсена	
 //#define Kn_  0.2	                                            // Число Кнудсена
 //#define a_2 0.102578  // 0.10263
-#define n_p_LISM_ (3.0) 
+#define n_p_LISM_ 3.0 //(3.0) 
 #define n_H_LISM_ (1.0)
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Дифференциальное сечение перезарядки
 //#define sigma2(x, y) (kv(1.0 - (a_2/(1.0 - a_2 * log(y))) * log(x)))  // Для другого обезразмеривания скорости на cp
@@ -177,7 +182,7 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 
 #define polusum false  // Берём лт полусумму источников или только один
 #define mu_statistic false  // считаем ли статистику весов по зонам
-#define func_stat true     // считаем ли функцию распределения и моменты на сфере радиуса?
+#define func_stat false     // считаем ли функцию распределения и моменты на сфере радиуса?
 #define R_stat 80.0        // Сфера на которой считаем статистику
 #define Al_stat 54         // Расчёт моментов по углу, на сколько дробим угол
 
