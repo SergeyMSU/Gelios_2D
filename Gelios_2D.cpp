@@ -76,6 +76,7 @@ int main(int argc, char** argv)
     int now = 0;
     int now2 = 1;
     double newyzka = 0.0;
+    double alpha = pi_ / 90.0;
 
     // Расчитываем уравнение Лапласа
     for (int iter = 0; iter <= 5000; iter++)
@@ -86,10 +87,11 @@ int main(int argc, char** argv)
         {
             double x, y, SS;
             double x2, y2;
+            double x3, y3;
             double psi, psi2;
             double sivi = 0.0;
             double divS = 0.0;
-            double dL;
+            double d1, d2;
             i->Get_Center(x, y);
             psi = i->par2[now]->psi;
 
@@ -97,42 +99,42 @@ int main(int argc, char** argv)
             if (i->type == C_1_B) continue;
             for (auto& j : i->Grans)
             {
+                j->Get_Center(x2, y2);
+                d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+
                 if (j->type == Extern)
                 {
-                    j->Get_Center(x2, y2);
-                    dL = sqrt(kv(x2 - x) + kv(y2 - y));
-                    dL = dL * 2;
+                    d2 = d1;
                     psi2 = psi;
                 }
                 else if (j->type == Axis)
                 {
-                    j->Get_Center(x2, y2);
-                    dL = sqrt(kv(x2 - x) + kv(y2 - y));
-                    dL = dL * 2;
-                    psi2 = -psi;
+                    d2 = d1;
+                    psi2 = 0.0;
                 }
                 else
                 {
                     if (j->Sosed->type == C_4)
                     {
-                        j->Get_Center(x2, y2);
-                        dL = sqrt(kv(x2 - x) + kv(y2 - y));
-                        dL = dL * 2;
+                        d2 = d1;
                         psi2 = psi;
                     }
                     else
                     {
-                        j->Sosed->Get_Center(x2, y2);
-                        dL = sqrt(kv(x2 - x) + kv(y2 - y));
-                        psi2 = j->Sosed->par2[now]->psi;
+                        j->Sosed->Get_Center(x3, y3);
+                        d2 = sqrt(kv(x2 - x3) + kv(y2 - y3));
+                        psi2 = (j->Sosed->par2[now]->psi * d1 + psi * d2)/(d1 + d2);
                     }
                 }
 
+                //SS = j->Get_square_rotate(alpha);
                 SS = j->Get_square();
-                sivi = sivi + SS / dL;
-                divS = divS + psi2 * SS / dL;
+                sivi = sivi + SS / d1;
+                divS = divS + psi2 * SS / d1;
             }
-            i->par2[now2]->psi = (divS) / sivi;
+            //sivi = sivi + 2.0 * i->Get_Volume() / (y * alpha);
+            //divS = divS + 2.0 * psi * i->Get_Volume() / (y * alpha);
+            i->par2[now2]->psi = (divS / sivi);
             newyzka = max(newyzka, fabs(i->par2[now2]->psi - psi));
         }
 
@@ -191,14 +193,20 @@ int main(int argc, char** argv)
 
             j->Get_normal(n1, n2);
             SS = j->Get_square();
+            //SS = j->Get_square_rotate(alpha);
             sivix = sivix + n1 * (psi * d2 + psi2 * d1)/(d1 + d2) * SS;
             siviy = siviy + n2 * (psi * d2 + psi2 * d1)/(d1 + d2) * SS;
             //sivix = sivix + n1 * psi2 * SS;
             //siviy = siviy + n2 * psi2 * SS;
         }
 
+        //siviy = siviy + 2.0 * sin(alpha) * psi * i->Get_Volume();
+
         i->par2[now2]->grad_psi_x = sivix / i->Get_Volume();
         i->par2[now2]->grad_psi_y = siviy / i->Get_Volume();
+
+        //i->par2[now2]->grad_psi_x = sivix / i->Get_Volume_rotate(alpha);
+        //i->par2[now2]->grad_psi_y = siviy / i->Get_Volume_rotate(alpha);
     }
 
     
