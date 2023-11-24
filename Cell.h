@@ -14,6 +14,7 @@ enum Cell_type  // Тип грани нужен для граничных условий
 	C_5,
 	C_centr,
 	C_no,
+	C_1_B, // Для этих ячеек не надо считать psi - он задан граничными условиями
 };
 
 struct Parametr
@@ -96,6 +97,9 @@ struct Parametr
 struct Parametr2
 {                    // ДОБАВЛЯТЬ ПЕРЕМЕННЫЕ СТРОГО В КОНЕЦ!!!!
 	double psi = 0.0;
+	double grad_psi_x = 0.0;  // Градиент пси
+	double grad_psi_y = 0.0;
+	double grad_psi_z = 0.0;
 };
 
 class Point;
@@ -113,7 +117,7 @@ public:
 	double Potok_H4[4];
 	double L;                   // Характерный размер ячейки
 	Parametr par[2];
-	Parametr2 par2[2];
+	Parametr2* par2[2];
 	vector <Point*> contour;    // Гарантируется расположение точек по кругу
 	vector <Gran*> Grans;
 
