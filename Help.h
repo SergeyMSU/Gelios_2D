@@ -165,11 +165,11 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define R11_ (3.0/RR_)  // 38.0    // Действует! До какой внутренней границы не двигаем ячейки
 #define R111_ (4.5/RR_)  // 50.0 
 #define R2_ (10.0/RR_)  // 100.0
-#define R3_ (17.0/RR_)  // 150.0
-#define R4_ (25.0/RR_)  // 600.0
-#define R5_ (40.0/RR_)  // 2200.0
+#define R3_ (30.0/RR_)  // 150.0
+#define R4_ (50.0/RR_)  // 600.0
+#define R5_ (80.0/RR_)  // 2200.0
 //#define Rmax_ (1300.0/RR_)  // 1300.0  // (1300.0)   // Максимальный радиус для Монте-Карло
-#define Left_ (-40.0/RR_)  // -1500
+#define Left_ (-60.0/RR_)  // -1500
 #define H_pow 0.5 //0.45  // Показатель убывания плотности для первой компоненты водорода
 #define weight_ 0.25     // Веса для атомов
 #define gam(i) ( 1.0/(kv(R5_ - 2.0/RR_)/kv(Ri[(i)]) - 1.0) )

@@ -35,17 +35,18 @@ int main(int argc, char** argv)
 
 
     Setka* SS;
-
-    SS = new Setka(20, 15, 10, 30, 50, 20, 10, 10);    // n_inner 3
-    //SS->TVD_prepare();
+    SS = new Setka();
+    SS->Download_Setka_ALL_ALPHA_2_0("Magnit_1");
+    //SS = new Setka(30, 15, 10, 40, 50, 20, 30, 20);    // n_inner 3
+    SS->TVD_prepare();
     SS->Proverka();
-    SS->Print_cell2();
+    
 
 
     // Заполняем ячейки, для которых будем считать магнитное поле
     for (auto& i : SS->All_Cells)
     {
-        if (i->type == C_1 || i->type == C_2 || i->type == C_3)
+        if (i->type == C_1 || i->type == C_2 || i->type == C_3 || i->type == C_1_B)
         {
             i->par2[0] = new Parametr2;
             i->par2[1] = new Parametr2;
@@ -70,146 +71,35 @@ int main(int argc, char** argv)
                 }
             }
         }
+        else if(i->type == C_4 || i->type == C_5)
+        {
+            SS->All_Cells_Outer.push_back(i);
+            i->par[0].ro = 1.0;
+            i->par[0].p = 1.0 / (ggg * 100.0);
+            i->par[0].u = -1.0;
+            i->par[0].v = 0.0;
+            i->par[1] = i->par[0];
+        }
     }
 
-
-    int now = 0;
-    int now2 = 1;
-    double newyzka = 0.0;
-    double alpha = pi_ / 90.0;
-
-    // Расчитываем уравнение Лапласа
-    for (int iter = 0; iter <= 5000; iter++)
+    SS->Go_5_komponent__MK2(2000, false);
+    SS->Magnitosphere(20000);
+    cout << "Start" << endl;
+    for (int i = 1; i <= 5; i++)
     {
-        newyzka = 0.0;
-
-        for (auto& i : SS->All_Cells_Inner)
-        {
-            double x, y, SS;
-            double x2, y2;
-            double x3, y3;
-            double psi, psi2;
-            double sivi = 0.0;
-            double divS = 0.0;
-            double d1, d2;
-            i->Get_Center(x, y);
-            psi = i->par2[now]->psi;
-
-
-            if (i->type == C_1_B) continue;
-            for (auto& j : i->Grans)
-            {
-                j->Get_Center(x2, y2);
-                d1 = sqrt(kv(x2 - x) + kv(y2 - y));
-
-                if (j->type == Extern)
-                {
-                    d2 = d1;
-                    psi2 = psi;
-                }
-                else if (j->type == Axis)
-                {
-                    d2 = d1;
-                    psi2 = 0.0;
-                }
-                else
-                {
-                    if (j->Sosed->type == C_4)
-                    {
-                        d2 = d1;
-                        psi2 = psi;
-                    }
-                    else
-                    {
-                        j->Sosed->Get_Center(x3, y3);
-                        d2 = sqrt(kv(x2 - x3) + kv(y2 - y3));
-                        psi2 = (j->Sosed->par2[now]->psi * d1 + psi * d2)/(d1 + d2);
-                    }
-                }
-
-                //SS = j->Get_square_rotate(alpha);
-                SS = j->Get_square();
-                sivi = sivi + SS / d1;
-                divS = divS + psi2 * SS / d1;
-            }
-            //sivi = sivi + 2.0 * i->Get_Volume() / (y * alpha);
-            //divS = divS + 2.0 * psi * i->Get_Volume() / (y * alpha);
-            i->par2[now2]->psi = (divS / sivi);
-            newyzka = max(newyzka, fabs(i->par2[now2]->psi - psi));
-        }
-
-        now = (now + 1) % 2; // Какие параметры сейчас берём
-        now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
-
-        if (iter % 50 == 0)
-        {
-            cout << "Newyazka = " << newyzka << endl;
-        }
+        if (i % 50 == 0) cout << i << endl;
+        SS->Go_5_komponent__MK2(3, true);
+        SS->Magnitosphere(5000);
     }
 
-    for (auto& i : SS->All_Cells_Inner)
-    {
-        double x, y, SS;
-        double x2, y2;
-        double x3, y3;
-        double psi, psi2;
-        double sivix = 0.0;
-        double siviy = 0.0;
-        double n1, n2;
-        double d1, d2;
-        i->Get_Center(x, y);
-        psi = i->par2[now]->psi;
+    SS->Save_Setka_ALL_ALPHA("Magnit_2");
 
-        if (i->type == C_1_B) continue;
-        for (auto& j : i->Grans)
-        {
-            j->Get_Center(x2, y2);
-            d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+    SS->Print_Tecplot();
+    SS->Print_cell2();
+    SS->Print_Gran("Grans.txt");
+    //cout << "Laplas" << endl;
 
-            if (j->type == Extern)
-            {
-                d2 = d1;
-                psi2 = psi;
-            }
-            else if (j->type == Axis)
-            {
-                d2 = d1;
-                psi2 = -psi;
-            }
-            else
-            {
-                if (j->Sosed->type == C_4)
-                {
-                    d2 = d1;
-                    psi2 = psi;
-                }
-                else
-                {
-                    j->Sosed->Get_Center(x3, y3);
-                    d2 = sqrt(kv(x2 - x3) + kv(y2 - y3));
-                    psi2 = j->Sosed->par2[now]->psi;
-                }
-            }
 
-            j->Get_normal(n1, n2);
-            SS = j->Get_square();
-            //SS = j->Get_square_rotate(alpha);
-            sivix = sivix + n1 * (psi * d2 + psi2 * d1)/(d1 + d2) * SS;
-            siviy = siviy + n2 * (psi * d2 + psi2 * d1)/(d1 + d2) * SS;
-            //sivix = sivix + n1 * psi2 * SS;
-            //siviy = siviy + n2 * psi2 * SS;
-        }
-
-        //siviy = siviy + 2.0 * sin(alpha) * psi * i->Get_Volume();
-
-        i->par2[now2]->grad_psi_x = sivix / i->Get_Volume();
-        i->par2[now2]->grad_psi_y = siviy / i->Get_Volume();
-
-        //i->par2[now2]->grad_psi_x = sivix / i->Get_Volume_rotate(alpha);
-        //i->par2[now2]->grad_psi_y = siviy / i->Get_Volume_rotate(alpha);
-    }
-
-    
 
     // Выводим всё в файл
     ofstream fout;
@@ -219,9 +109,9 @@ int main(int argc, char** argv)
     {
         double x, y;
         i->Get_Center(x, y);
-        fout << x << " " << y << " " << i->par2[now2]->psi <<
-            " " << i->par2[now2]->grad_psi_x << " " << i->par2[now2]->grad_psi_y << 
-            " " << (kv(i->par2[now2]->grad_psi_x) + kv(i->par2[now2]->grad_psi_y))/(8.0 * pi_) << endl;
+        fout << x << " " << y << " " << i->par2[0]->psi <<
+            " " << i->par2[0]->grad_psi_x << " " << i->par2[0]->grad_psi_y << 
+            " " << (kv(i->par2[0]->grad_psi_x) + kv(i->par2[0]->grad_psi_y))/(8.0 * pi_) << endl;
     }
     fout.close();
 

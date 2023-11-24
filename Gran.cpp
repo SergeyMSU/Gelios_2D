@@ -278,9 +278,9 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	else if (this->type == Input)
 	{
 		auto par2 = this->Master->par[i];
-		par = {1.0, 1.0, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
+		par = {1.0, 1.0/(ggg * 100.0), -1.0, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
 		par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//
-		1.0, 0.5, Velosity_inf, 0.0};
+		1.0, 0.5, -1.0, 0.0};
 
 		//par = { 4.0, 2.5, Velosity_inf, 0.0, 100.0, par2.ro_H1, par2.p_H1, par2.u_H1, par2.v_H1,//
 		//par2.ro_H2, par2.p_H2, par2.u_H2, par2.v_H2 , par2.ro_H3, par2.p_H3, par2.u_H3, par2.v_H3,//

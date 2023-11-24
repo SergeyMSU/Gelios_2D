@@ -33,6 +33,7 @@ public:
 
 	vector <Cell*> All_Cells;          // Все ячейки
 	vector <Cell*> All_Cells_Inner;    // Ячейки внутри маленького радиуса (там отдельно считает)
+	vector <Cell*> All_Cells_Outer;    // Ячейки внутри маленького радиуса (там отдельно считает)
 	vector <Cell*> All_Cells_zero;    // Ячейки в нуле
 
 	vector <Gran*> Line_Contact;     // Контакт
@@ -147,6 +148,8 @@ public:
 
 	void normir(int ii);
 
+	void Magnitosphere(int step);
+
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
 	void Save_Source_MK(string name);
 	void Download_Source_MK(string name);
@@ -214,7 +217,7 @@ public:
 	void Go_5_komponent(int step);
 	void Go_5_komponent_2(int step);  // Другой способ записи законов сохранения и, соответственно многое поменялось
 	void Go_5_komponent_MK(int step, bool dvig = true);  // Версия с источниками из Монте-Карло
-	void Go_5_komponent__MK2(int step);
+	void Go_5_komponent__MK2(int step, bool movement = true);
 	double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
 		const double& ro_R, const double& Q_R, const double& p_R, const double& v1_R, const double& v2_R, const double& W, //
 		double* P, double& PQ, const double& n1, const double& n2, const double& rad, int metod, double& Vl, double& Vc, double& Vp, bool nul_potok = false);
