@@ -2225,6 +2225,7 @@ void Setka::Print_Tecplot_MK_2d(string name0)
 		B = i->Grans[0]->Sosed;
 		C = i->Grans[1]->Sosed;
 		D = i->Grans[2]->Sosed;
+		E = nullptr;
 
 		if (i->Grans.size() == 3)
 		{
@@ -2373,7 +2374,7 @@ void Setka::Print_Tecplot_MK_2d(string name0)
 		auto m1 = Line_Inner[ii];
 		auto m2 = Line_Inner[ii + 1];
 		Cell* i;
-
+		i = nullptr;
 		A = m1->Master;
 		B = m2->Master;
 

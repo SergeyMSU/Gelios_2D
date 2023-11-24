@@ -93,6 +93,11 @@ struct Parametr
 	double divV = 0.0;
 };
 
+struct Parametr2
+{                    // ДОБАВЛЯТЬ ПЕРЕМЕННЫЕ СТРОГО В КОНЕЦ!!!!
+	double psi = 0.0;
+};
+
 class Point;
 class Gran;
 class Sensor;
@@ -108,6 +113,7 @@ public:
 	double Potok_H4[4];
 	double L;                   // Характерный размер ячейки
 	Parametr par[2];
+	Parametr2 par2[2];
 	vector <Point*> contour;    // Гарантируется расположение точек по кругу
 	vector <Gran*> Grans;
 
