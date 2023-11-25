@@ -80,6 +80,14 @@
 #include <xmmintrin.h>
 #include <string>
 
+#include <math.h>
+#include <vector>
+#include <chrono>
+#include <memory>
+#include <fstream>
+#include <sstream> //to split strings
+#include <iterator> //to split strings as well
+
 
 #include "Setka.h"
 #include "Rail.h"
@@ -93,13 +101,10 @@
 #include <mutex>
 
 
-#include <vector>
 #include <string>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fstream>
-#include <math.h>
 #include <algorithm>
 
 #include "Dist_func.h"
@@ -199,6 +204,31 @@ void Vector_product(const double& a1, const double& a2, const double& a3,//
 #define pred2(i, j, area, k, l) (min(Mu_[area][i][j],Mu_[area][k][l]))
 
 //#define pred(i, j, al) (Mu[i][j] * sin(al))
+
+
+inline void mulMat_1(double mat1[2][4], double mat2[4][2], double rslt[2][2])
+{
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 2; j++) {
+			rslt[i][j] = 0;
+
+			for (int k = 0; k < 4; k++) {
+				rslt[i][j] += mat1[i][k] * mat2[k][j];
+			}
+		}
+	}
+}
+
+inline void mulMat_vec_1(double mat[2][4], double vec[4], double rslt[2])
+{
+	for (int i = 0; i < 2; i++) {
+		rslt[i] = 0;
+
+		for (int k = 0; k < 4; k++) {
+			rslt[i] += mat[i][k] * vec[k];
+		}
+	}
+}
 
 inline double polar_angle(const double& x, const double& y)
 {

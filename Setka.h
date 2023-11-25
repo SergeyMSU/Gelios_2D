@@ -149,6 +149,7 @@ public:
 	void normir(int ii);
 
 	void Magnitosphere(int step);
+	void Magnitosphere2(int step);
 
 	void Save_Setka_ALL_ALPHA(string name); // Большая и сложная функция сохранения полной сетки
 	void Save_Source_MK(string name);

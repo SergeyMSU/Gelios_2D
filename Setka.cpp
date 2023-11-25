@@ -4083,7 +4083,7 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
-	double koef1 = 0.0001 * 1.0; // 0.08; // 0.3;
+	double koef1 = 0.1; // 0.000001 * 1.0; // 0.08; // 0.3;
 	double koef2 = 0.1 * 0.05; // 0.005;
 	double koef3 = 0.1 * 1.0; // 0.1;
 	// Разбираемся с контактом
@@ -4245,8 +4245,8 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			auto i = this->Line_Contact[j];
 			if (i->A->count > 0)
 			{
-				i->A->Vx /= koef1 * (1.0 * i->A->count);
-				i->A->Vy /= koef1 * (1.0 * i->A->count);
+				i->A->Vx /= (1.0 * i->A->count);
+				i->A->Vy /= (1.0 * i->A->count);
 			}
 
 		}
@@ -5220,7 +5220,10 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		//i->All_point[i->M1 + i->M2]->y2 = R3 * sin(i->s);
 
 		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
-
+		if (R4 > 65.0)
+		{
+			R4 = 65.0;
+		}
 
 		for (int j = 0; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
 		{
@@ -5232,6 +5235,10 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		}
 
 		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
+		if (R4 > 65.0)
+		{
+			R4 = 65.0;
+		}
 
 		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
 		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
@@ -11606,8 +11613,10 @@ void Setka::Magnitosphere(int step)
 	{
 		newyzka = 0.0;
 
-		for (auto& i : this->All_Cells_Inner)
+#pragma omp parallel for
+		for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
 		{
+			auto& i = this->All_Cells_Inner[ii];
 			double x, y, SS;
 			double x2, y2;
 			double x3, y3;
@@ -11664,17 +11673,19 @@ void Setka::Magnitosphere(int step)
 		now = (now + 1) % 2; // Какие параметры сейчас берём
 		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
 
-		if (iter % 1000 == 0)
+		/*if (iter % 1000 == 0)
 		{
 			cout << "Newyazka = " << newyzka << endl;
-		}
+		}*/
 	}
 
 	cout << "Newyazka end = " << newyzka << endl;
 
 	// Вычисляем градиент
-	for (auto& i : this->All_Cells_Inner)
+#pragma omp parallel for
+	for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
 	{
+		auto& i = this->All_Cells_Inner[ii];
 		double x, y, SS;
 		double x2, y2;
 		double x3, y3;
@@ -11735,6 +11746,283 @@ void Setka::Magnitosphere(int step)
 		//i->par2[now2]->grad_psi_y = siviy / i->Get_Volume_rotate(alpha);
 	}
 
+	
+#pragma omp parallel for
+	for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
+	{
+		auto& i = this->All_Cells_Inner[ii];
+		double x, y, SS;
+		double x2, y2;
+		double x3, y3;
+		double psi, psi2;
+		double grad = 0.0;
+		double sivix = 0.0;
+		double siviy = 0.0;
+		double n1, n2, nn;
+		double d1, d2;
+		double dense_mat_A[4][2];
+		double dense_mat_AT[2][4];
+		double dense_mat_AA[2][2];
+		double b[4];
+		double bb[2];
+		int gr = -1;
+		i->Get_Center(x, y);
+		psi = i->par2[now]->psi;
+
+		if (i->type == C_1_B) continue;
+		for (auto& j : i->Grans)
+		{
+			gr = gr + 1;
+			j->Get_Center(x2, y2);
+			d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+
+			n1 = (x2 - x);
+			n2 = (y2 - y);
+
+			if (j->type == Extern)
+			{
+				grad = 0.0;
+			}
+			else if (j->type == Axis)
+			{
+				psi2 = -psi;
+				grad = (psi2 - psi) / (2.0 * d1);
+			}
+			else
+			{
+				if (j->Sosed->type == C_4)
+				{
+					grad = 0.0;
+				}
+				else
+				{
+					j->Sosed->Get_Center(x3, y3);
+					n1 = (x3 - x);
+					n2 = (y3 - y);
+					d2 = sqrt(kv(x - x3) + kv(y - y3));
+					psi2 = j->Sosed->par2[now]->psi;
+					grad = (psi2 - psi) / (d2);
+				}
+			}
+
+			//j->Get_normal(n1, n2);
+			nn = sqrt(n1 * n1 + n2 * n2);
+			n1 = n1 / nn;
+			n2 = n2 / nn;
+			dense_mat_A[gr][0] = n1;
+			dense_mat_A[gr][1] = n2;
+			dense_mat_AT[0][gr] = n1;
+			dense_mat_AT[1][gr] = n2;
+			b[gr] = grad;
+		}
+
+		mulMat_1(dense_mat_AT, dense_mat_A, dense_mat_AA);
+		mulMat_vec_1(dense_mat_AT, b, bb);
+		/*cout << dense_mat_A[0][0] << " " << dense_mat_A[0][1] << endl;
+		cout << dense_mat_A[1][0] << " " << dense_mat_A[1][1] << endl;
+		cout << dense_mat_A[2][0] << " " << dense_mat_A[2][1] << endl;
+		cout << dense_mat_A[3][0] << " " << dense_mat_A[3][1] << endl << endl;
+
+		cout << dense_mat_AT[0][0] << " " << dense_mat_AT[0][1] << " " << dense_mat_AT[0][2] << " " << dense_mat_AT[0][3] << endl;
+		cout << dense_mat_AT[1][0] << " " << dense_mat_AT[1][1] << " " << dense_mat_AT[1][2] << " " << dense_mat_AT[1][3] << endl << endl;
+
+		cout << dense_mat_AA[0][0] << " " << dense_mat_AA[0][1] << endl;
+		cout << dense_mat_AA[1][0] << " " << dense_mat_AA[1][1] << endl << endl;
+
+		cout << "b = " << b[0] << " " << b[1] << " " << b[2] << " " << b[3] << endl;
+		cout << "bb = " << bb[0] << " " << bb[1] << endl;*/
+
+		i->par2[now]->grad_psi_x = -(dense_mat_AA[1][1] * bb[0] - dense_mat_AA[0][1] * bb[1]) / (dense_mat_AA[0][1] * dense_mat_AA[1][0] - dense_mat_AA[0][0] * dense_mat_AA[1][1]);
+		i->par2[now]->grad_psi_y = -(-dense_mat_AA[1][0] * bb[0] + dense_mat_AA[0][0] * bb[1]) / (dense_mat_AA[0][1] * dense_mat_AA[1][0] - dense_mat_AA[0][0] * dense_mat_AA[1][1]);
+		//cout << "xx = " << i->par2[now]->grad_psi_x << " " << i->par2[now]->grad_psi_y << endl;
+		//system("pause");
+	}
+
+}
+
+void Setka::Magnitosphere2(int step)
+{
+	int now = 0;
+	int now2 = 1;
+	double newyzka = 0.0;
+
+	// Расчитываем уравнение Лапласа
+	for (int iter = 1; iter <= step; iter++)
+	{
+		newyzka = 0.0;
+
+		// Вычисляем градиент
+//#pragma omp parallel for
+		for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
+		{
+			auto& i = this->All_Cells_Inner[ii];
+			double x, y, SS;
+			double x2, y2;
+			double x3, y3;
+			double psi, psi2;
+			double grad = 0.0;
+			double sivix = 0.0;
+			double siviy = 0.0;
+			double n1, n2, nn;
+			double d1, d2;
+			double dense_mat_A[4][2];
+			double dense_mat_AT[2][4];
+			double dense_mat_AA[2][2];
+			double b[4];
+			double bb[2];
+			int gr = -1;
+			i->Get_Center(x, y);
+			psi = i->par2[now]->psi;
+
+			if (i->type == C_1_B) continue;
+			for (auto& j : i->Grans)
+			{
+				gr = gr + 1;
+				j->Get_Center(x2, y2);
+				d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+
+				n1 = (x2 - x);
+				n2 = (y2 - y);
+
+				if (j->type == Extern)
+				{
+					grad = 0.0;
+				}
+				else if (j->type == Axis)
+				{
+					psi2 = -psi;
+					grad = (psi2 - psi) / (2.0 * d1);
+				}
+				else
+				{
+					if (j->Sosed->type == C_4)
+					{
+						grad = 0.0;
+					}
+					else
+					{
+						j->Sosed->Get_Center(x3, y3);
+						n1 = (x3 - x);
+						n2 = (y3 - y);
+						d2 = sqrt(kv(x - x3) + kv(y - y3));
+						psi2 = j->Sosed->par2[now]->psi;
+						grad = (psi2 - psi) / (d2);
+					}
+				}
+
+				//j->Get_normal(n1, n2);
+				nn = sqrt(n1 * n1 + n2 * n2);
+				n1 = n1 / nn;
+				n2 = n2 / nn;
+				dense_mat_A[gr][0] = n1;
+				dense_mat_A[gr][1] = n2;
+				dense_mat_AT[0][gr] = n1;
+				dense_mat_AT[1][gr] = n2;
+				b[gr] = grad;
+			}
+
+			mulMat_1(dense_mat_AT, dense_mat_A, dense_mat_AA);
+			mulMat_vec_1(dense_mat_AT, b, bb);
+			/*cout << dense_mat_A[0][0] << " " << dense_mat_A[0][1] << endl;
+			cout << dense_mat_A[1][0] << " " << dense_mat_A[1][1] << endl;
+			cout << dense_mat_A[2][0] << " " << dense_mat_A[2][1] << endl;
+			cout << dense_mat_A[3][0] << " " << dense_mat_A[3][1] << endl << endl;
+
+			cout << dense_mat_AT[0][0] << " " << dense_mat_AT[0][1] << " " << dense_mat_AT[0][2] << " " << dense_mat_AT[0][3] << endl;
+			cout << dense_mat_AT[1][0] << " " << dense_mat_AT[1][1] << " " << dense_mat_AT[1][2] << " " << dense_mat_AT[1][3] << endl << endl;
+
+			cout << dense_mat_AA[0][0] << " " << dense_mat_AA[0][1] << endl;
+			cout << dense_mat_AA[1][0] << " " << dense_mat_AA[1][1] << endl << endl;
+
+			cout << "b = " << b[0] << " " << b[1] << " " << b[2] << " " << b[3] << endl;
+			cout << "bb = " << bb[0] << " " << bb[1] << endl;*/
+
+			i->par2[now]->grad_psi_x = -(dense_mat_AA[1][1] * bb[0] - dense_mat_AA[0][1] * bb[1]) / (dense_mat_AA[0][1] * dense_mat_AA[1][0] - dense_mat_AA[0][0] * dense_mat_AA[1][1]);
+			i->par2[now]->grad_psi_y = -(-dense_mat_AA[1][0] * bb[0] + dense_mat_AA[0][0] * bb[1]) / (dense_mat_AA[0][1] * dense_mat_AA[1][0] - dense_mat_AA[0][0] * dense_mat_AA[1][1]);
+			//cout << "xx = " << i->par2[now]->grad_psi_x << " " << i->par2[now]->grad_psi_y << endl;
+			//system("pause");
+		}
+
+
+//#pragma omp parallel for
+		for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
+		{
+			auto& i = this->All_Cells_Inner[ii];
+			double x, y, SS;
+			double x2, y2;
+			double x3, y3;
+			double n1, n2;
+			double psix, psi2x;
+			double psiy, psi2y;
+			double sivi = 0.0;
+			double divS = 0.0;
+			double d1, d2;
+			i->Get_Center(x, y);
+			psix = i->par2[now]->grad_psi_x;
+			psiy = i->par2[now]->grad_psi_y;
+
+
+			if (i->type == C_1_B) continue;
+			for (auto& j : i->Grans)
+			{
+				j->Get_Center(x2, y2);
+				d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+
+				if (j->type == Extern)
+				{
+					d2 = d1;
+					psi2x = psix;
+					psi2y = psiy;
+				}
+				else if (j->type == Axis)
+				{
+					d2 = d1;
+					psi2x = psix;
+					psi2y = -psiy;
+				}
+				else
+				{
+					if (j->Sosed->type == C_4)
+					{
+						d2 = d1;
+						psi2x = psix;
+						psi2y = psiy;
+					}
+					else
+					{
+						j->Sosed->Get_Center(x3, y3);
+						d2 = sqrt(kv(x2 - x3) + kv(y2 - y3));
+						psi2x = j->Sosed->par2[now]->grad_psi_x;
+						psi2y = j->Sosed->par2[now]->grad_psi_y;
+					}
+				}
+
+				//SS = j->Get_square_rotate(alpha);
+				j->Get_normal(n1, n2);
+				SS = j->Get_square();
+				sivi = sivi + SS * 0.5 * (n1 * (psi2x + psix) + n2 * (psi2y + psiy));
+			}
+			//sivi = sivi + 2.0 * i->Get_Volume() / (y * alpha);
+			//divS = divS + 2.0 * psi * i->Get_Volume() / (y * alpha);
+			i->par2[now2]->psi = i->par2[now]->psi + 0.00001 * (-sivi) / i->Get_Volume();
+			newyzka = max(newyzka, fabs(i->par2[now2]->psi - i->par2[now]->psi));
+
+
+		}
+
+		now = (now + 1) % 2; // Какие параметры сейчас берём
+		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
+
+		if (iter % 1 == 0)
+		{
+			cout << "Newyazka = " << newyzka << endl;
+		}
+
+		system("pause");
+
+	}
+
+	cout << "Newyazka end = " << newyzka << endl;
 }
 
 void Setka::Go_5_komponent__MK2(int step, bool movement)
