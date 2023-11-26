@@ -4083,7 +4083,7 @@ void Setka::Move_surface_hand(void)
 
 void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
-	double koef1 = 0.1; // 0.000001 * 1.0; // 0.08; // 0.3;
+	double koef1 = 0.02; // 0.000001 * 1.0; // 0.08; // 0.3;
 	double koef2 = 0.1 * 0.05; // 0.005;
 	double koef3 = 0.1 * 1.0; // 0.1;
 	// Разбираемся с контактом
@@ -11845,6 +11845,7 @@ void Setka::Magnitosphere2(int step)
 	int now = 0;
 	int now2 = 1;
 	double newyzka = 0.0;
+	double x0, y0;
 
 	// Расчитываем уравнение Лапласа
 	for (int iter = 1; iter <= step; iter++)
@@ -11852,7 +11853,7 @@ void Setka::Magnitosphere2(int step)
 		newyzka = 0.0;
 
 		// Вычисляем градиент
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
 		{
 			auto& i = this->All_Cells_Inner[ii];
@@ -11944,20 +11945,30 @@ void Setka::Magnitosphere2(int step)
 		}
 
 
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int ii = 0; ii < size(this->All_Cells_Inner); ii++)
 		{
 			auto& i = this->All_Cells_Inner[ii];
+			double M[2][2];
+			double MM[2][2];
+			double A[2];
+			double C[2];
 			double x, y, SS;
 			double x2, y2;
 			double x3, y3;
 			double n1, n2;
+			double psi, psi2;
 			double psix, psi2x;
 			double psiy, psi2y;
 			double sivi = 0.0;
 			double divS = 0.0;
-			double d1, d2;
+			double dx, dy;
+			double cx, cy;
+			double dd, cc, r;
+			double Det;
 			i->Get_Center(x, y);
+			psi = i->par2[now]->psi;
+
 			psix = i->par2[now]->grad_psi_x;
 			psiy = i->par2[now]->grad_psi_y;
 
@@ -11965,60 +11976,195 @@ void Setka::Magnitosphere2(int step)
 			if (i->type == C_1_B) continue;
 			for (auto& j : i->Grans)
 			{
+				SS = j->Get_square();
 				j->Get_Center(x2, y2);
-				d1 = sqrt(kv(x2 - x) + kv(y2 - y));
+				cx = x - x2;
+				cy = y - y2;
+				cc = sqrt(kv(cx) + kv(cy));
+				j->Get_normal(n1, n2);
 
 				if (j->type == Extern)
 				{
-					d2 = d1;
-					psi2x = psix;
-					psi2y = psiy;
+					continue;  // Т.к. производная по нормали ноль
+					dx = -cx;
+					dy = cy;
+					dd = cc;
+					psi2 = psi;
 				}
 				else if (j->type == Axis)
 				{
-					d2 = d1;
-					psi2x = psix;
-					psi2y = -psiy;
+					dx = cx;
+					dy = -cy;
+					dd = cc;
+					psi2 = -psi;
+					psi2x = -psix;
+					psi2y = psiy;
 				}
 				else
 				{
 					if (j->Sosed->type == C_4)
 					{
-						d2 = d1;
-						psi2x = psix;
-						psi2y = psiy;
+						continue;  // Т.к. производная по нормали ноль
+						dx = -cx;
+						dy = -cy;
+						dd = cc;
+						psi2 = psi;
 					}
 					else
 					{
-						j->Sosed->Get_Center(x3, y3);
-						d2 = sqrt(kv(x2 - x3) + kv(y2 - y3));
 						psi2x = j->Sosed->par2[now]->grad_psi_x;
 						psi2y = j->Sosed->par2[now]->grad_psi_y;
+						j->Sosed->Get_Center(x3, y3);
+						dx = x3 - x2;
+						dy = y3 - y2;
+						dd = sqrt(kv(dx) + kv(dy));
+						psi2 = j->Sosed->par2[now]->psi;
 					}
 				}
 
+				// Разбираем случаи
+
+				if (1.0 - fabs((cx * dx + cy * dy) / dd / cc) < 0.003) // В этом случае вектора параллельны
+				{
+					if (1.0 - fabs((cx * n1 + cy * n2) / cc) < 0.003) // Если нормаль с ними сонаправлена
+					{
+						sivi = sivi - SS / (dd + cc);
+						divS = divS + psi2 * SS / (dd + cc);
+						continue;
+					}
+					else
+					{
+						double lx, ly, ll, ln, lm;
+						double mx, my;
+						double ex, ey;
+						double cost, dpsim;
+
+						lx = (-cx + dx);
+						ly = (-cy + dy);
+						ll = sqrt(kv(lx) + kv(ly));
+						ln = fabs(lx * n1 + ly * n2);
+						mx = -ly;
+						my = lx;
+						if( (n1 * mx + n2 * my)/ll < 0.0)
+						{
+							mx = -mx;
+							my = -my;
+						}
+						lm = fabs(lx * n2 - ly * n1);
+						ex = -n2;
+						ey = n1;
+						if ((lx * ex + ly * ey) / ll < 0.0)
+						{
+							ex = -ex;
+							ey = -ey;
+						}
+						ex = -ex * lm;
+						ey = -ey * lm;
+						psix = (psix + psi2x) / 2.0;
+						psiy = (psiy + psi2y) / 2.0;
+						//dpsil = (psi2 - psi) / ll;
+						dpsim = (psix * mx + psiy * my)/ll;
+						cost = (n1 * lx + n2 * ly) / ll;
+						//divS = divS + SS * (cost / ll * psi2 + dpsim * sqrt(1.0 - kv(cost)));
+						//sivi = sivi - SS * cost / ll;
+						divS = divS + SS * (psi2 + ex * psix + ey * psiy) / ln;
+						sivi = sivi - SS / ln;
+					}
+				}
+				else
+				{
+					/*sivi = sivi - SS / (dd + cc);
+					divS = divS + psi2 * SS / (dd + cc);
+					continue;*/
+
+					double lx, ly, ll, ln, lm;
+					double mx, my;
+					double ex, ey;
+					double cost, dpsim;
+
+
+					lx = (-cx + dx);
+					ly = (-cy + dy);
+					ll = sqrt(kv(lx) + kv(ly));
+					ln = fabs(lx * n1 + ly * n2);
+					mx = -ly;
+					my = lx;
+					if ((n1 * mx + n2 * my) / ll < 0.0)
+					{
+						mx = -mx;
+						my = -my;
+					}
+					lm = fabs(lx * n2 - ly * n1);
+					ex = -n2;
+					ey = n1;
+					if ((lx * ex + ly * ey) / ll < 0.0)
+					{
+						ex = -ex;
+						ey = -ey;
+					}
+					ex = -ex * lm;
+					ey = -ey * lm;
+					psix = (psix + psi2x) / 2.0;
+					psiy = (psiy + psi2y) / 2.0;
+					//dpsil = (psi2 - psi) / ll;
+					dpsim = (psix * mx + psiy * my) / ll;
+					cost = (n1 * lx + n2 * ly) / ll;
+					//divS = divS + SS * (cost / ll * psi2 + dpsim * sqrt(1.0 - kv(cost)));
+					//sivi = sivi - SS * cost / ll;
+					divS = divS + SS * (psi2 + ex * psix + ey * psiy) / ln;
+					sivi = sivi - SS / ln;
+					continue;
+
+
+
+					r = 0.0; // (cx * psix + cy * psiy + dx * psi2x + dy * psi2y) / 2.0;
+					M[0][0] = dx / dd;
+					M[0][1] = dy / dd;
+					M[1][0] = cx / cc;
+					M[1][1] = cy / cc;
+					Det = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+					MM[0][0] = M[1][1] / Det;
+					MM[0][1] = -M[0][1] / Det;
+					MM[1][0] = -M[1][0] / Det;
+					MM[1][1] = M[0][0] / Det;
+					A[0] = 1.0 / (2.0 * dd);
+					A[1] = -1.0 / (2.0 * cc);
+					C[0] = r / dd;
+					C[1] = r / cc;
+
+					divS = divS + SS * psi2 * (n1 * (MM[0][0] * A[0] + MM[0][1] * A[1]) +
+						n2 * (MM[1][0] * A[0] + MM[1][1] * A[1]));
+					divS = divS + SS * (n1 * (MM[0][0] * C[0] + MM[0][1] * C[1]) +
+						n2 * (MM[1][0] * C[0] + MM[1][1] * C[1]));
+					sivi = sivi + SS * (-n1 * (MM[0][0] * A[0] + MM[0][1] * A[1]) -
+						n2 * (MM[1][0] * A[0] + MM[1][1] * A[1]));
+				}
+
 				//SS = j->Get_square_rotate(alpha);
-				j->Get_normal(n1, n2);
-				SS = j->Get_square();
-				sivi = sivi + SS * 0.5 * (n1 * (psi2x + psix) + n2 * (psi2y + psiy));
+				
+				//sivi = sivi + SS / d1;
+				//divS = divS + psi2 * SS / d1;
 			}
 			//sivi = sivi + 2.0 * i->Get_Volume() / (y * alpha);
 			//divS = divS + 2.0 * psi * i->Get_Volume() / (y * alpha);
-			i->par2[now2]->psi = i->par2[now]->psi + 0.00001 * (-sivi) / i->Get_Volume();
-			newyzka = max(newyzka, fabs(i->par2[now2]->psi - i->par2[now]->psi));
-
-
+			i->par2[now2]->psi = (-divS / sivi);
+			if (fabs(i->par2[now2]->psi - psi) > newyzka)
+			{
+				x0 = x;
+				y0 = y;
+			}
+			newyzka = max(newyzka, fabs(i->par2[now2]->psi - psi));
 		}
 
 		now = (now + 1) % 2; // Какие параметры сейчас берём
 		now2 = (now2 + 1) % 2; // Какие параметры сейчас меняем
 
-		if (iter % 1 == 0)
+		/*if (iter % 500 == 0)
 		{
-			cout << "Newyazka = " << newyzka << endl;
-		}
+			cout << "Newyazka = " << newyzka << "   x, y = " << x0 << " " << y0 << endl;
+		}*/
 
-		system("pause");
+		//system("pause");
 
 	}
 

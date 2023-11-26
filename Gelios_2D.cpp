@@ -36,8 +36,8 @@ int main(int argc, char** argv)
 
     Setka* SS;
     SS = new Setka();
-    SS->Download_Setka_ALL_ALPHA_2_0("Magnit_5");
-    //SS = new Setka(30, 15, 10, 40, 50, 20, 30, 20);    // n_inner 3
+    //SS->Download_Setka_ALL_ALPHA_2_0("Magnit_10");
+    SS = new Setka(50, 10, 5, 30, 35, 35, 40, 10);    // n_inner 3
     SS->TVD_prepare();
     SS->Proverka();
     
@@ -83,20 +83,21 @@ int main(int argc, char** argv)
     }
 
 
-    //SS->Go_5_komponent__MK2(2000, false);
-    SS->Magnitosphere(10000);
+    SS->Magnitosphere2(40000);
+    SS->Go_5_komponent__MK2(20000, false);
+
     //SS->Magnitosphere(200);
     cout << "Start" << endl;
-    //for (int i = 1; i <= 500; i++)
-    //{
-    //    if (i % 10 == 0) cout << i << endl;
-    //    SS->Magnitosphere(1000);
-    //    SS->Go_5_komponent__MK2(300, false);
-    //    SS->Go_5_komponent__MK2(1, true);
-    //    //SS->Magnitosphere(7000);
-    //}
+    for (int i = 1; i <= 100; i++)
+    {
+        if (i % 10 == 0) cout << i << endl;
+        SS->Magnitosphere2(5000);
+        SS->Go_5_komponent__MK2(500, false);
+        SS->Go_5_komponent__MK2(3, true);
+        //SS->Magnitosphere(7000);
+    }
 
-    SS->Save_Setka_ALL_ALPHA("Magnit_6");
+    SS->Save_Setka_ALL_ALPHA("2Magnit_1");
 
     SS->Print_Tecplot();
     SS->Print_cell2();
