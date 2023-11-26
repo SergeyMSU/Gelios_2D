@@ -228,10 +228,10 @@ void Gran::Get_par(Parametr& par, int i)  // Здесь задаются граничные условия
 	{
 		par = this->Master->par[i];
 		par.v = -par.v;
-		par.v_H1 = -par.v_H1;
+		/*par.v_H1 = -par.v_H1;
 		par.v_H2 = -par.v_H2;
 		par.v_H3 = -par.v_H3;
-		par.v_H4 = -par.v_H4;
+		par.v_H4 = -par.v_H4;*/
 	}
 	else if (this->type == Inner_sphere)
 	{

@@ -4085,7 +4085,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 {
 	double koef1 = 0.02; // 0.000001 * 1.0; // 0.08; // 0.3;
 	double koef2 = 0.1 * 0.05; // 0.005;
-	double koef3 = 0.1 * 1.0; // 0.1;
+	double koef3 = 0.01 * 1.0; // 0.1;
 	// Разбираемся с контактом
 
 	//for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -4099,7 +4099,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	//}
 	
 	// Контакт
-	if (true)
+	if (false)
 	{
 		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -5220,9 +5220,9 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		//i->All_point[i->M1 + i->M2]->y2 = R3 * sin(i->s);
 
 		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
-		if (R4 > 65.0)
+		if (R4 >= 73.0)
 		{
-			R4 = 65.0;
+			R4 = 73.0;
 		}
 
 		for (int j = 0; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
@@ -5235,9 +5235,9 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		}
 
 		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
-		if (R4 > 65.0)
+		if (R4 >= 73.0)
 		{
-			R4 = 65.0;
+			R4 = 73.0;
 		}
 
 		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
@@ -12258,6 +12258,11 @@ void Setka::Go_5_komponent__MK2(int step, bool movement)
 						par2.v = par2.v - 2.0 * skk * n2;
 					}
 				}
+				else if (i->type == Axis)
+				{
+					par2 = par11;
+					par2.v = 0.0; // -par2.v;
+				}
 
 				/*if (i->type == Usualy)
 				{
@@ -12352,6 +12357,9 @@ void Setka::Go_5_komponent__MK2(int step, bool movement)
 			i->count = 0;
 		}
 	}
+
+	cout << "Time = " << T[0] << " " << T[1] << endl;
+
 }
 
 double Setka::HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, const double& p_L, const double& v1_L, const double& v2_L,//
