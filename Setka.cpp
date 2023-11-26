@@ -1485,6 +1485,30 @@ void Setka::TVD_prepare(void)
 		}
 	}
 
+	for (auto& i : this->All_Gran)
+	{
+		if (i->type != Extern) continue;
+
+		i->Get_normal(n1, n2);
+		
+
+		for (auto& j : i->Master->Grans)
+		{
+			if (j->number == i->number) continue;
+
+			double k1, k2;
+			j->Get_normal(k1, k2);
+			if (k1 * n1 + k2 * n2 < -0.9)
+			{
+				if (j->Sosed != nullptr)
+				{
+					i->Sosed_down = j->Sosed;
+					continue;
+				}
+			}
+		}
+	}
+
 	//cout << "Setka.cpp    " << "TVD  prepare  end" << endl;
 
 	// Подготовим всё для переинтерполяции источников
@@ -4099,7 +4123,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 	//}
 	
 	// Контакт
-	if (false)
+	if (true)
 	{
 		//int bb = -1;
 		for (int j = 0; j < this->Line_Contact.size(); j++)  // Вычисляем скорость контакта
@@ -4141,6 +4165,11 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			qqq2[2] = par2.u;
 			qqq2[3] = par2.v;
 			qqq2[4] = 0.0;
+
+			if (qqq1[1] < 0.05)
+			{
+				qqq1[1] = 0.05;
+			}
 
 			/*double x, y;
 
@@ -4573,18 +4602,18 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			qqq2[3] = par2.v;
 			qqq2[4] = 0.0;
 
-			//auto S = Solvers();
-			//S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
+			auto S = Solvers();
+			S.Godunov_Solver_Alexashov(qqq1, qqq2, n, qqq, Vl, Vp, VV);
 
-			this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
-				par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
+			//this->HLLC_2d_Korolkov_b_s(par1.ro, par1.Q, par1.p, par1.u, par1.v, par2.ro, par2.Q, //
+			//	par2.p, par2.u, par2.v, 0.0, P, PQ, n1, n2, 1.0, 1, Vl, VV, Vp);
 			Vp = Vp * koef3;  // 0.1
 			//cout << "Setka.cpp    " << Vp << endl;
 
 			double t1 = -n2;
 			double t2 = n1;
 
-			if (kvv(par1.u, par1.v, 0.0) / (ggg * par1.p / par1.ro) > 1.0)
+			if (false)//(kvv(par1.u, par1.v, 0.0) / (ggg * par1.p / par1.ro) > 1.0)
 			{
 				i->B->Vx += Vp * n1;
 				i->B->Vy += Vp * n2;
@@ -4595,7 +4624,7 @@ void Setka::Move_surface(int ii, const double& dt = 1.0)
 			}
 			else
 			{
-				if (fabs(par1.u * t1 + par1.v * t2) < 0.01)
+				if (true)//(fabs(par1.u * t1 + par1.v * t2) < 0.01)
 				{
 					i->A->Vx += Vp * n1;
 					i->A->Vy += Vp * n2;
@@ -5214,7 +5243,7 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 
 		//i->All_point[i->M1 + i->M2 - 2]->x2 = R3 * cos(i->s);   // Устанавливаем точку до контакта 
 		//i->All_point[i->M1 + i->M2 - 2]->y2 = R3 * sin(i->s);
-		R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
+		//R3 = sqrt(kv(i->Key_point[1]->x2) + kv(i->Key_point[1]->y2));
 
 		//i->All_point[i->M1 + i->M2]->x2 = R3 * cos(i->s);   // Устанавливаем точку после контакта 
 		//i->All_point[i->M1 + i->M2]->y2 = R3 * sin(i->s);
@@ -5225,6 +5254,10 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 			R4 = 73.0;
 		}
 
+		i->Key_point[2]->x2 = R4 * cos(i->s);  // Если хотим ограничить движение, нужно задавать координаты (т.к. в циклах они не меняются)
+		i->Key_point[2]->y2 = R4 * sin(i->s);
+
+
 		for (int j = 0; j < i->M3 - 1; j++)// Передвинули точки до внешней волны
 		{
 			//x = (j) / (1.0 * (i->M3 - 1));
@@ -5234,11 +5267,6 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 			i->All_point[i->M1 + i->M2 + j]->y2 = r * sin(i->s);
 		}
 
-		R4 = sqrt(kv(i->Key_point[2]->x2) + kv(i->Key_point[2]->y2));
-		if (R4 >= 73.0)
-		{
-			R4 = 73.0;
-		}
 
 		//x = log(R5_ / R4) / (log(1.0 * i->M4 + 1) * (i->M4));
 		//double dd = 2.0 * (R5_ - R4) / (i->M4 * (i->M4 + 1.0));
@@ -5379,6 +5407,13 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		//i->All_point[i->M1 + i->M2]->y2 = R3 ;
 
 		R4 = i->Key_point[2]->y2;
+
+		if (R4 >= 73.0)
+		{
+			R4 = 73.0;
+		}
+
+		i->Key_point[2]->y2 = R4;
 
 		for (int j = 0; j < i->M3 - 1; j++)
 		{
@@ -5522,6 +5557,11 @@ void Setka::Move_Setka_Calculate_2(const double& dt)
 		V = i->Key_point[2]->Vy;
 		i->Key_point[2]->x2 = i->Key_point[0]->x2;
 		i->Key_point[2]->y2 = i->Key_point[2]->y + dt * V;
+
+		if (i->Key_point[2]->y2 >= 73.0)
+		{
+			i->Key_point[2]->y2 = 73.0;
+		}
 		//i->Key_point[2]->y2 = i->Key_point[2]->y/1.3;
 
 		if (jj >= n_outer_shock)                                                        // ТУТ ИЗМЕНИЛ
@@ -11887,7 +11927,10 @@ void Setka::Magnitosphere2(int step)
 
 				if (j->type == Extern)
 				{
-					grad = 0.0;
+					double psi3 = j->Sosed_down->par2[now]->psi;
+					j->Sosed_down->Get_Center(x3, y3);
+					grad = (psi - psi3) / (sqrt(kv(x3 - x) + kv(y3 - y)));
+					//grad = 0.0;
 				}
 				else if (j->type == Axis)
 				{
@@ -11985,11 +12028,14 @@ void Setka::Magnitosphere2(int step)
 
 				if (j->type == Extern)
 				{
-					continue;  // Т.к. производная по нормали ноль
+					double psi3 = j->Sosed_down->par2[now]->psi;
+					//j->Sosed_down->Get_Center(x3, y3);
+					//double grad = (psi - psi3) / (sqrt(kv(x3 - x) + kv(y3 - y)));
+					//continue;  // Т.к. производная по нормали ноль
 					dx = -cx;
 					dy = cy;
 					dd = cc;
-					psi2 = psi;
+					psi2 = psi + (psi - psi3);
 				}
 				else if (j->type == Axis)
 				{
@@ -12261,7 +12307,7 @@ void Setka::Go_5_komponent__MK2(int step, bool movement)
 				else if (i->type == Axis)
 				{
 					par2 = par11;
-					par2.v = 0.0; // -par2.v;
+					par2.v = -par2.v;
 				}
 
 				/*if (i->type == Usualy)
