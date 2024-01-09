@@ -630,12 +630,12 @@ int main(int argc, char** argv)
     //SS->culc_PUI();
 
     //exit(-1);
-    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
+    //SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     double start;
     double end = 0.0;
     start = omp_get_wtime();
 
-    SS->MK_start_new();  // Была эта
+    //SS->MK_start_new();  // Была эта
 
     
     //SS->Download_Source_MK(parameter_22);
@@ -774,8 +774,9 @@ int main(int argc, char** argv)
         }
 
         //SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
-        SS->Save_Source_MK(parameter_22);
-        SS->Print_Tecplot_MK();
+        //SS->Save_Source_MK(parameter_22);
+        SS->Print_Tecplot_MK(parameter_1);
+
         //SS->Print_cell2();
        // SS->Print_Gran("gran_vers19_1.txt");
         //SS->Print_Tecplot_MK();

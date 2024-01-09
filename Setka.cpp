@@ -2526,11 +2526,11 @@ void Setka::Print_Tecplot_MK(string name0)
 	}
 	fout.close();
 
-	name_f = "1D_tecplot_" + name0 + ".txt";
+	name_f = "1D_tecplot_new_" + name0 + ".txt";
 	fout.open(name_f);
 	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"Ro_r_r\", \"P\", \"Vx\", \"Vy\", \"T\", \"Max\",\"Q\",\"Ro_H1\", \"T_H1\", \"Vx_H1\", \"Vy_H1\"," << //
 		" \"Ro_H2\", \"T_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"T_H3\", \"Vx_H3\", \"Vy_H3\",\"Ro_H4\", \"T_H4\", \"Vx_H4\", \"Vy_H4\", \"RO_H\", \"T_H\", \"I_u\", \"I_v\", \"I_T\"," << //
-		"ZONE T = \"HP\"" << endl;
+		"\"zone\", ZONE T = \"HP\"" << endl;
 	int num = 0;
 	//double ro = (389.988 * 389.988) / (chi_ * chi_);
 
@@ -2572,7 +2572,68 @@ void Setka::Print_Tecplot_MK(string name0)
 			<< i->par[0].H_u[3] * u_o << " " << i->par[0].H_v[3] * u_o << " " <<//
 			(i->par[0].H_n[0] + i->par[0].H_n[1] + i->par[0].H_n[2] + i->par[0].H_n[3]) * ro_o_H << //
 			" " << (i->par[0].H_n[0] * i->par[0].H_T[0] + i->par[0].H_n[1] * i->par[0].H_T[1] + i->par[0].H_n[2] * i->par[0].H_T[2] + i->par[0].H_n[3] * i->par[0].H_T[3])/ (i->par[0].H_n[0] + i->par[0].H_n[1] + i->par[0].H_n[2] + i->par[0].H_n[3]) << //
-			" " << i->par[0].I_u<< " " << i->par[0].I_v << " " << i->par[0].I_T <<  endl;
+			" " << i->par[0].I_u<< " " << i->par[0].I_v << " " << i->par[0].I_T << " " << i->type << endl;
+
+	}
+	fout.close();
+
+
+	name_f = "1D_tecplot_discontinity_" + name0 + ".txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", " << //
+		"\"zone\", ZONE T = \"HP\"" << endl;
+
+	for(int nn = 0; nn < this->M1 + this->M2 + this->M3 + this->M4; nn++)
+	{
+		auto i = this->All_Cells[nn];
+		
+
+		double x, y;
+		i->Get_Center(x, y);
+
+		fout << x << " " <<  i->par[0].ro << " " << i->type << endl;
+
+		if (nn == this->M1 + this->M2 + this->M3 - 1)
+		{
+			double x2, y2;
+			this->All_Cells[nn + 1]->Get_Center(x2, y2);
+
+			double x3, y3;
+			this->All_Cells[nn - 1]->Get_Center(x3, y3);
+
+			double x4, y4;
+			this->All_Cells[nn + 2]->Get_Center(x4, y4);
+
+
+			fout << 0.5 * (x + x2) << " " << linear(x3, this->All_Cells[nn - 1]->par[0].ro, x, i->par[0].ro, 0.5 * (x + x2)) << " " << 3 << endl;
+			double ddd = linear(x2, this->All_Cells[nn + 1]->par[0].ro, x4, this->All_Cells[nn + 2]->par[0].ro, 0.5 * (x + x2));
+			fout << 0.5 * (x + x2) << " " << ddd << " " << 4 << endl;
+		}
+
+		
+
+	}
+	fout.close();
+
+
+	name_f = "1D_tecplot_source_" + name0 + ".txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"M_21\", \"M_22\", \"M_3\", \"I_21\", \"I_22\", \"I_3\", " << //
+		"ZONE T = \"HP\"" << endl;
+
+	for (int nn = 0; nn < this->M1 + this->M2 + this->M3 + this->M4; nn++)
+	{
+		auto i = this->All_Cells[nn];
+		double x, y;
+		i->Get_Center(x, y);
+		double a1, a2, a3, u, v, ro, p;
+		ro = i->par[0].ro;
+		p = i->par[0].p;
+		u = i->par[0].u;
+		v = i->par[0].v;
+		i->Get_Sourse_MK1(a1, a2, a3, u, v, ro, p, true);
+
+		fout << x << " " << a1 << " " << a2 << " " << a3 << " " << i->par[0].I_u << " " << i->par[0].I_v << " " << i->par[0].I_T << endl;
 
 	}
 	fout.close();
