@@ -141,9 +141,43 @@ public:
 	mutex mut_mom;
 
 
+	// —ледующие массивы дл€ BS, HP, TS дл€ движени€ сетки, они используютс€ (инициализируютс€ и удал€ютс€)
+	// в функции Download_surface
+	double* BS_al;
+	double* BS_r;
+	double* BS_x;
+	double* BS_y;
+	double* HP_al;
+	double* HP_r;
+	double* HP_x;
+	double* HP_y;
+	double* TS_al;
+	double* TS_r;
+	int TS_n;
+	int HP_n;
+	int BS_n;
+
+
 	Setka(int N1, int N2, int N3, int N4, int M1, int M2, int M3, int M4);
 	Setka();
 	void Inizialization(void);
+
+
+	// —охранение сетки
+	void Save_surface(string name); // —охранение положений поверхностей разрыва дл€ дальнейшего считывани€
+	// ƒл€ TS сохран€ет в пол€рных координатах, дл€ других поверхностей сохранение и в пол€рных и в декартовых
+
+	//
+
+	// —читывание положений основных поверхностей с файла и перестройка сетки под эти поверхности
+	void Download_surface(string name);
+	double find_TS(const double& alp);
+	double find_HP_angle(const double& alp);
+	double find_HP_x(const double& x);
+	double find_BS_x(const double& x);
+	double find_BS_angle(const double& alp);
+	void Move_Setka_Calculate_stat();  // «десь нет сгущени€ точек нулю по умолчанию, но можно организовать
+
 
 	void normir(int ii);
 
@@ -163,7 +197,7 @@ public:
 	void Print_Gran_type();
 	void Print_cell(void);   // ѕечатает €чейки (но много лишних узлов выписывает, т.к. просто каждую €чейку рисует и линии накладываютс€
 	void Print_cell_type(void);
-	void Print_cell2(void);  // ¬ отличие от предыдущей не выводит лишних точек, нужна дл€ дополнительной проверки правильности геометрии
+	void Print_cell2(string name = "Setka_all_cell.txt");  // ¬ отличие от предыдущей не выводит лишних точек, нужна дл€ дополнительной проверки правильности геометрии
 	void Print_connect(void); // ѕосмотреть, как св€заны €чейки
 	void Print_point_connect(void); // ѕосмотреть, как св€заны узлы с €чейками
 	void Print_Tecplot(void);

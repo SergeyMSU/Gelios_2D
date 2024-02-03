@@ -3,7 +3,7 @@
 
 // Схема запуска:
 //  1) Установить загрузочный файл для сетки
-#define parameter_1 "vers22_2.txt"
+#define parameter_1 "vers7_6.txt"
 //  2) Установить файл сохранения газодинамических параметров
 #define parameter_21 "vers17_11.txt"   //  газодинамических параметров
 #define parameter_22 "source_vers17_12.txt"   //  источников монте-карло (это и для сохранения, и для скачивания)
@@ -90,6 +90,7 @@
 #include "sensor.h"
 #include "sensor2.h"
 #include "MKmethod.h"
+#include "Interpol_Setka.h"
 #include <mutex>
 
 

@@ -40,3 +40,5 @@ Debug/gelios_2d.obj.enc
 Dist_f.rar
 
 script_1.sbatch
+
+*.bin

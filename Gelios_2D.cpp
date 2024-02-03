@@ -13,6 +13,7 @@
 
 #if USEMPI
 #include "mpi.h"
+#include "Gelios_2D.h"
 #endif
 
 //extern inline void fff_velocity(const double& a, const double& b);
@@ -154,6 +155,7 @@ int main(int argc, char** argv)
 
 
     Setka* SS, * K, *SS2, * SS3;
+    Interpol_Setka* II;
     if (false)
     {
         SS = new Setka(80, 20, 15, 20, 50, 30, 40, 25);    // n_inner 30
@@ -163,6 +165,7 @@ int main(int argc, char** argv)
     }
 
     SS = new Setka();
+    SS2 = new Setka();
 
     //SS->Download_Setka_ALL_ALPHA_2_0("vers6_106.txt");  // 17    IPROBE
     //cout << "SLEEP  sec" << endl;
@@ -174,6 +177,19 @@ int main(int argc, char** argv)
     string name_gd = parameter_21;
     SS->TVD_prepare();
     SS->Proverka();
+
+    SS->Save_surface("save_surf.bin");
+    SS->Print_Gran("SS_all_gran.txt");
+    SS->Print_cell2("SS_all_cell.txt");
+
+    II = new Interpol_Setka(SS);
+    II->Print_Cell("Interpol_setka.txt");
+
+    SS2 = new Setka(15, 10, 7, 10, 25, 10, 10, 10);
+    SS2->Download_surface("save_surf.bin");
+    SS2->Print_cell2("SS2_all_cell.txt");
+
+    return 0;
 
     // Подготовим функции распределения
 
@@ -642,7 +658,7 @@ int main(int argc, char** argv)
     //SS->func_pogloshenie();
     //SS->Print_Tecplot_MK();
 
-    //SS->MK_start_2_0();
+    SS->MK_start_2_0();
 
     //SS->MPI_MK_start(argc, argv);
 

@@ -13,6 +13,16 @@ Cell::Cell(Point* A, Point* B, Point* C, Point* D)
 	this->Initial();
 }
 
+Cell::Cell(Point* A, Point* B, Point* C)
+{
+	this->contour.push_back(A);
+	this->contour.push_back(B);
+	this->contour.push_back(C);
+	this->number = -1;
+	this->type = C_no;
+	this->Initial();
+}
+
 Cell::Cell(void)
 {
 	this->number = -1;

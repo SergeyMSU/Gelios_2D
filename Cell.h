@@ -157,7 +157,8 @@ public:
 	double y_center;
 	double alf_center;
 
-	Cell(Point* A, Point* B, Point* C, Point* D);
+	Cell(Point* A, Point* B, Point* C, Point* D); 
+	Cell(Point* A, Point* B, Point* C);
 	Cell(void);
 
 	void Initial(void);
