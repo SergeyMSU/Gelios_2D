@@ -11926,7 +11926,7 @@ void Setka::Go_5_komponent_MK(int step, bool dvig)
 					met = 0;
 				}
 				
-				met = 0;
+				//met = 0;
 				
 				if (false)//(K->type != C_centr && np == false)
 				{
@@ -14884,7 +14884,7 @@ void Setka::MK_start_new(void)
 			if (index == 0)
 			{
 				mut_1.lock();
-			   cout << "Setka.cpp    " << "Mk_start_new   " << "Wright weyght   " << mu1 << " " << mu2 << " " << mu3 << " " << mu4 << endl;
+				cout << "Setka.cpp    " << "Mk_start_new   " << "Wright weyght   " << mu1 << " " << mu2 << " " << mu3 << " " << mu4 << endl;
 				mut_1.unlock();
 			}
 

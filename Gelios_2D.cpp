@@ -181,6 +181,7 @@ int main(int argc, char** argv)
     SS->Save_surface("save_surf.bin");
     SS->Print_Gran("SS_all_gran.txt");
     SS->Print_cell2("SS_all_cell.txt");
+    SS->Print_Tecplot_MK_2d("tecplot_MK_" + name_gd);
 
     II = new Interpol_Setka(SS);
     II->Print_Cell("Interpol_setka.txt");
