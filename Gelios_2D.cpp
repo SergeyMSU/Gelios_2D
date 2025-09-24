@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iterator>
 #include <omp.h>
-#include "Help.h"
 
 
 #if USEMPI
@@ -16,13 +15,6 @@
 #include "Gelios_2D.h"
 #endif
 
-//extern inline void fff_velocity(const double& a, const double& b);
-
-//template<typename Random_type, typename Distribution_type>
-//auto Change(Random_type gen, Distribution_type dis)
-//{
-//    return (dis(gen));
-//}
 
 void fff_velocity_(const double& a, const double& b)
 {
@@ -34,56 +26,7 @@ int main(int argc, char** argv)
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
-
-    if (false)
-    {
-        Sensor* s = new Sensor(1, 4, 8);
-        Sensor& adv = *s;
-
-        //std::random_device rd;
-        //std::mt19937 gen(rd());  // mt19937    mt19937
-        //std::uniform_real_distribution<double> dis(0.0000001, 1.0);
-
-        /*std::mt19937 gen2(rd());
-        std::uniform_real_distribution<double> dis2(0.0, 1.0);*/
-        //float aa;
-        //float bb = 1.23;
-        //float cc = 2324.2323;
-
-        double start;
-        double end;
-        start = omp_get_wtime();
-        
-
-//#pragma omp parallel for
-        for (unsigned long int n = 0; n < 2000; ++n) {
-            //std::mt19937 gen2(rd());
-            //std::uniform_real_distribution<double> dis2(0.0, 1.0);
-
-            for (unsigned long int n2 = 0; n2 < 1000; ++n2) {
-                for (unsigned long int n3 = 0; n3 < 1000; ++n3) {
-                    //aa = exp(sin(sqrt(bb * bb + cc * cc + n))) + log(bb * cc);
-                    //aa = Change(gen2, dis2);
-                    //dis(gen);
-                    //double a = 1.23423432;
-                    //double b = 2.23424123;
-                    //Change(a, b);
-                    adv.MakeRandom();
-                    //aa = s->MakeRandom();
-                }
-            }
-        }
-
-        //cout << s->a1_ << " " << s->a2_ << " " << s->a3_ << endl;
-        //cout << adv.a1_ << " " << adv.a2_ << " " << adv.a3_ << endl;
-
-        //cout << SIZE_MAX << endl;
-        end = omp_get_wtime();
-        printf("Work took %f seconds\n", end - start);
-
-        exit(-1);
-    }
-
+    // Проверка монте-карло
     if (false)
     {
         MKmethod MK = MKmethod();
@@ -120,22 +63,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (false)
-    {
-        MKmethod MK = MKmethod();
-        cout << MK.int_1(0.1, 1.23) << endl;
-        cout << MK.int_1(1.1, 1.23) << endl;
-        cout << MK.int_1(2.2, 1.23) << endl;
-        cout << MK.int_1(3.3, 1.23) << endl;
-        cout << MK.int_1(4.4, 1.23) << endl;
-        cout << MK.int_1(5.5, 1.23) << endl;
-        cout << MK.int_1(6.6, 1.23) << endl;
-        cout << "    " << endl;
-        cout << MK.int_1_f1(1.23) << endl;
-        cout << MK.int_1_f2(1.23) << endl;
-        cout << MK.int_1_f3(1.23) << endl;
-        return 0;
-    }
     //CC->TVD_prepare();
     //CC->Proverka();
 
