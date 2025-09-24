@@ -17,8 +17,6 @@
 
 Debug/Gelios_2D.vcxproj.FileListAbsolute.txt
 
-*.txt
-
 *.filters
 
 *.vcxproj
@@ -42,3 +40,17 @@ Dist_f.rar
 script_1.sbatch
 
 *.bin
+
+Gelios_2D/.vs/CopilotSnapshots/45F3B194512F7D4482F06B9214F5286D/
+
+Gelios_2D/.vs/Gelios_2D/copilot-chat/d12476bc/sessions/
+
+*.db
+
+*.db-shm
+
+*.db-wal
+
+Gelios_2D/.vs/Gelios_2D/FileContentIndex/
+
+Gelios_2D/.vs/Gelios_2D/v17/
