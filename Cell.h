@@ -135,6 +135,12 @@ public:
 	Dist_func* df_s3;
 	bool df_s3_bool = false;
 
+	Dist_func* df_s2;
+	bool df_s2_bool = false;
+
+	Dist_func* df_s1;
+	bool df_s1_bool = false;
+
 	int number;
 	int zona;
 	int zona_alpha;

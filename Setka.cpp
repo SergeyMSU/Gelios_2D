@@ -2596,7 +2596,7 @@ void Setka::Print_Tecplot_MK_2d(string name0)
 		"\"H2_n\", \"H2_u\", \"H2_v\", \"H2_T\", \"H3_n\", \"H3_u\", \"H3_v\", \"H3_T\", \"H4_n\", \"H4_u\", \"H4_v\", \"H4_T\", \"H5_n\", \"H5_u\", \"H5_v\", \"H5_T\", \"H6_n\", \"H6_u\", \"H6_v\", \"H6_T\", \"k_u\", \"k_v\", \"k_T\", \"m_1\",  \"m_2\",  \"m_3\",  \"m_4\",  \"m_5\",  \"m_6\",  \"m_7\",  \"num1\", \"num2\", \"num3\", \"num4\", ZONE T = \"HP\"" << //
 		", N= " << 5 * (n) + (Line_Inner.size() - 1) * 4 << ", E =  "<<  4 * (n) + 2 * (Line_Inner.size() - 1)<< ", F=FEPOINT, ET=TRIANGLE "<< endl;
 	
-	for (auto& i : this->All_Cells)
+	for (auto i : this->All_Cells)
 	{
 		double kk = 1.0;
 		double Max = 0.0;
@@ -2847,6 +2847,8 @@ void Setka::Print_Tecplot_MK_2d(string name0)
 	fout.close();
 
 }
+
+
 void Setka::Print_Tecplot_MK(string name0)
 {
 	double r_o = 1.0; // RR_;    // Размер расстояния
@@ -13479,12 +13481,14 @@ Cell* Setka::Belong_point(int b, const double& x, const double& y)
 
 	cout << "Setka.cpp    " << "ERRORRRORORfireubfvwcefrvjywgkvygdcwkug324h324334" << endl;
 	cout << "Setka.cpp    " << "FFF  " << x << " " << y << " " << b << endl;
-	for (auto& i : this->Cell_disk)
+	//exit(-1);
+	for (auto& i : this->Cell_side)
 	{
 		double x1, y1;
 		i->Get_Center(x1, y1);
 		cout << "Setka.cpp    " << "DDD  +  " << i->belong(x, y) << " " << x1 << " " << y1 << endl;
 	}
+	exit(-1);
 	return nullptr;
 }
 
@@ -13613,17 +13617,42 @@ void Setka::M_K_prepare(void)
 
 	cout << "Setka.cpp    " << "this->Cell_sphere = " << this->Cell_sphere.size() << endl;
 
+	short int ikl = 0;
+	this->Cell_side.clear();
 	for (auto& i : this->All_Cells)    // Заполняем массивы начальными гранями
 	{
+		if (i->Grans.size() != 4)
+		{
+			cout << "ERROR   " << i->Grans.size() << endl;
+			exit(-2);
+		}
+
+		double x1, y1;
+		i->Get_Center(x1, y1);
+		/*if (sqrt(kvv((x1 + 0.05), (y1 - 5.58), 0.0)) < 0.02)
+		{
+			cout << "Cell =  " << x1 << "  " << y1 << endl;
+		}*/
+
+
 		for (auto& j : i->Grans)
 		{
-			if (j->type == Upper_wall)
+			/*if (sqrt(kvv((x1 + 0.05), (y1 - 5.58), 0.0)) < 0.02)
+			{
+				cout << "type = " << j->type << endl;
+				cout << x1 << "  " << y1 << endl;
+			}*/
+
+			if (j->type == Gran_type::Upper_wall)
 			{
 				this->Cell_side.push_back(i);
+				//cout << "CC = " << x1 << "  " << y1 << endl;
+				ikl++;
 				break;
 			}
 		}
 	}
+	cout << "ikl = " << ikl << endl;
 
 	for (auto& i : this->All_Cells)    // Заполняем массивы начальными ячейками
 	{
@@ -13737,10 +13766,11 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 411 * 1000 * 282;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
-	this->Number2 = 411 * 30 * 282;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
-	this->Number3 = 411 * 30 * 282;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
-	this->Number4 = 411 * 30 * 282;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
+	short int nmn = 10;
+	this->Number1 = 411 * 1000 * nmn;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
+	this->Number2 = 411 * 30 * nmn;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
+	this->Number3 = 411 * 30 * nmn;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
+	this->Number4 = 411 * 30 * nmn;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 80 * 2 * 3; //411 * 200; // * 200; // * 30; // 200; //  300  411 * 1650; // 135 * 40; // 30;
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 	cout << "Setka.cpp    " << "this->AllNumber " << this->AllNumber << endl;
 
@@ -21146,6 +21176,20 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 			if (now->df_s3_bool == true)
 			{
 				now->df_s3->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
+			}
+		}
+		else if (area == 1)
+		{
+			if (now->df_s2_bool == true)
+			{
+				now->df_s2->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
+			}
+		}
+		else if (area == 0)
+		{
+			if (now->df_s1_bool == true)
+			{
+				now->df_s1->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
 			}
 		}
 

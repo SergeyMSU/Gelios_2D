@@ -1,4 +1,4 @@
-п»ї#include "Help.h"
+#include "Help.h"
 #include <iomanip>
 //#include <unistd.h>
 #include <vector>
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 {
     std::cout << "Program prepared by Korolkov Sergey. All rights reserved!\n";
 
-    // РџСЂРѕРІРµСЂРєР° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
+    // Проверка монте-карло
     if (false)
     {
         MKmethod MK = MKmethod();
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 
     //CC->Init_conditions();
 
-    //CC->M_K_prepare();     // РќСѓР¶РЅРѕ РєРѕРјРјРµРЅС‚РёС‚СЊ, РµСЃР»Рё РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ, С‚Р°Рј СѓРґР°Р»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРё
+    //CC->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     //CC->MK_start_new();
   
     ////CC->Print_Gran("surface6_test.txt");
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
     //exit(-1);
 
-    // РљРћРќР•Р¦ РўР•РЎРўРћР’РћР™ Р—РђР”РђР§Р ---------------------------------------------------------------
+    // КОНЕЦ ТЕСТОВОЙ ЗАДАЧИ ---------------------------------------------------------------
 
 
     Setka* SS, * K, *SS2, * SS3;
@@ -104,11 +104,16 @@ int main(int argc, char** argv)
     string name_gd = parameter_21;
     SS->TVD_prepare();
     SS->Proverka();
+    
+
 
     SS->Save_surface("save_surf.bin");
     SS->Print_Gran("SS_all_gran.txt");
     SS->Print_cell2("SS_all_cell.txt");
     SS->Print_Tecplot_MK_2d("tecplot_MK_" + name_gd);
+
+
+  
 
     II = new Interpol_Setka(SS);
     II->Print_Cell("Interpol_setka.txt");
@@ -117,15 +122,19 @@ int main(int argc, char** argv)
     SS2->Download_surface("save_surf.bin");
     SS2->Print_cell2("SS2_all_cell.txt");
 
-    return 0;
+    
 
-    // РџРѕРґРіРѕС‚РѕРІРёРј С„СѓРЅРєС†РёРё СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЏ
+    cout << "A1" << endl;
+
+    //return 0;
+
+    // Подготовим функции распределения
 
 
     int ijk = 0;
     string nmk;
-    // РЎС‡РёС‚Р°РµРј С„СѓРЅРєС†РёСЋ СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЏ РґР»СЏ РќР°СЃС‚Рё
-    if (false)
+    // Считаем функцию распределения для Насти
+    if (true)
     {
         for (auto& KL : SS->All_Cells)
         {
@@ -157,6 +166,25 @@ int main(int argc, char** argv)
             SS->Dist_func_all.push_back(asd);
             KL->df_s3 = asd;
             KL->df_s3_bool = true;
+
+
+            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            asd->xxx = xx;
+            asd->yyy = yy;
+            nmk = "S2_" + to_string(ijk);
+            asd->call_name(nmk);
+            SS->Dist_func_all.push_back(asd);
+            KL->df_s2 = asd;
+            KL->df_s2_bool = true;
+
+            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            asd->xxx = xx;
+            asd->yyy = yy;
+            nmk = "S1_" + to_string(ijk);
+            asd->call_name(nmk);
+            SS->Dist_func_all.push_back(asd);
+            KL->df_s1 = asd;
+            KL->df_s1_bool = true;
         }
     }
     
@@ -181,7 +209,7 @@ int main(int argc, char** argv)
     exit(-1);*/
 
 
-    // Р”РІРёРіР°РµРј СѓР·Р»С‹ РІСЂСѓС‡РЅСѓСЋ
+    // Двигаем узлы вручную
     if (true)
     {
 
@@ -207,25 +235,25 @@ int main(int argc, char** argv)
     }
 
 
-    // РџРѕРґРіРѕС‚РѕРІРєР° РјР°СЃСЃРёРІРѕРІ РґР»СЏ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕР±Р»Р°СЃС‚Рё СЃС‡С‘С‚Р° Рё РїРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР° РїР°СЂР°РјРµС‚СЂРѕРІ, РµСЃР»Рё РЅР°РґРѕ. РќР• РЈР”РђР›РЇРўР¬
+    // Подготовка массивов для внутренней области счёта и перенормировка параметров, если надо. НЕ УДАЛЯТЬ
     for (auto i : SS->All_Cells)
     {
         if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
         {
-            //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+            //Для счёта монте-карло
+           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
            //i->par[0].v = i->par[0].v * (chi_real / chi_);
            //i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
            //i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
 
-           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
            //i->par[1].v = i->par[1].v * (chi_real / chi_);
            //i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
            //i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
 
 
-           // РґР»СЏ СЃС‡С‘С‚Р° РїР»Р°Р·РјС‹
-           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+           // для счёта плазмы
+           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
            //i->par[1].v = i->par[0].v = i->par[0].v / (chi_real / chi_);
            //i->par[1].ro = i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
            //i->par[1].Q = i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
@@ -271,20 +299,20 @@ int main(int argc, char** argv)
     }
 
 
-    // Р‘Р»РѕРє СЂР°СЃС‡С‘С‚Р° СЃ Kn -> infty
+    // Блок расчёта с Kn -> infty
     if (false)
     {
         for (auto i : SS->All_Cells)
         {
             if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
             {
-                //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-               i->par[0].u = i->par[0].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+                //Для счёта монте-карло
+               i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
                i->par[0].v = i->par[0].v / (chi_real / chi_);
                i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
                i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
 
-               i->par[1].u = i->par[1].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+               i->par[1].u = i->par[1].u / (chi_real / chi_);       // Перенормировка
                i->par[1].v = i->par[1].v / (chi_real / chi_);
                i->par[1].ro = i->par[1].ro * kv(chi_real / chi_);
                i->par[1].Q = i->par[1].Q * kv(chi_real / chi_);
@@ -295,7 +323,7 @@ int main(int argc, char** argv)
         double end = 0.0;
         start = omp_get_wtime();
 
-        int max_k = 1000;  // 150  СЃС‡РёС‚Р°СЋС‚СЃСЏ 30 РјРёРЅСѓС‚, РїСЂРѕСЃРёС‚СЊ 40 РјРёРЅСѓС‚
+        int max_k = 1000;  // 150  считаются 30 минут, просить 40 минут
 
         for (int k = 0; k < max_k; k++)  // 10
         {
@@ -314,13 +342,13 @@ int main(int argc, char** argv)
         {
             if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
             {
-                //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-                i->par[0].u = i->par[0].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+                //Для счёта монте-карло
+                i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
                 i->par[0].v = i->par[0].v * (chi_real / chi_);
                 i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
                 i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
 
-                i->par[1].u = i->par[1].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+                i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
                 i->par[1].v = i->par[1].v * (chi_real / chi_);
                 i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
                 i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
@@ -329,14 +357,14 @@ int main(int argc, char** argv)
 
         double seconds = difftime(end, start);
         end = omp_get_wtime();
-        printf("WorkВ tookВ %fВ seconds\n", end - start);
+        printf("Work took %f seconds\n", end - start);
         SS->Print_Gran("gran_vers18_1.txt");
         SS->Save_Setka_ALL_ALPHA("vers18_1.txt");
         SS->Print_Tecplot_MK();
         return 0;
     }
 
-    // РќР°СЃС‚СЂРѕР№РєР° СЃС…РµРјС‹ СЃС‡С‘С‚Р° РґР»СЏ СЂР°Р·Р»РёС‡РЅС‹С… РіСЂР°РЅРµР№
+    // Настройка схемы счёта для различных граней
     if (true)
     {
         cout << "Hellow 1" << endl;
@@ -435,20 +463,20 @@ int main(int argc, char** argv)
     //{
     //    if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
     //    {
-    //        //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-    //        i->par[0].u = i->par[0].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+    //        //Для счёта монте-карло
+    //        i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
     //        i->par[0].v = i->par[0].v / (chi_real / chi_);
     //        i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
     //        i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
 
-    //        i->par[1].u = i->par[1].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+    //        i->par[1].u = i->par[1].u / (chi_real / chi_);       // Перенормировка
     //        i->par[1].v = i->par[1].v / (chi_real / chi_);
     //        i->par[1].ro = i->par[1].ro * kv(chi_real / chi_);
     //        i->par[1].Q = i->par[1].Q * kv(chi_real / chi_);
     //    }
     //}
 
-    // Р‘Р›РћРљ РґР»СЏ СЂР°СЃС‡С‘С‚Р° РіР°Р·РѕРІРѕР№ РґРёРЅР°РјРёРєРё (РЅР° CPU)
+    // БЛОК для расчёта газовой динамики (на CPU)
     if (parameter_4)
     {
         for (auto& i : SS->All_Cells)
@@ -477,7 +505,7 @@ int main(int argc, char** argv)
         }
         //SS->Download_Source_MK("source_vers7_7.txt");
 
-        SS->Download_Source_MK(parameter_22); // РўРЈРў Р—РђРќРЈР›РЇР®РўРЎРЇ РРЎРўРћР§РќРРљР
+        SS->Download_Source_MK(parameter_22); // ТУТ ЗАНУЛЯЮТСЯ ИСТОЧНИКИ
 
         //SS->Download_Source_MK("source_vers7_9.txt");
         double norm_istok = 1.0;
@@ -527,7 +555,7 @@ int main(int argc, char** argv)
             SS->Print_Tecplot_MK();
         }
 
-        int max_k = 100;  // 150  СЃС‡РёС‚Р°СЋС‚СЃСЏ 30 РјРёРЅСѓС‚, РїСЂРѕСЃРёС‚СЊ 40 РјРёРЅСѓС‚   900
+        int max_k = 100;  // 150  считаются 30 минут, просить 40 минут   900
         //SS->Init_conditions();
         cout << "FFFFF = " << 0.0 << endl;
         for (int k = 1; k <= max_k; k++)  // 10
@@ -563,7 +591,7 @@ int main(int argc, char** argv)
 
         double seconds = difftime(end, start);
         end = omp_get_wtime();
-        printf("WorkВ tookВ %fВ seconds\n", end - start);
+        printf("Work took %f seconds\n", end - start);
         SS->Save_Setka_ALL_ALPHA(name_gd);
         //SS->Print_Gran("gran_" + name_gd);
         //SS->Print_Tecplot_MK("tecplot_MK_" + name_gd);
@@ -573,20 +601,23 @@ int main(int argc, char** argv)
 
     //SS->culc_PUI();
 
+    SS->Print_Gran_type();
+    SS->Print_cell();
+
     //exit(-1);
-    //SS->M_K_prepare();     // РќСѓР¶РЅРѕ РєРѕРјРјРµРЅС‚РёС‚СЊ, РµСЃР»Рё РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ, С‚Р°Рј СѓРґР°Р»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРё
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     double start;
     double end = 0.0;
     start = omp_get_wtime();
 
-    //SS->MK_start_new();  // Р‘С‹Р»Р° СЌС‚Р°
+    SS->MK_start_new();  // Была эта
 
     
     //SS->Download_Source_MK(parameter_22);
     //SS->func_pogloshenie();
     //SS->Print_Tecplot_MK();
 
-    SS->MK_start_2_0();
+    //SS->MK_start_2_0();
 
     //SS->MPI_MK_start(argc, argv);
 
@@ -594,8 +625,8 @@ int main(int argc, char** argv)
     int rank = 0, size = 0;
 
 #if USEMPI 
-    MPI_Comm_size(MPI_COMM_WORLD, &size);               // РџРѕР»СѓС‡РёС‚СЊ РѕР±С‰РµРµ С‡РёСЃР»Рѕ РїСЂРѕС†РµСЃСЃРѕРІ - РєРѕРјРїРѕРІ
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);               // РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ С‚РµРєСѓС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° - РєРѕРјРїР°
+    MPI_Comm_size(MPI_COMM_WORLD, &size);               // Получить общее число процессов - компов
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);               // Получить номер текущего процесса - компа
 
     MPI_Barrier(MPI_COMM_WORLD);
     cout << "Barrer " << rank << endl;
@@ -606,7 +637,7 @@ int main(int argc, char** argv)
     {
         double seconds = difftime(end, start);
         end = omp_get_wtime();
-        printf("WorkВ tookВ %fВ seconds\n", end - start);
+        printf("Work took %f seconds\n", end - start);
         //SS->Print_for_Igor();
 
        //SS->GD_prepare();
@@ -614,8 +645,8 @@ int main(int argc, char** argv)
         SS->Print_cell2();
         //SS2 = new Setka();
         //SS3 = new Setka();
-        //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 РґРѕ РґРѕР±Р°РІР»РµРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєРѕРІ 
-        //SS3->Download_Setka_ALL_ALPHA_2_0("vers6_121.txt");  // 84 РґРѕ РґРѕР±Р°РІР»РµРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєРѕРІ 
+        //SS2->Download_Setka_ALL_ALPHA_2_0("vers6_118.txt");  // 84 до добавления источников 
+        //SS3->Download_Setka_ALL_ALPHA_2_0("vers6_121.txt");  // 84 до добавления источников 
         if (false)
         {
             for (int i = 0; i < SS->All_Cells.size(); i++)
@@ -694,7 +725,7 @@ int main(int argc, char** argv)
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(30000, false);
             end = omp_get_wtime();
-            printf("WorkВ tookВ %fВ seconds\n", end - start);
+            printf("Work took %f seconds\n", end - start);
         }
 
         for (int k = 0; k < 0; k++)  // 10
@@ -707,7 +738,7 @@ int main(int argc, char** argv)
             //SS->Go_5_komponent__MK2(5000);
             SS->Go_5_komponent_MK(30000);
             end = omp_get_wtime();
-            printf("WorkВ tookВ %fВ seconds\n", end - start);
+            printf("Work took %f seconds\n", end - start);
             if (k % 30 == 0 && k > 1)
             {
                 string nm;
@@ -718,13 +749,13 @@ int main(int argc, char** argv)
         }
 
         //SS->Save_Setka_ALL_ALPHA("vers7_6.txt");
-        //SS->Save_Source_MK(parameter_22);
+        SS->Save_Source_MK(parameter_22);
         SS->Print_Tecplot_MK(parameter_1);
 
         //SS->Print_cell2();
-       // SS->Print_Gran("gran_vers19_1.txt");
+        // SS->Print_Gran("gran_vers19_1.txt");
         //SS->Print_Tecplot_MK();
-        //SS->Print_Sourse();
+        SS->Print_Sourse();
         //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
         //SS->Save_Setka_ALL_ALPHA("vers19_1.txt");
 
@@ -733,8 +764,8 @@ int main(int argc, char** argv)
             //i->print_1d(1);
             //i->print_1d(2);
             //i->print_1d(3);
-            //i->print_3d();
-            break;
+            i->print_3d();
+            //break;
         }
 
         ofstream fout_cr;
@@ -776,20 +807,20 @@ int main(int argc, char** argv)
     {
         if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
         {
-            //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+            //Для счёта монте-карло
+           //i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
            //i->par[0].v = i->par[0].v * (chi_real / chi_);
            //i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
            //i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
 
-           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+           //i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
            //i->par[1].v = i->par[1].v * (chi_real / chi_);
            //i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
            //i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
 
 
-           // РґР»СЏ СЃС‡С‘С‚Р° РїР»Р°Р·РјС‹
-           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+           // для счёта плазмы
+           //i->par[1].u = i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
            //i->par[1].v = i->par[0].v / (chi_real / chi_);
            //i->par[1].ro = i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
            //i->par[1].Q = i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
@@ -829,13 +860,13 @@ int main(int argc, char** argv)
 
         //if (x < -700 && y < 200)
         //{
-        //    i->par[1].u = i->par[0].u = Velosity_inf;       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+        //    i->par[1].u = i->par[0].u = Velosity_inf;       // Перенормировка
         //    i->par[1].v = i->par[0].v = 0.0;
         //}
 
         //if (sqrt(x * x + y * y) <= 80.0)
         //{
-        //    i->par[1].u = i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+        //    i->par[1].u = i->par[0].u = 36.12 / (chi_real / chi_) * x / sqrt(x * x + y * y);       // Перенормировка
         //    i->par[1].v = i->par[0].v = 36.12 / (chi_real / chi_) * y / sqrt(x * x + y * y);
         //    i->par[1].ro = i->par[0].ro = 116.667 * kv(chi_real / chi_) / (x * x + y * y);
         //    i->par[1].p = i->par[0].p = kv(36.12 / (chi_real / chi_)) * (116.667 * kv(chi_real / chi_)) / (ggg * kv(10.0)) * pow(1.0 / sqrt(x * x + y * y), 2.0 * ggg);
@@ -846,7 +877,7 @@ int main(int argc, char** argv)
             SS->All_Cells_zero.push_back(i);
         }
     }
-    SS->M_K_prepare();     // РќСѓР¶РЅРѕ РєРѕРјРјРµРЅС‚РёС‚СЊ, РµСЃР»Рё РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ, С‚Р°Рј СѓРґР°Р»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРё
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
     for (int k = 0; k < 40; k++)  // 10
     {
@@ -905,7 +936,7 @@ int main(int argc, char** argv)
             SS->All_Cells_zero.push_back(i);
         }
     }
-    SS->M_K_prepare();     // РќСѓР¶РЅРѕ РєРѕРјРјРµРЅС‚РёС‚СЊ, РµСЃР»Рё РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ, С‚Р°Рј СѓРґР°Р»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРё
+    SS->M_K_prepare();     // Нужно комментить, если не считается монте-карло, там удаляются источники
     SS->MK_start_new();
     for (int k = 0; k < 40; k++)  // 10
     {
@@ -925,10 +956,10 @@ int main(int argc, char** argv)
 
 
     //S.Download_Setka_ALL_ALPHA("all_save_3_122.txt");  
-    /// 122 - РЅР°С‡Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РіР°Р·РѕРІРѕР№ РґРёРЅР°РјРёРєРё РґРѕ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ    ALPHA
+    /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
 
 
-    S.Download_Setka_ALL_ALPHA_2_0("all_save_4_177.txt"); // 125 РґРѕ РґРІРёР¶РµРЅРёСЏ РїРѕРІРµСЂС…РЅРѕСЃС‚РµР№
+    S.Download_Setka_ALL_ALPHA_2_0("all_save_4_177.txt"); // 125 до движения поверхностей
     S.Print_Gran();
     //S.Print_Tecplot_MK();
     //exit(-1);
@@ -937,31 +968,31 @@ int main(int argc, char** argv)
     //return 0;
 
 
-    // Р”Р»СЏ РІС‹РіСЂСѓР·РєРё РґР°РЅРЅС‹С… РІ СЂР°РІРЅРѕРјРµСЂРЅСѓСЋ 2Рґ СЃРµС‚РєСѓ
+    // Для выгрузки данных в равномерную 2д сетку
     if (false)
     {
         ofstream file_save;
         file_save.open("area_point_.txt");
 
-        int N = 2048;  //1792 //1792                 // РљРѕР»РёС‡РµСЃС‚РІРѕ СЏС‡РµРµРє РїРѕ x
-        int M = 1280; //1280 //1280                 // РљРѕР»РёС‡РµСЃС‚РІРѕ СЏС‡РµРµРє РїРѕ y
-        int K = (N * M);                // РљРѕР»РёС‡РµСЃС‚РІРѕ СЏС‡РµРµРє РІ СЃРµС‚РєРµ
+        int N = 2048;  //1792 //1792                 // Количество ячеек по x
+        int M = 1280; //1280 //1280                 // Количество ячеек по y
+        int K = (N * M);                // Количество ячеек в сетке
         double x_min = -1500.0; // -2500.0 // -1300  //-2000                // -1500.0
         double x_max = 1500.0; // 450.0
         double y_max = 2000.0; // 1600.0 //1840.0
         double y_min = (y_max / (2.0 * M));
-        double dx = ((x_max - x_min) / (N - 1));   // Р’РµР»РёС‡РёРЅР° РіСЂР°РЅРё РїРѕ dx
-        double dy = ((y_max) / (M));     // Р’РµР»РёС‡РёРЅР° РіСЂР°РЅРё РїРѕ dy
+        double dx = ((x_max - x_min) / (N - 1));   // Величина грани по dx
+        double dy = ((y_max) / (M));     // Величина грани по dy
         bool bk = false;
-        for (int k = 0; k < K; k++)  // Р—Р°РїРѕР»РЅСЏРµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ СѓСЃР»РѕРІРёСЏ  РґРѕ K
+        for (int k = 0; k < K; k++)  // Заполняем начальные условия  до K
         {
             bk = false;
             if (k % 1000 == 0)
             {
                 cout << k << " " << K << endl;
             }
-            int n = k % N;                                   // РЅРѕРјРµСЂ СЏС‡РµР№РєРё РїРѕ x (РѕС‚ 0)
-            int m = (k - n) / N;                             // РЅРѕРјРµСЂ СЏС‡РµР№РєРё РїРѕ y (РѕС‚ 0)
+            int n = k % N;                                   // номер ячейки по x (от 0)
+            int m = (k - n) / N;                             // номер ячейки по y (от 0)
             double y = y_min + m * dy;
             double x = x_min + n * dx;
             double dist = sqrt(kvv(0.0, x, y));
@@ -1025,10 +1056,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    /// 122 - РЅР°С‡Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РіР°Р·РѕРІРѕР№ РґРёРЅР°РјРёРєРё РґРѕ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ    ALPHA
-    /// 126 - СЃС‡С‘С‚ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ СЃ Р±РѕР»СЊС€РёРј С‡РёСЃР»РѕРј С‡Р°СЃС‚РёС†    ALPHA_2_0
+    /// 122 - начальные параметры газовой динамики до счёта монте-карло    ALPHA
+    /// 126 - счёт монте-карло с большим числом частиц    ALPHA_2_0
 
-    // Р•СЃР»Рё РЅСѓР¶РЅРѕ РїРµСЂРµРЅРѕСЂРјРёСЂРѕРІР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РІ СЃРµС‚РєРµ
+    // Если нужно перенормировать параметры в сетке
     if (false)
     {
         for (auto& i : S.All_Cells)
@@ -1040,20 +1071,20 @@ int main(int argc, char** argv)
 
             if (i->type == C_centr || i->type == C_1 || i->type == C_2 || i->type == C_3)
             {
-                //Р”Р»СЏ СЃС‡С‘С‚Р° РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ
-               //i->par[0].u = i->par[0].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+                //Для счёта монте-карло
+               //i->par[0].u = i->par[0].u * (chi_real / chi_);       // Перенормировка
                //i->par[0].v = i->par[0].v * (chi_real / chi_);
                //i->par[0].ro = i->par[0].ro / kv(chi_real / chi_);
                //i->par[0].Q = i->par[0].Q / kv(chi_real / chi_);
 
-               //i->par[1].u = i->par[1].u * (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+               //i->par[1].u = i->par[1].u * (chi_real / chi_);       // Перенормировка
                //i->par[1].v = i->par[1].v * (chi_real / chi_);
                //i->par[1].ro = i->par[1].ro / kv(chi_real / chi_);
                //i->par[1].Q = i->par[1].Q / kv(chi_real / chi_);
 
 
-               // РґР»СЏ СЃС‡С‘С‚Р° РїР»Р°Р·РјС‹
-               //i->par[0].u = i->par[0].u / (chi_real / chi_);       // РџРµСЂРµРЅРѕСЂРјРёСЂРѕРІРєР°
+               // для счёта плазмы
+               //i->par[0].u = i->par[0].u / (chi_real / chi_);       // Перенормировка
                //i->par[0].v = i->par[0].v / (chi_real / chi_);
                //i->par[0].ro = i->par[0].ro * kv(chi_real / chi_);
                //i->par[0].Q = i->par[0].Q * kv(chi_real / chi_);
@@ -1083,7 +1114,7 @@ int main(int argc, char** argv)
 
 
     //Setka S = Setka(14, 5, 5, 5, 7, 10, 7, 8);
-    //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // РќСѓР¶РЅРѕ С‡С‚РѕР±С‹ РєРѕР»РёС‡РёСЃС‚РІРѕ СЏС‡РµРµРє РїРѕ СѓРіР»Сѓ РґРµР»РёР»РѕСЃСЊ РЅР° 8 РёР»Рё 10 (РЅРµ Р±С‹Р»Рѕ РїСЂРѕСЃС‚С‹Рј)
+    //Setka S = Setka(30, 12, 13, 30, 40, 20, 20, 15);  // Нужно чтобы количиство ячеек по углу делилось на 8 или 10 (не было простым)
 
 
     //S.Print_point();
@@ -1123,14 +1154,14 @@ int main(int argc, char** argv)
     }*/
 
     S.TVD_prepare();
-    S.M_K_prepare();   // РќСѓР¶РЅРѕ РєРѕРјРјРµРЅС‚РёС‚СЊ, РµСЃР»Рё РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РјРѕРЅС‚Рµ-РєР°СЂР»Рѕ, С‚.Рє. С‚Р°Рј СѓРґР°Р»СЏСЋС‚СЃСЏ РёСЃС‚РѕС‡РЅРёРєРё
+    S.M_K_prepare();   // Нужно комментить, если не считается монте-карло, т.к. там удаляются источники
     //S.Print_TVD();
 
 
     S.Proverka();
     //S.Print_cell_type();
 
-    // Р‘Р»РѕРє РїСЂРѕСЃРјРѕС‚СЂР°
+    // Блок просмотра
     if (false)
     {
         ofstream fout;
@@ -1190,7 +1221,7 @@ int main(int argc, char** argv)
     
 
 
-    // Р•СЃР»Рё РјС‹ С…РѕС‚РёРј РїРѕРґРІРёРЅСѓС‚СЊ СЃРµС‚РєСѓ РґРѕ РЅР°С‡Р°Р»Р° СЃС‡С‘С‚Р° С‚Рѕ РїРѕРјРѕРіР°РµС‚ СЃР»РµРґСѓСЋС‰РёР№ Р±Р»РѕРє РєРѕРґР°
+    // Если мы хотим подвинуть сетку до начала счёта то помогает следующий блок кода
    /* S.Move_Setka_Calculate(0);
     for (auto& i : S.All_Points)
     {
@@ -1201,7 +1232,7 @@ int main(int argc, char** argv)
     }*/
 
 
-    // РџРѕРґРіРѕС‚РѕРІРєР° РјР°СЃСЃРёРІРѕРІ РґР»СЏ РІРЅСѓС‚СЂРµРЅРЅРµР№ РѕР±Р»Р°СЃС‚Рё СЃС‡С‘С‚Р°. РќР• РЈР”РђР›РЇРўР¬
+    // Подготовка массивов для внутренней области счёта. НЕ УДАЛЯТЬ
     for (auto i : S.All_Cells)
     {
         double x, y;
@@ -1229,7 +1260,7 @@ int main(int argc, char** argv)
 
     //S.Init_conditions();
 
-    // РњРѕРЅС‚Рµ-РєР°СЂР»Рѕ Р±Р»РѕРє
+    // Монте-карло блок
     S.MK_start_new();
     /*cout << 1.0 * S.mmu1 / (1.0 * S.mn1) << " " << S.mn1 << endl;
     cout << S.mmu2 / (1.0 * S.mn2) << " " << S.mn2 << endl;

@@ -307,7 +307,7 @@ bool Dist_func::print_1d(int koord)
 bool Dist_func::print_3d(void)
 {
 	std::ofstream fout;
-	std::string name_f = "3D_Dist_func_" + this->name + ".txt";
+	std::string name_f = "func/3D_Dist_func_" + this->name + ".txt";
 	fout.open(name_f);
 
 	fout << this->xxx << " " << this->yyy << endl;
