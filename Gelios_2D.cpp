@@ -136,6 +136,61 @@ int main(int argc, char** argv)
     // Считаем функцию распределения для Насти
     if (true)
     {
+        std::ifstream fin("stat_moments-.txt");
+        if (!fin.is_open()) {
+            std::cerr << "Error 83y487tgfueuwf34 " << "stat_moments-.txt" << std::endl;
+            exit(-1);
+        }
+
+        // Объявление массивов как векторов
+        std::vector<std::vector<double>> mu_mom;
+        std::vector<std::vector<double>> Vx_mom;
+        std::vector<std::vector<double>> Vy_mom;
+        std::vector<std::vector<double>> Vxx_mom;
+        std::vector<std::vector<double>> Vyy_mom;
+        std::vector<std::vector<double>> Vxy_mom;
+        std::vector<std::vector<double>> Vxxx_mom;
+        std::vector<std::vector<double>> T_mom;
+
+        // Инициализация векторов с правильными размерами
+        mu_mom.resize(4, std::vector<double>(Al_stat));
+        Vx_mom.resize(4, std::vector<double>(Al_stat));
+        Vy_mom.resize(4, std::vector<double>(Al_stat));
+        Vxx_mom.resize(4, std::vector<double>(Al_stat));
+        Vyy_mom.resize(4, std::vector<double>(Al_stat));
+        Vxy_mom.resize(4, std::vector<double>(Al_stat));
+        Vxxx_mom.resize(4, std::vector<double>(Al_stat));
+        T_mom.resize(4, std::vector<double>(Al_stat));
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < Al_stat; j++) {
+                fin >> mu_mom[i][j]
+                    >> Vx_mom[i][j]
+                    >> Vy_mom[i][j]
+                    >> Vxx_mom[i][j]
+                    >> Vyy_mom[i][j]
+                    >> Vxy_mom[i][j]
+                    >> Vxxx_mom[i][j]
+                    >> T_mom[i][j];
+
+                if (fin.fail()) {
+                    std::cerr << "Error 4etu9348gergew4" << std::endl;
+                    fin.close();
+                    exit(-1);
+                }
+            }
+        }
+
+        // Дополнительная проверка, что не осталось лишних данных
+        std::string temp;
+        if (fin >> temp) {
+            std::cout << "Error ert456y456te5tge4we4r32423" << std::endl;
+            exit(-1);
+        }
+
+        fin.close();
+
+
         for (auto& KL : SS->All_Cells)
         {
             double xx, yy;
@@ -148,9 +203,20 @@ int main(int argc, char** argv)
                 continue;
             }
 
+
+            double phi_ = polar_angle(xx, yy);
+            int k = (int)(phi_ / (pi_ / Al_stat));
+            double Ux, Uy, sigx, sigy;
+
+            short int ii = 3;
+            Ux = Vx_mom[ii][k] / mu_mom[ii][k];
+            Uy = Vy_mom[ii][k] / mu_mom[ii][k];
+            sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
+            sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
+
             ijk++;
             nmk = "S4_" + to_string(ijk);
-            auto asd = new Dist_func(30, 30, 30, -3.0, 4.0, 0.0, 3.5, 0.0, 5.0);
+            auto asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             asd->call_name(nmk);
@@ -158,7 +224,13 @@ int main(int argc, char** argv)
             KL->df_s4 = asd;
             KL->df_s4_bool = true;
 
-            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            ii = 2;
+            Ux = Vx_mom[ii][k] / mu_mom[ii][k];
+            Uy = Vy_mom[ii][k] / mu_mom[ii][k];
+            sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
+            sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
+
+            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S3_" + to_string(ijk);
@@ -167,8 +239,13 @@ int main(int argc, char** argv)
             KL->df_s3 = asd;
             KL->df_s3_bool = true;
 
+            ii = 1;
+            Ux = Vx_mom[ii][k] / mu_mom[ii][k];
+            Uy = Vy_mom[ii][k] / mu_mom[ii][k];
+            sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
+            sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
 
-            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S2_" + to_string(ijk);
@@ -177,7 +254,13 @@ int main(int argc, char** argv)
             KL->df_s2 = asd;
             KL->df_s2_bool = true;
 
-            asd = new Dist_func(30, 30, 30, -2.0, 3.5, 0.0, 4.1, 0.0, 4.1);
+            ii = 0;
+            Ux = Vx_mom[ii][k] / mu_mom[ii][k];
+            Uy = Vy_mom[ii][k] / mu_mom[ii][k];
+            sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
+            sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
+
+            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S1_" + to_string(ijk);
@@ -642,6 +725,8 @@ int main(int argc, char** argv)
 
        //SS->GD_prepare();
 
+        cout << "A1 reg" << endl;
+
         SS->Print_cell2();
         //SS2 = new Setka();
         //SS3 = new Setka();
@@ -706,7 +791,7 @@ int main(int argc, char** argv)
         }
         //delete SS2;
         //delete SS3;
-
+        cout << "A2 reg" << endl;
         // SS->Download_Source_MK("source_vers19_1.txt");
         //SS->Print_for_Igor();
         //SS->culc_K_Istok();
@@ -752,12 +837,16 @@ int main(int argc, char** argv)
         SS->Save_Source_MK(parameter_22);
         SS->Print_Tecplot_MK(parameter_1);
 
+        cout << "A3 reg" << endl;
+
         //SS->Print_cell2();
         // SS->Print_Gran("gran_vers19_1.txt");
         //SS->Print_Tecplot_MK();
         SS->Print_Sourse();
         //SS->Save_Setka_ALL_ALPHA("vers6_107.txt");
         //SS->Save_Setka_ALL_ALPHA("vers19_1.txt");
+
+        cout << "A4 reg" << endl;
 
         for (auto& i : SS->Dist_func_all)
         {
@@ -767,6 +856,8 @@ int main(int argc, char** argv)
             i->print_3d();
             //break;
         }
+
+        cout << "A5 reg" << endl;
 
         ofstream fout_cr;
         //fout_cr.open("Pogloshenie.txt");

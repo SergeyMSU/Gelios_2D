@@ -1,6 +1,6 @@
 #include "Dist_func.h"
 #include "Help.h"
-
+#include <filesystem> 
 
 
 
@@ -308,7 +308,23 @@ bool Dist_func::print_3d(void)
 {
 	std::ofstream fout;
 	std::string name_f = "func/3D_Dist_func_" + this->name + ".txt";
+
+	std::filesystem::path file_path = name_f;
+
+	// Проверяем существование и доступность директории
+	if (!std::filesystem::exists(file_path.parent_path())) 
+	{
+		cout << "ERROR iwjfheuit4h9834ut893g" << endl;
+		exit(-1);
+	}
+
 	fout.open(name_f);
+
+	if (!fout.is_open()) 
+	{
+		cout << "Error ugewerfwefhgoiue " << endl;
+		exit(-1);
+	}
 
 	fout << this->xxx << " " << this->yyy << endl;
 	fout << "TITLE = \"HP\"  VARIABLES = \"vz\", \"vr\", \"vphi\", \"f\"," << "ZONE T = \"HP\"" << std::endl;

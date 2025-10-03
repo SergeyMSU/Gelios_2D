@@ -13766,7 +13766,7 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	short int nmn = 10;  // 1 - это 3 минуты
+	short int nmn = 10 * 3;  // 1 - это 3 минуты
 	this->Number1 = 411 * 1000 * nmn;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
 	this->Number2 = 411 * 30 * nmn;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
 	this->Number3 = 411 * 30 * nmn;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
@@ -15310,6 +15310,16 @@ void Setka::MK_start_new(void)
 		if (k->df_s3_bool == true)
 		{
 			k->df_s3->normir(sum_s / no);
+		}
+
+		if (k->df_s2_bool == true)
+		{
+			k->df_s2->normir(sum_s / no);
+		}
+
+		if (k->df_s1_bool == true)
+		{
+			k->df_s1->normir(sum_s / no);
 		}
 
 		k->par[0].F_n = sum_s * k->par[0].F_n / no;
@@ -21504,6 +21514,20 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 			now->df_s3->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
 		}
 	}
+	else if (area == 1)
+	{
+		if (now->df_s2_bool == true)
+		{
+			now->df_s2->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
+		}
+	}
+	else if (area == 0)
+	{
+		if (now->df_s1_bool == true)
+		{
+			now->df_s1->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
+		}
+	}
 
 	now->par[0].F_n += t2 * mu2;
 	now->par[0].F_u += t2 * Vx * mu2;
@@ -21776,6 +21800,16 @@ aa1:
 				{
 					return;
 				}
+			}
+		}
+
+		if (mu_statistic)
+		{
+			if (now->zona != zon_stat)
+			{
+				Mu_stat[area][now->zona] += mu;
+				I_stat[area][now->zona]++;
+				zon_stat = now->zona;
 			}
 		}
 
