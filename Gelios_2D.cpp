@@ -209,10 +209,13 @@ int main(int argc, char** argv)
             double Ux, Uy, sigx, sigy;
 
             short int ii = 3;
+            if (mu_mom[ii][k] < 0.0001) mu_mom[ii][k] = 0.00001;
             Ux = Vx_mom[ii][k] / mu_mom[ii][k];
             Uy = Vy_mom[ii][k] / mu_mom[ii][k];
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
-            sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
+            sigy = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
+
+            cout << "Ux = " << Ux << " " << Uy << " " << sigx << " " << sigy << endl;
 
             ijk++;
             nmk = "S4_" + to_string(ijk);
@@ -225,6 +228,7 @@ int main(int argc, char** argv)
             KL->df_s4_bool = true;
 
             ii = 2;
+            if (mu_mom[ii][k] < 0.0001) mu_mom[ii][k] = 0.00001;
             Ux = Vx_mom[ii][k] / mu_mom[ii][k];
             Uy = Vy_mom[ii][k] / mu_mom[ii][k];
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
@@ -240,6 +244,7 @@ int main(int argc, char** argv)
             KL->df_s3_bool = true;
 
             ii = 1;
+            if (mu_mom[ii][k] < 0.0001) mu_mom[ii][k] = 0.00001;
             Ux = Vx_mom[ii][k] / mu_mom[ii][k];
             Uy = Vy_mom[ii][k] / mu_mom[ii][k];
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
@@ -255,6 +260,7 @@ int main(int argc, char** argv)
             KL->df_s2_bool = true;
 
             ii = 0;
+            if (mu_mom[ii][k] < 0.0001) mu_mom[ii][k] = 0.00001;
             Ux = Vx_mom[ii][k] / mu_mom[ii][k];
             Uy = Vy_mom[ii][k] / mu_mom[ii][k];
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));

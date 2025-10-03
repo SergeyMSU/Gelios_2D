@@ -13,9 +13,13 @@
 #define parameter_4 false   // Считаем газовую динамику? Если да, то true, если монте-карло, то false
 //  5) Установить число шагов\траекторий
 //  6) Установить файл загрузки весов
-#define parameter_6 "stat_do_7_5.txt"
+#define parameter_6 "stat_do_7_7.txt"   // "stat_do_7_5.txt"
 //  7) Установить файл сохранения весов
 #define parameter_7 "stat_do_7_--.txt"
+
+#define N_traektor (22) 
+// 1 - это - минуты Nuclon (24 минут  Iprobe)
+// 27 минут при выборе весов
 
 // Поменял начальную сферу вылета и перезярядку для x > 1
 #define charge_x_1 false    // Отключить перезярядку при x > 1

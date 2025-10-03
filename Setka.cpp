@@ -13766,7 +13766,7 @@ void Setka::M_K_prepare(void)
 	cout << "Setka.cpp    " << "this->sqv_1 = " << this->sqv_1 << endl;
 	cout << "Setka.cpp    " << "this->sqv_4 = " << this->sqv_4 << endl;
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	short int nmn = 10 * 3;  // 1 - это 3 минуты
+	short int nmn = N_traektor; //10 * 3;  // 1 - это 3 минуты (7.15 минут)
 	this->Number1 = 411 * 1000 * nmn;// * 154;// * 1071;// * 1440 * 2;//0 * 45;// *4000 * 2; // 411 * 20 * 353;// * 5 * 10 * 16;// * 100;// * 80;// * 20;// *36; // 280 * 250 * 7 * 20; // 280 * 62;// *23; // 280 * 120 * 2 * 3;// * 100; // 411 * 25 * 144; // 0 * 15;// *12 or 38;// *150;// *250; // * 10; // * 50; //250  6000;  250 * 50   411
 	this->Number2 = 411 * 30 * nmn;// * 20;// *36; // 280 * 250 * 7; //280 * 62;// *23; // 280 * 10 * 2 * 3; //411 * 30; // * 30; // * 30; // 30; // 30;
 	this->Number3 = 411 * 30 * nmn;// * 20; // 280 * 250; //280 * 62;// *23; // 280 * 3 * 2 * 3; //411 * 5; // * 5; // * 10; // 10;
@@ -13915,7 +13915,7 @@ void Setka::M_K_prepare(void)
 	koeff[0] = 0.5; // 0.1
 	koeff[1] = 0.2; // 0.05
 	koeff[2] = 0.5; // 0.5
-	koeff[3] = 0.05; // 0.5
+	koeff[3] = 0.2; // 0.5
 
 	double KKK = 5.0;
 
@@ -15002,6 +15002,7 @@ void Setka::MK_start_new(void)
 								ii_alp = alpha_zones(x, sqrt(kvv(y, z, 0.0)));
 							}
 
+
 							/*bool** BZ = new bool* [I_];
 							for (size_t i2 = 0; i2 < I_; i2++)
 							{
@@ -15022,6 +15023,13 @@ void Setka::MK_start_new(void)
 							//Fly_exchenge_Imit_Korol(MK, sens2, BZ, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], 3, false, mu1 * mu[i], ii_z, ii_alp, true);
 							//cout << "B" << endl;
 
+							/*for (int i = 0; i < I_; ++i) {
+								delete[] BZ[i];
+							}
+							delete[] BZ;*/
+
+
+							// Эта функция, если веса посчитаны
 							Fly_exchenge_Imit_Korol_auto_weight(MK, s1, s2, s3, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i],
 								3, false, mu1 * mu[i], ii_z, ii_alp, true);
 
@@ -15040,10 +15048,7 @@ void Setka::MK_start_new(void)
 							//Fly_exchenge_Imit(MK, sens2, x, y, z, Vx, Vy, Vz, Point, mu1 * mu[i], -log(1.0 - sens1->MakeRandom()), 0.0, 3, mu1, i, ii); // i
 
 
-							/*for (int i = 0; i < I_; ++i) {
-								delete[] BZ[i];
-							}
-							delete[] BZ;*/
+							
 
 						}
 					}
@@ -15229,7 +15234,7 @@ void Setka::MK_start_new(void)
 		}
 
 		// Теперь посчиатем S- для игоря ///////////////////////////////////////////////
-		if (k->type == C_1 || k->type == C_2 || k->type == C_3)
+		if (false)//(k->type == C_1 || k->type == C_2 || k->type == C_3)
 		{
 			double S_min[n_S];
 			for (int ij = 0; ij < n_S; ij++)
@@ -19928,6 +19933,20 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens,  bool** AZ, doub
 				now->df_s3->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
 			}
 		}
+		else if (area == 1)
+		{
+			if (now->df_s2_bool == true)
+			{
+				now->df_s2->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
+			}
+		}
+		else if (area == 0)
+		{
+			if (now->df_s1_bool == true)
+			{
+				now->df_s1->Add_point(Vx, Vy, Vz, y_ex, z_ex, t_ex * mu);
+			}
+		}
 
 		//now->par[0].w_m[area] += mu / max(sin(alpha), 0.3 * Sinus[i_alp]);
 		now->par[0].F_n += t_ex * mu;
@@ -20391,6 +20410,20 @@ void Setka::Fly_exchenge_Imit_Korol(MKmethod& MK, Sensor* sens,  bool** AZ, doub
 		if (now->df_s3_bool == true)
 		{
 			now->df_s3->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
+		}
+	}
+	else if (area == 1)
+	{
+		if (now->df_s2_bool == true)
+		{
+			now->df_s2->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
+		}
+	}
+	else if (area == 0)
+	{
+		if (now->df_s1_bool == true)
+		{
+			now->df_s1->Add_point(Vx, Vy, Vz, y_ex, z_ex, t2 * mu2);
 		}
 	}
 
@@ -20962,8 +20995,6 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 		double kappa = 0.0;
 		//drob = min(fabs(polar_angle(y_0, z_0) - polar_angle(y_0 + time * Vy, z_0 + time * Vz)) / 0.017 + 5.0, 80.0);
 
-
-
 		if (true)
 		{
 
@@ -21034,7 +21065,7 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 		double all = polar_angle(x_ex, sqrt(kv(y_ex) + kv(z_ex)));
 
 		// Находим пересечение с лучами зрения
-		if (true)
+		if (false)
 		{
 			double xk = now->x_center;
 			double yk = now->y_center;
@@ -21050,7 +21081,6 @@ void Setka::Fly_exchenge_Imit_Korol_auto_weight(MKmethod& MK, int& s1, int& s2, 
 			double Vu = Vx * e1 + Vy * e2 + Vz * e3;
 
 			now->pogloshenie[area][min(pogl_rad_ - 1, max(0 , (int)( (Vu - pogVmin) / ( (pogVmax - pogVmin) / pogl_rad_) )))] += t_ex * mu_ex + mu2 * time;
-			
 		}
 
 		// для сбора статистики
@@ -21802,6 +21832,7 @@ aa1:
 				}
 			}
 		}
+
 
 		if (mu_statistic)
 		{
@@ -23683,7 +23714,6 @@ void Setka::Fly_exchenge_Imit_Korol_PUI(MKmethod& MK, Sensor* sens, double x_0, 
 
 	return;
 }
-
 
 void Setka::Fly_exchenge_Imit(MKmethod& MK, Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Cell* now, double mu, double KSI, //
 	double I_do, int area, const double& mu_start, int to_I = 0, int iii = 0)
