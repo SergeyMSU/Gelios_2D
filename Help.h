@@ -17,7 +17,7 @@
 //  7) Установить файл сохранения весов
 #define parameter_7 "stat_do_7_--.txt"
 
-#define N_traektor (22) 
+#define N_traektor (150) 
 // 1 - это - минуты Nuclon (24 минут  Iprobe)
 // 27 минут при выборе весов
 

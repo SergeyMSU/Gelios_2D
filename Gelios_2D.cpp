@@ -219,7 +219,7 @@ int main(int argc, char** argv)
 
             ijk++;
             nmk = "S4_" + to_string(ijk);
-            auto asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
+            auto asd = new Dist_func(30, 30, 30, Ux, 3.0 * sigx, Uy, 3.0 * sigy, 0.0, 3.0 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             asd->call_name(nmk);
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
             sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
 
-            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
+            asd = new Dist_func(30, 30, 30, Ux, 3.0 * sigx, Uy, 3.0 * sigy, 0.0, 3.0 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S3_" + to_string(ijk);
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
             sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
 
-            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
+            asd = new Dist_func(30, 30, 30, Ux, 3.0 * sigx, Uy, 3.0 * sigy, 0.0, 3.0 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S2_" + to_string(ijk);
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
             sigx = sqrt(Vxx_mom[ii][k] / mu_mom[ii][k] - kv(Ux));
             sigx = sqrt(Vyy_mom[ii][k] / mu_mom[ii][k] - kv(Uy));
 
-            asd = new Dist_func(30, 30, 30, Ux, 2.6 * sigx, Uy, 2.6 * sigy, 0.0, 2.6 * sigy);
+            asd = new Dist_func(30, 30, 30, Ux, 3.0 * sigx, Uy, 3.0 * sigy, 0.0, 3.0 * sigy);
             asd->xxx = xx;
             asd->yyy = yy;
             nmk = "S1_" + to_string(ijk);
